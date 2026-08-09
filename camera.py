@@ -54,7 +54,7 @@ class VideoCamera(object):
             return
 
         try:
-            
+            self.update_hrv_analysis(img)
             
             objs = DeepFace.analyze(img, 
                                   actions=['emotion'], 

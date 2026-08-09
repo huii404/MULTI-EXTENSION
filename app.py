@@ -175,7 +175,8 @@ def analyze_frame_api():
     return jsonify({
         'stress': float(camera_stream.get_stress_level()),
         'emotion_label': getattr(camera_stream, 'current_emotion', 'Unknown'),
-        'details': getattr(camera_stream, 'current_emotions_dict', {})
+        'details': getattr(camera_stream, 'current_emotions_dict', {}),
+        'hrv': getattr(camera_stream, 'latest_hrv_metrics', {})
     })    
 
 
