@@ -132,10 +132,9 @@ function attachHomeEvents() {
   });
 }
 
-// ---------- LIVE CLOCK & SVG PULLER INTERACTION ----------
+// ---------- LIVE CLOCK ----------
 function initLiveClock() {
   const clockElement = document.getElementById('clockTime');
-  const pullerElement = document.getElementById('timePuller');
 
   if (!clockElement) return;
 
@@ -149,20 +148,6 @@ function initLiveClock() {
 
   updateClock();
   setInterval(updateClock, 1000);
-
-  // Hiệu ứng giật dây khi người dùng click vào nhân vật
-  if (pullerElement) {
-    pullerElement.addEventListener('click', () => {
-      pullerElement.style.transform = 'translateY(-50%) translateX(-8px) scale(1.1)';
-      setTimeout(() => {
-        pullerElement.style.transform = '';
-      }, 200);
-
-      if (typeof showToast === 'function') {
-        showToast('💪 Đã gồng hết sức níu giữ thời gian!', 'info', 1500);
-      }
-    });
-  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

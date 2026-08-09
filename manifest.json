@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Multi Tool Hub",
   "version": "2.0.0",
-  "description": "Tập hợp tiện ích: Đánh giá DTU nhanh, Tải tài liệu Studocu không watermark...",
+  "description": "Đánh giá DTU nhanh, Tải tài liệu Studocu,chụp ảnh web,...",
   "icons": {
     "16": "icons/a.png",
     "32": "icons/b.png",

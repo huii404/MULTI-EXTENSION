@@ -269,7 +269,7 @@ body {
 .feature-card .info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .feature-card .info .title { 
   font-size: 14px; 
-  font-weight: 700; 
+  font-weight: 700;   
   color: var(--text); 
 }
 .feature-card .info .desc {

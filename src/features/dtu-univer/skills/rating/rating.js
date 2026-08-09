@@ -1,6 +1,4 @@
-// ============================================
 // DTU RATING SKILL MODULE
-// ============================================
 
 export function attachEvents() {
   const confirmBtn = document.getElementById('dtu-confirm-btn') || document.getElementById('confirmButton');
