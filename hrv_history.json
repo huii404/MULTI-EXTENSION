@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2026-08-09T15:23:56.070949",
+    "BPM": 72.0,
+    "RMSSD": 42.5,
+    "SDNN": 48.2,
+    "LFHF": 1.2,
+    "z_score": 0.1,
+    "hrv_stress": 35.0,
+    "combined_stress": 0.0,
+    "status": "B\u00ecnh th\u01b0\u1eddng"
+  }
+]

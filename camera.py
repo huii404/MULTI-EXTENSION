@@ -16,6 +16,7 @@ class VideoCamera(object):
         self.force_stress = False
         self.hrv_processor = HRVProcessor()
         self.current_hrv_metrics = self.hrv_processor.get_metrics()
+        self.latest_hrv_metrics = self.current_hrv_metrics
 
     def trigger_fake_stress(self):
         self.force_stress = True
@@ -24,13 +25,17 @@ class VideoCamera(object):
         self.current_emotions_dict = {'angry': 15.0, 'fear': 88.5, 'sad': 60.0, 'happy': 0.0, 'neutral': 5.0}
         self.current_hrv_metrics = {
             "bpm": 115,
+            "BPM": 115,
             "rmssd": 14.2,
+            "RMSSD": 14.2,
             "sdnn": 18.5,
+            "SDNN": 18.5,
             "pnn50": 0.0,
             "hrv_stress": 88.5,
             "status": "Căng thẳng (HRV Thấp)",
             "signal": []
         }
+        self.latest_hrv_metrics = self.current_hrv_metrics
         
         threading.Timer(15.0, self.reset_fake_stress).start()
 
@@ -52,6 +57,7 @@ class VideoCamera(object):
                 green_mean = float(np.mean(roi[:, :, 1]))
                 self.hrv_processor.add_sample(time.time(), green_mean)
                 self.current_hrv_metrics = self.hrv_processor.get_metrics()
+                self.latest_hrv_metrics = self.current_hrv_metrics
             
             # 2. Phân tích cảm xúc khuôn mặt bằng DeepFace
             objs = DeepFace.analyze(img, 
@@ -126,6 +132,7 @@ class VideoCamera(object):
                 green_mean = float(np.mean(roi[:, :, 1]))
                 self.hrv_processor.add_sample(time.time(), green_mean)
                 self.current_hrv_metrics = self.hrv_processor.get_metrics()
+                self.latest_hrv_metrics = self.current_hrv_metrics
             
             objs = DeepFace.analyze(img, 
                                   actions=['emotion'], 
@@ -166,7 +173,7 @@ class VideoCamera(object):
         if not self.emotion_history: return {}
         totals = {k: 0.0 for k in self.emotion_history[0].keys()}
         
-        weights = list(range(1, len(self.emotion_history) + 1)) # [1, 2, 3, 4, 5...]
+        weights = list(range(1, len(self.emotion_history) + 1))
         total_weight = sum(weights)
         
         for i, entry in enumerate(self.emotion_history):
@@ -188,7 +195,6 @@ class VideoCamera(object):
         happy = emotions.get('happy', 0) / 100.0
         neutral = emotions.get('neutral', 0) / 100.0
 
-        # Trừ hao đi 15% (0.15) cho nỗi buồn để khắc phục lỗi "Resting Face" và góc camera thấp
         sad = max(0.0, sad - 0.15)
 
         if neutral > sad:

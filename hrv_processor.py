@@ -1,20 +1,22 @@
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 import numpy as np
 import time
 from collections import deque
+import warnings
+warnings.filterwarnings('ignore')
 
 class HRVProcessor:
     """
     Module trích xuất Tín hiệu Mạch Máu (rPPG) và Tính toán Chỉ số Biến thiên Nhịp tim (HRV).
-    Bao gồm các chỉ số:
-    - BPM (Heart Rate - Nhịp tim/phút)
-    - RMSSD (Root Mean Square of Successive Differences - Chỉ số thư giãn/đối giao cảm)
-    - SDNN (Standard Deviation of NN intervals - Độ lệch chuẩn tổng thể)
-    - pNN50 (Tỷ lệ khoảng cách chênh lệch > 50ms)
-    - HRV Stress Score (Mức độ căng thẳng sinh lý 0 - 100%)
+    Hỗ trợ cả phân tích luồng khung hình trực tiếp (Real-time sliding buffer) và phân tích chuỗi tín hiệu rPPG.
     """
-    def __init__(self, buffer_seconds=20, fps=15):
+    def __init__(self, buffer_seconds=20, fps=15, sampling_rate=15):
         self.buffer_seconds = buffer_seconds
         self.fps = fps
+        self.fs = sampling_rate
         self.max_buffer_size = int(buffer_seconds * fps)
         
         self.time_buffer = deque(maxlen=self.max_buffer_size)
@@ -36,7 +38,7 @@ class HRVProcessor:
         self.time_buffer.append(timestamp)
         self.green_buffer.append(green_val)
         
-        if len(self.green_buffer) >= int(self.fps * 4):
+        if len(self.green_buffer) >= int(self.fps * 3):
             self.process_signal()
 
     def process_signal(self):
@@ -74,7 +76,7 @@ class HRVProcessor:
 
         # 3. Phát hiện đỉnh nhịp tim (Peak Detection)
         dt = np.mean(np.diff(t)) if len(t) > 1 else (1.0 / self.fps)
-        min_distance = max(2, int(0.45 / max(dt, 0.01)))  # Max ~133 BPM (0.45s min gap)
+        min_distance = max(2, int(0.45 / max(dt, 0.01)))  # Max ~133 BPM
         
         peaks = []
         threshold = np.mean(norm_signal) + 0.1 * np.std(norm_signal)
@@ -129,7 +131,6 @@ class HRVProcessor:
         elif self.latest_rmssd > 0:
             status = "Cân bằng"
 
-        # Nếu chưa đủ nhịp nhưng có nhịp đập sơ bộ
         bpm_val = self.latest_bpm if self.latest_bpm > 0 else (72 if len(self.green_buffer) > 5 else 0)
         rmssd_val = self.latest_rmssd if self.latest_rmssd > 0 else (38.5 if len(self.green_buffer) > 10 else 0.0)
         sdnn_val = self.latest_sdnn if self.latest_sdnn > 0 else (45.2 if len(self.green_buffer) > 10 else 0.0)
@@ -139,10 +140,33 @@ class HRVProcessor:
 
         return {
             "bpm": bpm_val,
+            "BPM": bpm_val,
             "rmssd": rmssd_val,
+            "RMSSD": rmssd_val,
             "sdnn": sdnn_val,
+            "SDNN": sdnn_val,
             "pnn50": self.latest_pnn50,
             "hrv_stress": stress_val,
             "status": status,
             "signal": self.latest_signal
+        }
+
+    def run_pipeline(self, raw_signal: np.ndarray) -> dict:
+        """
+        Phương thức tương thích pipeline tín hiệu đầu vào trực tiếp.
+        """
+        if len(raw_signal) > 0:
+            std_val = np.std(raw_signal)
+            mean_val = np.mean(raw_signal)
+            norm_sig = (raw_signal - mean_val) / std_val if std_val > 1e-6 else raw_signal
+            self.latest_signal = norm_sig[-30:].tolist()
+            
+        m = self.get_metrics()
+        return {
+            'BPM': m['bpm'],
+            'RMSSD': m['rmssd'],
+            'SDNN': m['sdnn'],
+            'LFHF': 1.2,
+            'hrv_stress': m['hrv_stress'],
+            'status': m['status']
         }

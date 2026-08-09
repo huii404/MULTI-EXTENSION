@@ -100,6 +100,35 @@
             </div>
         </div>
 
+        <div class="card card-custom p-4 border-0 shadow-sm mb-3">
+            <h6 class="fw-bold text-muted mb-3 text-uppercase small ls-1"><i class="bi bi-heart-pulse-fill text-danger me-1"></i> Biến thiên nhịp tim (HRV & rPPG)</h6>
+            
+            <div class="row g-2 text-center mb-2">
+                <div class="col-4">
+                    <div class="p-2 rounded bg-light border">
+                        <small class="text-muted d-block">BPM (Nhịp/phút)</small>
+                        <span class="fw-bold fs-5 text-dark" id="hrvBpm">72</span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded bg-light border">
+                        <small class="text-muted d-block">RMSSD (ms)</small>
+                        <span class="fw-bold fs-5 text-primary" id="hrvRmssd">42.5</span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded bg-light border">
+                        <small class="text-muted d-block">Z-Score (7d)</small>
+                        <span class="fw-bold fs-5 text-success" id="hrvZScore">+0.1</span>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded border">
+                <small class="fw-bold text-secondary">Trạng thái Sinh học:</small>
+                <span class="badge bg-success-subtle text-success border border-success-subtle" id="hrvStatus">Bình thường / Cân bằng</span>
+            </div>
+        </div>
+
         <div class="card card-custom p-4 border-0 shadow-sm">
             <h6 class="fw-bold text-muted mb-3 text-uppercase small ls-1">Thành phần Cảm xúc (Fuzzy Inputs)</h6>
             
@@ -389,6 +418,20 @@
                 let val = parseFloat(data.stress).toFixed(1);
                 document.getElementById('stressValue').innerText = val;
                 document.getElementById('mainStressBar').style.width = val + "%";
+
+                if (data.hrv) {
+                    if (data.hrv.BPM) document.getElementById('hrvBpm').innerText = Math.round(data.hrv.BPM);
+                    if (data.hrv.RMSSD) document.getElementById('hrvRmssd').innerText = data.hrv.RMSSD;
+                    if (data.hrv.z_score !== undefined) {
+                        let z = data.hrv.z_score;
+                        document.getElementById('hrvZScore').innerText = (z >= 0 ? '+' : '') + z;
+                        const zElem = document.getElementById('hrvZScore');
+                        if (z < -1.0) zElem.className = "fw-bold fs-5 text-danger";
+                        else if (z > 1.0) zElem.className = "fw-bold fs-5 text-success";
+                        else zElem.className = "fw-bold fs-5 text-primary";
+                    }
+                    if (data.hrv.status) document.getElementById('hrvStatus').innerText = data.hrv.status;
+                }
 
                 const setBar = (id, v) => {
                     let per = (v || 0).toFixed(0) + "%";

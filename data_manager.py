@@ -21,9 +21,9 @@ def save_real_data(stress_level, emotion, hrv_data=None):
             "stress": round(stress_level, 2),
             "emotion": emotion,
             "hrv": {
-                "bpm": hrv_data.get('bpm', 0) if hrv_data else 0,
-                "rmssd": hrv_data.get('rmssd', 0.0) if hrv_data else 0.0,
-                "sdnn": hrv_data.get('sdnn', 0.0) if hrv_data else 0.0,
+                "bpm": hrv_data.get('bpm', hrv_data.get('BPM', 0)) if hrv_data else 0,
+                "rmssd": hrv_data.get('rmssd', hrv_data.get('RMSSD', 0.0)) if hrv_data else 0.0,
+                "sdnn": hrv_data.get('sdnn', hrv_data.get('SDNN', 0.0)) if hrv_data else 0.0,
                 "status": hrv_data.get('status', 'N/A') if hrv_data else 'N/A'
             } if hrv_data else {}
         }
@@ -31,7 +31,11 @@ def save_real_data(stress_level, emotion, hrv_data=None):
         
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=2)
-        print(f"--> Đã lưu dữ liệu thật: Stress {stress_level}% | Emotion {emotion} | HRV RMSSD: {new_record.get('hrv', {}).get('rmssd')}ms")
+            
+        if hrv_data:
+            save_hrv_data(hrv_data)
+            
+        print(f"--> Đã lưu dữ liệu thật: Stress {stress_level}% | Emotion {emotion}")
 
 def get_dashboard_stats():
     init_file()
@@ -99,7 +103,6 @@ def get_dashboard_stats():
         }
     }
 
-
 def get_alerts():
     init_file()
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
@@ -141,7 +144,6 @@ def resolve_alert(alert_id):
         return True
     return False
 
-
 CHAT_LOG_FILE = 'chat_logs.json'
 
 def init_chat_file():
@@ -170,3 +172,52 @@ def get_chat_logs():
         
     logs.sort(key=lambda x: x['timestamp'], reverse=True)
     return logs
+
+# ==========================================
+# QUẢN LÝ DỮ LIỆU HRV & BASELINE 7 NGÀY
+# ==========================================
+HRV_FILE = 'hrv_history.json'
+
+def init_hrv_file():
+    if not os.path.exists(HRV_FILE):
+        with open(HRV_FILE, 'w', encoding='utf-8') as f:
+            json.dump([], f)
+
+def save_hrv_data(hrv_metrics: dict):
+    init_hrv_file()
+    if not hrv_metrics:
+        return
+        
+    with open(HRV_FILE, 'r', encoding='utf-8') as f:
+        history = json.load(f)
+        
+    record = {
+        "timestamp": datetime.now().isoformat(),
+        **hrv_metrics
+    }
+    history.append(record)
+    
+    with open(HRV_FILE, 'w', encoding='utf-8') as f:
+        json.dump(history, f, indent=2)
+    print(f"--> Đã lưu dữ liệu HRV: RMSSD={hrv_metrics.get('rmssd', hrv_metrics.get('RMSSD', 0))}ms")
+
+def get_hrv_history(limit: int = 50):
+    init_hrv_file()
+    with open(HRV_FILE, 'r', encoding='utf-8') as f:
+        history = json.load(f)
+    return history[-limit:]
+
+def get_hrv_baseline_7days():
+    init_hrv_file()
+    with open(HRV_FILE, 'r', encoding='utf-8') as f:
+        history = json.load(f)
+        
+    now = datetime.now()
+    seven_days_ago = now - timedelta(days=7)
+    
+    recent = []
+    for item in history:
+        ts = datetime.fromisoformat(item['timestamp'])
+        if ts >= seven_days_ago:
+            recent.append(item)
+    return recent
