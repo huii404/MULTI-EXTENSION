@@ -403,6 +403,18 @@
                     document.getElementById('val'+id).innerText = "0%";
                 });
 
+                if(document.getElementById('valBPM')) document.getElementById('valBPM').innerText = "--";
+                if(document.getElementById('valRMSSD')) document.getElementById('valRMSSD').innerText = "--";
+                if(document.getElementById('valSDNN')) document.getElementById('valSDNN').innerText = "--";
+                if(document.getElementById('valHRVStatus')) {
+                    document.getElementById('valHRVStatus').innerText = "Đang đo rPPG...";
+                    document.getElementById('valHRVStatus').className = "badge bg-primary rounded-pill px-3 py-1";
+                }
+                if (typeof ppgChart !== 'undefined') {
+                    ppgChart.data.datasets[0].data = Array(30).fill(0);
+                    ppgChart.update();
+                }
+
                 document.getElementById('alertStatus').style.display = 'none';
                 document.getElementById('normalStatus').style.display = 'block';
 
@@ -553,6 +565,7 @@
     });
 
     function restartScan() {
+        fetch('/api/reset_scan', { method: 'POST' }).catch(err => console.error(err));
     
         isScanning = true;
         validFrames = 0;
@@ -575,6 +588,18 @@
             document.getElementById('bar'+id).style.width = "0%";
             document.getElementById('val'+id).innerText = "0%";
         });
+
+        if(document.getElementById('valBPM')) document.getElementById('valBPM').innerText = "--";
+        if(document.getElementById('valRMSSD')) document.getElementById('valRMSSD').innerText = "--";
+        if(document.getElementById('valSDNN')) document.getElementById('valSDNN').innerText = "--";
+        if(document.getElementById('valHRVStatus')) {
+            document.getElementById('valHRVStatus').innerText = "Đang đo rPPG...";
+            document.getElementById('valHRVStatus').className = "badge bg-primary rounded-pill px-3 py-1";
+        }
+        if (typeof ppgChart !== 'undefined') {
+            ppgChart.data.datasets[0].data = Array(30).fill(0);
+            ppgChart.update();
+        }
         
         startCamera(currentFacingMode);
     }

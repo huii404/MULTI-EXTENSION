@@ -88,6 +88,13 @@ class VideoCamera(object):
         except Exception as e:
             print(f"Lỗi phân tích: {e}")
 
+    def reset_hrv(self):
+        self.hrv_processor.reset()
+        self.current_hrv_metrics = self.hrv_processor.get_metrics()
+        self.latest_hrv_metrics = self.current_hrv_metrics
+        self.emotion_history.clear()
+        self.current_emotions_dict = {}
+
     def get_hrv_metrics(self):
         return getattr(self, 'current_hrv_metrics', self.hrv_processor.get_metrics())
 

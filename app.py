@@ -147,6 +147,14 @@ def trigger_cheat_api():
     except Exception as e:
         return jsonify({'success': False})
 
+@app.route('/api/reset_scan', methods=['POST'])
+def reset_scan_api():
+    try:
+        camera_stream.reset_hrv()
+        return jsonify({'success': True, 'message': 'Đã làm sạch bộ đệm quét'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route('/api/analyze_frame', methods=['POST'])
 def analyze_frame_api():
     data = request.json

@@ -119,11 +119,25 @@ class HRVProcessor:
             elif self.latest_rmssd > 0:
                 self.latest_hrv_stress = round(float(85.0 - ((self.latest_rmssd - 18.0) / (55.0 - 18.0)) * 70.0), 1)
 
+    def reset(self):
+        """
+        Xóa sạch bộ đệm dữ liệu rPPG và HRV khi bắt đầu phiên quét mới.
+        """
+        self.time_buffer.clear()
+        self.green_buffer.clear()
+        self.rr_intervals.clear()
+        self.latest_bpm = 0
+        self.latest_rmssd = 0.0
+        self.latest_sdnn = 0.0
+        self.latest_pnn50 = 0.0
+        self.latest_hrv_stress = 0.0
+        self.latest_signal = []
+
     def get_metrics(self):
         """
-        Trả về kết quả phân tích HRV hiện tại.
+        Trả về kết quả phân tích HRV hiện tại. Không dùng giá trị giả lập mặc định.
         """
-        status = "Đang khởi tạo HRV..."
+        status = "Đang đo rPPG..."
         if self.latest_rmssd >= 45.0:
             status = "Thư giãn (HRV Cao)"
         elif self.latest_rmssd > 0 and self.latest_rmssd < 25.0:
@@ -131,22 +145,15 @@ class HRVProcessor:
         elif self.latest_rmssd > 0:
             status = "Cân bằng"
 
-        bpm_val = self.latest_bpm if self.latest_bpm > 0 else (72 if len(self.green_buffer) > 5 else 0)
-        rmssd_val = self.latest_rmssd if self.latest_rmssd > 0 else (38.5 if len(self.green_buffer) > 10 else 0.0)
-        sdnn_val = self.latest_sdnn if self.latest_sdnn > 0 else (45.2 if len(self.green_buffer) > 10 else 0.0)
-        stress_val = self.latest_hrv_stress if self.latest_rmssd > 0 else (30.0 if len(self.green_buffer) > 10 else 0.0)
-        if status == "Đang khởi tạo HRV..." and rmssd_val > 0:
-            status = "Cân bằng"
-
         return {
-            "bpm": bpm_val,
-            "BPM": bpm_val,
-            "rmssd": rmssd_val,
-            "RMSSD": rmssd_val,
-            "sdnn": sdnn_val,
-            "SDNN": sdnn_val,
+            "bpm": self.latest_bpm,
+            "BPM": self.latest_bpm,
+            "rmssd": self.latest_rmssd,
+            "RMSSD": self.latest_rmssd,
+            "sdnn": self.latest_sdnn,
+            "SDNN": self.latest_sdnn,
             "pnn50": self.latest_pnn50,
-            "hrv_stress": stress_val,
+            "hrv_stress": self.latest_hrv_stress,
             "status": status,
             "signal": self.latest_signal
         }
