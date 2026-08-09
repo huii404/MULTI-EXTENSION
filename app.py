@@ -6,7 +6,7 @@ from flask import Flask, render_template, Response, jsonify, request, session, r
 from functools import wraps
 from camera import VideoCamera
 from chatbot import get_gemini_response
-from data_manager import get_dashboard_stats, save_real_data, get_alerts, resolve_alert, save_chat_log, get_chat_logs
+from data_manager import get_dashboard_stats, save_real_data, get_alerts, resolve_alert, save_chat_log, get_chat_logs, save_hrv_data, get_hrv_history, get_hrv_baseline_7days
 import base64
 import numpy as np
 import cv2
@@ -42,10 +42,12 @@ def video_feed():
 
 @app.route('/stress_data')
 def stress_data():
+    hrv_info = getattr(camera_stream, 'latest_hrv_metrics', {})
     return jsonify({
         'stress': float(camera_stream.get_stress_level()),
         'emotion_label': camera_stream.current_emotion,
-        'details': camera_stream.current_emotions_dict if hasattr(camera_stream, 'current_emotions_dict') else {} 
+        'details': camera_stream.current_emotions_dict if hasattr(camera_stream, 'current_emotions_dict') else {},
+        'hrv': hrv_info
     })
 
 
@@ -54,7 +56,24 @@ def result():
     current_stress = camera_stream.get_stress_level()
     current_emotion = getattr(camera_stream, 'current_emotion', 'Unknown')
     save_real_data(current_stress, current_emotion)
+
+    # Lưu dữ liệu HRV sinh học
+    if hasattr(camera_stream, 'latest_hrv_metrics'):
+        save_hrv_data(camera_stream.latest_hrv_metrics)
+
     return render_template('result.html')
+
+@app.route('/api/hrv/metrics')
+def api_hrv_metrics():
+    return jsonify(getattr(camera_stream, 'latest_hrv_metrics', {}))
+
+@app.route('/api/hrv/baseline')
+def api_hrv_baseline():
+    baseline_data = get_hrv_baseline_7days()
+    return jsonify({
+        'history': get_hrv_history(30),
+        'baseline_7days': baseline_data
+    })
 
 @app.route('/solution/breath')
 def breath():

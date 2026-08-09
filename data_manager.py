@@ -160,3 +160,52 @@ def get_chat_logs():
         
     logs.sort(key=lambda x: x['timestamp'], reverse=True)
     return logs
+
+# ==========================================
+# QUẢN LÝ DỮ LIỆU HRV & BASELINE 7 NGÀY
+# ==========================================
+HRV_FILE = 'hrv_history.json'
+
+def init_hrv_file():
+    if not os.path.exists(HRV_FILE):
+        with open(HRV_FILE, 'w', encoding='utf-8') as f:
+            json.dump([], f)
+
+def save_hrv_data(hrv_metrics: dict):
+    init_hrv_file()
+    if not hrv_metrics:
+        return
+        
+    with open(HRV_FILE, 'r', encoding='utf-8') as f:
+        history = json.load(f)
+        
+    record = {
+        "timestamp": datetime.now().isoformat(),
+        **hrv_metrics
+    }
+    history.append(record)
+    
+    with open(HRV_FILE, 'w', encoding='utf-8') as f:
+        json.dump(history, f, indent=2)
+    print(f"--> Đã lưu dữ liệu HRV: RMSSD={hrv_metrics.get('RMSSD', 0)}ms | Z-Score={hrv_metrics.get('z_score', 0)}")
+
+def get_hrv_history(limit: int = 50):
+    init_hrv_file()
+    with open(HRV_FILE, 'r', encoding='utf-8') as f:
+        history = json.load(f)
+    return history[-limit:]
+
+def get_hrv_baseline_7days():
+    init_hrv_file()
+    with open(HRV_FILE, 'r', encoding='utf-8') as f:
+        history = json.load(f)
+        
+    now = datetime.now()
+    seven_days_ago = now - timedelta(days=7)
+    
+    recent = []
+    for item in history:
+        ts = datetime.fromisoformat(item['timestamp'])
+        if ts >= seven_days_ago:
+            recent.append(item)
+    return recent

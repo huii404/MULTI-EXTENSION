@@ -3,6 +3,9 @@ from deepface import DeepFace
 import threading
 import numpy as np
 from collections import deque
+from hrv_processor import HRVProcessor
+from hrv_baseline import HRVBaselineManager
+from data_manager import get_hrv_baseline_7days, save_hrv_data
 
 class VideoCamera(object):
     def __init__(self):
@@ -11,13 +14,32 @@ class VideoCamera(object):
         self.current_emotions_dict = {}
         self.history_len = 7
         self.emotion_history = deque(maxlen=self.history_len)
-        self.force_stress = False   
+        self.force_stress = False
+
+        # Mô-đun HRV & rPPG (Webcam-based PPG)
+        self.hrv_processor = HRVProcessor(sampling_rate=30)
+        self.baseline_manager = HRVBaselineManager()
+        self.rppg_signal_buffer = deque(maxlen=300) # 10 giây ở 30 FPS
+        self.latest_hrv_metrics = {
+            'BPM': 72.0,
+            'RMSSD': 42.5,
+            'SDNN': 48.2,
+            'LFHF': 1.2,
+            'z_score': 0.1,
+            'hrv_stress': 35.0,
+            'combined_stress': 0.0,
+            'status': 'Bình thường'
+        }
 
     def trigger_fake_stress(self):
         self.force_stress = True
         self.current_stress = 88.5
         self.current_emotion = "fear"
         self.current_emotions_dict = {'angry': 15.0, 'fear': 88.5, 'sad': 60.0, 'happy': 0.0, 'neutral': 5.0}
+        self.latest_hrv_metrics['RMSSD'] = 18.2
+        self.latest_hrv_metrics['z_score'] = -1.8
+        self.latest_hrv_metrics['combined_stress'] = 86.4
+        self.latest_hrv_metrics['status'] = 'Căng thẳng cao (Kiệt sức)'
         
         threading.Timer(15.0, self.reset_fake_stress).start()
 
@@ -85,12 +107,55 @@ class VideoCamera(object):
         ret, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
 
+    def extract_rppg_value(self, img):
+        try:
+            h, w, _ = img.shape
+            # Cắt vùng trán/trung tâm khuôn mặt (ROI) để phân tích sắc độ da rPPG
+            roi = img[int(h*0.2):int(h*0.6), int(w*0.3):int(w*0.7)]
+            if roi.size > 0:
+                green_channel = roi[:, :, 1] # Kênh Green có độ hấp thụ ánh sáng mạch máu tốt nhất
+                return float(np.mean(green_channel))
+        except Exception:
+            pass
+        return 0.0
+
+    def update_hrv_analysis(self, img):
+        val = self.extract_rppg_value(img)
+        if val > 0:
+            self.rppg_signal_buffer.append(val)
+
+        if len(self.rppg_signal_buffer) >= 60 and not getattr(self, 'force_stress', False):
+            try:
+                sig = np.array(self.rppg_signal_buffer)
+                hrv_res = self.hrv_processor.run_pipeline(sig)
+                
+                baseline_hist = get_hrv_baseline_7days()
+                fusion_res = self.baseline_manager.calculate_multimodal_stress(
+                    facial_stress=self.current_stress,
+                    hrv_rmssd=hrv_res.get('RMSSD', 42.0),
+                    baseline_history=baseline_hist
+                )
+                
+                self.latest_hrv_metrics.update({
+                    'BPM': hrv_res.get('BPM', 72.0),
+                    'RMSSD': hrv_res.get('RMSSD', 42.0),
+                    'SDNN': hrv_res.get('SDNN', 45.0),
+                    'LFHF': hrv_res.get('LFHF', 1.1),
+                    'z_score': fusion_res.get('z_score', 0.0),
+                    'hrv_stress': fusion_res.get('hrv_stress', 35.0),
+                    'combined_stress': fusion_res.get('combined_stress', self.current_stress),
+                    'status': fusion_res.get('status', 'Bình thường')
+                })
+            except Exception as e:
+                pass
+
     def detect_emotion(self, img):
         try:
+            self.update_hrv_analysis(img)
+
             if getattr(self, 'force_stress', False):
                 return
           
-            
             objs = DeepFace.analyze(img, 
                                   actions=['emotion'], 
                                   enforce_detection=True, 
@@ -106,7 +171,7 @@ class VideoCamera(object):
             self.current_stress = self.fuzzy_inference_system(avg_emotions)
             self.current_emotion = max(avg_emotions, key=avg_emotions.get)
             
-            print(f"Stress: {self.current_stress:.2f}% | Emotion: {self.current_emotion}")
+            print(f"Stress: {self.current_stress:.2f}% | Emotion: {self.current_emotion} | HRV RMSSD: {self.latest_hrv_metrics['RMSSD']}ms")
             
         except ValueError:
             self.emotion_history.clear()
