@@ -185,3 +185,14 @@
     font-size: 10px;
   }
 }
+#tt-skill-body .cleaner-container,
+#tt-skill-body .comparator-container,
+#tt-skill-body .ocr-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}

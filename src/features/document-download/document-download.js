@@ -26,9 +26,12 @@ const DOC_DOWNLOAD_HTML = `
     <span class="doc-skill-arrow">›</span>
   </button>
 
+  <!-- Thêm container hiển thị nội dung skill con -->
+  <div id="doc-skill-content" style="display:none; margin-top:12px; padding-top:12px;">
+    <div id="doc-skill-body"></div>
+  </div>
 </div>
 `;
-
 
 // DANH SÁCH SKILL CON
 

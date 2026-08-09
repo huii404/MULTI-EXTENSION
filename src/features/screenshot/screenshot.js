@@ -37,12 +37,9 @@ PAGES.screenshot = {
             <button id="ss-download-btn" class="action-btn secondary" style="flex:1; padding:8px; font-size:12px; text-align:center;">
               💾 Tải xuống
             </button>
-            <button id="ss-copy-btn" class="action-btn secondary" style="flex:1; padding:8px; font-size:12px; text-align:center;">
-              📋 Sao chép
-            </button>
           </div>
         </div>
-      </div>
+      </div>  
     `;
   },
 
@@ -199,33 +196,6 @@ PAGES.screenshot = {
       }
     });
 
-    // === SAO CHÉP ===
-    document.getElementById('ss-copy-btn')?.addEventListener('click', async function() {
-      const preview = document.getElementById('ss-preview');
-      const dataUrl = preview.dataset.dataUrl;
-      
-      if (!dataUrl) {
-        showToast('❌ Chưa có ảnh để sao chép', 'error');
-        return;
-      }
-
-      try {
-        const response = await fetch(dataUrl);
-        const blob = await response.blob();
-        
-        if (navigator.clipboard && navigator.clipboard.write) {
-          await navigator.clipboard.write([
-            new ClipboardItem({ [blob.type]: blob })
-          ]);
-          showToast('📋 Đã sao chép ảnh!', 'success');
-        } else {
-          await navigator.clipboard.writeText(dataUrl);
-          showToast('📋 Đã sao chép (Base64)', 'info');
-        }
-      } catch (err) {
-        showToast('❌ Lỗi sao chép: ' + err.message, 'error');
-      }
-    });
   },
 
   title: '📸 Chụp ảnh Web'
