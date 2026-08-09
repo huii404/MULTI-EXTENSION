@@ -1,10 +1,10 @@
 
-const PAGES = {
-  home: {
-    render: renderHome,
-    title: ''
-  }
+window.PAGES = window.PAGES || {};
+window.PAGES.home = {
+  render: renderHome,
+  title: ''
 };
+const PAGES = window.PAGES;
 
 let currentPage = 'home';
 let previousPage = null; 

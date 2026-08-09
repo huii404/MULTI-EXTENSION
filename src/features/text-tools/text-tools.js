@@ -168,69 +168,82 @@ function attachCleanerEvents() {
   let rawText = '';
 
 
-// LOGIC LỌC THÔNG MINH MỚI
+// LOGIC LỌC THÔNG MINH MỚI (CONTEXT-AWARE OCR & TEXT CLEANER - BENCHMARK PRO)
 
-function smartCleanText(text) {
+function smartCleanText(text, level = 'STANDARD') {
   if (!text) return '';
 
-  let cleaned = text;
+  // 1. Chuẩn hóa bảng mã Unicode sang NFC (Việt Nam -> Việt Nam)
+  let cleaned = typeof text.normalize === 'function' ? text.normalize('NFC') : text;
 
-  // =========================================================================
-  // BƯỚC 1: XỬ LÝ KÝ TỰ RÁC Ở GIỮA CHỮ (VD: h|ôm -> hôm, h_ôm -> hôm)
-  // =========================================================================
-  // Nếu ký tự rác chèn dính liền giữa 2 chữ cái (không có khoảng trắng xung quanh): XÓA HẲN (thành '')
-  cleaned = cleaned.replace(/([a-zA-Z0-9À-ỹ])[\^\/~`|_+=#%&*<>{}[\]\\]+([a-zA-Z0-9À-ỹ])/g, '$1$2');
+  // 2. Xóa ký tự điều khiển ẩn và khoảng trắng đặc biệt (Zero-width space, Non-breaking space)
+  cleaned = cleaned.replace(/[\u200B-\u200D\uFEFF]/g, '');
+  cleaned = cleaned.replace(/\u00A0/g, ' ');
+  cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
-  // =========================================================================
-  // BƯỚC 2: XÓA RÁC VÀ NGOẶC THỪA GIỮA CÁC TỪ (VD: Hôm ++ nay, (( sớm )))
-  // =========================================================================
-  // 2.1. Xóa chùm ký tự lặp 2 lần trở lên giữa các từ thành 1 khoảng trắng
-  cleaned = cleaned.replace(/(?<!\d)[^\w\s\nÀ-ỹáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ]{2,}(?!\d)/gi, ' ');
+  // 3. SỬA LỖI OCR TÁCH CHỮ VÀ DẤU THANH (VD: "nhi ễu" -> "nhiễu", "h ôm" -> "hôm", "ti ến" -> "tiến")
+  cleaned = cleaned.replace(/([a-zA-ZÀ-ỹ])\s+([áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ])/g, '$1$2');
+  cleaned = cleaned.replace(/([áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ])\s+([a-zA-ZÀ-ỹ])/g, '$1$2');
 
-  // 2.2. Xóa các ký tự dị dính liền dính xung quanh từ, bảo toàn toán tử hợp lệ (1 + 1, a = b)
-  cleaned = cleaned.replace(/([\(\[\{<~^#%&@*+\-\/\\>!?:;|='"])+/g, (match, p1, offset, string) => {
-    const prevChar = string[offset - 1] || '';
-    const nextChar = string[offset + match.length] || '';
-    if (/[\d\s\w]/.test(prevChar) && /[\d\s\w]/.test(nextChar) && /^[\+\-\*\/\=\<\>]$/.test(match)) {
-      return match; // Giữ toán tử chuẩn
+  // 4. XỬ LÝ LỖI NỐI DÒNG BỊ NGẮT TỪ OCR (VD: "nhiễ\nu" -> "nhiễu")
+  cleaned = cleaned.replace(/([a-zA-ZÀ-ỹ]+)[\r\n]+([a-zàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ]{1,3}\b)/g, '$1$2');
+
+  // 5. XỬ LÝ KÝ TỰ RÁC DÍNH TRONG TỪ (VD: "H|ôm" -> "Hôm", "t~iên" -> "tiên")
+  // Chỉ xóa rác OCR chèn dính giữa chữ: | ~ ` ^ § ¤ ¦ ° ¢ £ ¥ (KHÔNG xóa - _ / : . @ # $ % + * = ' ")
+  cleaned = cleaned.replace(/([a-zA-Z0-9À-ỹ])[\|\~`\^§¤¦°¢£¥]+([a-zA-Z0-9À-ỹ])/g, '$1$2');
+
+  // 6. DỌN CHÙM RÁC LẶP VÔ NGHĨA (VD: |||||, ~~~~~, #####) - Giữ lại ellipsis (...)
+  cleaned = cleaned.replace(/(?<!\.)(\.{2,})(?!\.)/g, '___ELLIPSIS___');
+  cleaned = cleaned.replace(/([\|\~`\^§¤¦°#%&*+=\\<>{}[\]]{4,})/g, ' ');
+  cleaned = cleaned.replace(/___ELLIPSIS___/g, '...');
+
+  // Chế độ BASIC: Chỉ dọn rác OCR thô, giữ nguyên 100% ký tự đặc biệt & format
+  if (level === 'BASIC') {
+    return cleaned
+      .split('\n')
+      .map(line => line.replace(/[ \t]+/g, ' ').trim())
+      .filter((line, i, arr) => !(line === '' && arr[i - 1] === ''))
+      .join('\n')
+      .trim();
+  }
+
+  // 7. XỬ LÝ TỪNG DÒNG VỚI QUY TẮC BẢO TOÀN FORM & HÀM Ý (STANDARD & ADVANCED)
+  const lines = cleaned.split('\n').map(line => {
+    let l = line.replace(/[ \t]+/g, ' ').trim();
+    if (!l) return '';
+
+    // Dọn dẹp rác ở ĐẦU dòng (giữ lại Headers #, List bullets 1., a), -, +, *, >, |, URLs, Path, Quotes, Emojis)
+    const isValidStart = /^(?:\s*)(?:#+|\d+[\.\)]|[a-zA-Z][\.\)]|[-+*•–—>|✓✗⚠️]|https?:\/\/|[a-zA-Z]:\\|["'“‘(])/i.test(l);
+    if (!isValidStart) {
+      l = l.replace(/^[^a-zA-Z0-9À-ỹ\s\(\[\{\"'“‘✓✗⚠️#\+\-\*\•\–\—\>\|]+/g, '');
     }
-    return ' ';
-  });
 
-  // BƯỚC 3: SMART TRIM ĐẦU - CUỐI CHO TỪNG DÒNG
+    // Dọn dẹp rác ở CUỐI dòng (giữ lại dấu câu ., ?, !, :, ;, %, ), ], }, ", ', `, toán tử, unicode symbols)
+    l = l.replace(/[^a-zA-Z0-9À-ỹ\s\.\?\!\:\;\%\)\}\]\'\"\`\+\-\|✓✗⚠️]+$/g, '');
 
-  return cleaned
-    .split('\n')
-    .map(line => {
-      // 3.1 Gộp khoảng trắng lặp
-      let l = line.replace(/[ \t]+/g, ' ').trim();
-      if (!l) return '';
-
-      // 3.2 Xóa rác ĐẦU dòng (VD: "+) a" -> "a", "--> ab" -> "ab")
-      // Giữ lại dấu âm/dương cho số toán học (-5, +10)
-      l = l.replace(/^(?!\s*[\+\-]\d)[^\w\sÀ-ỹáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ\(\{\[]+/gi, '');
-
-      // 3.3 Xóa rác CUỐI dòng (VD: "ab==" -> "ab", "ab.." -> "ab.", "trời!!!" -> "trời.")
-      l = l.replace(/[^\w\sÀ-ỹáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ\)\}\]]+$/gi, (match) => {
-        if (match.includes('?')) return '?';
-        if (match.includes('!')) return '!';
-        if (match.includes('.')) return '.';
-        return '';
-      });
-
-      // 3.4 Tự động thêm dấu chấm nếu câu kết thúc bằng chữ/số
-      if (l.length > 0 && /[a-zA-Z0-9À-ỹ]$/.test(l)) {
+    // ADVANCED LEVEL: Tự động bổ sung dấu chấm câu cho văn xuôi tự do dài
+    if (level === 'ADVANCED') {
+      const words = l.split(' ');
+      if (
+        l.length > 20 &&
+        words.length >= 4 &&
+        !/^https?:\/\//i.test(l) &&
+        !/^[a-zA-Z0-9_\-\.\/\\:]+$/.test(l) &&
+        !/^[#\+\-\*\•\–\—\d\w\.\)\>\|]/.test(l) &&
+        /[a-zA-Z0-9À-ỹ]$/.test(l)
+      ) {
         l += '.';
       }
+    }
 
-      return l;
-    })
+    return l;
+  });
+
+  return lines
     .filter((line, index, arr) => !(line === '' && arr[index - 1] === ''))
-    .join('\n\n')
+    .join('\n')
     .trim();
 }
-
-// HÀM PROCESSTEXT ĐƯỢC CẬP NHẬT
 
 async function processText(text) {
   if (!text || !text.trim()) {
@@ -238,8 +251,13 @@ async function processText(text) {
     return;
   }
 
-  // Gọi hàm lọc thông minh
-  const result = smartCleanText(text);
+  rawText = text;
+
+  const levelSelect = document.getElementById('cleaner-level');
+  const level = levelSelect ? levelSelect.value : 'STANDARD';
+
+  // Gọi hàm lọc thông minh theo cấp độ
+  const result = smartCleanText(text, level);
 
   // Hiển thị ra giao diện
   const output = document.getElementById('cleaner-output');
@@ -530,7 +548,7 @@ PAGES['text-tools'] = {
         body.innerHTML = html;
 
         setTimeout(() => {
-          const page = PAGES[skill.pageName];
+          const page = window.PAGES ? window.PAGES[skill.pageName] : null;
           if (page && typeof page.attachEvents === 'function') {
             console.log('[Text Tools] Calling attachEvents via PAGES for', skillId);
             page.attachEvents();
