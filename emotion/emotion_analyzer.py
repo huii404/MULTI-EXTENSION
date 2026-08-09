@@ -153,63 +153,69 @@ class EmotionAnalyzer:
         }
         """
 
-    def _build_result(self, ai_data, text, history):
-        # 1. Hậu xử lý trọng số: Ưu tiên cực cao cho các tín hiệu âm thanh nếu có
+    def _build_result(self, ai_data, text, history, is_audio=False):
+        # 1. Hậu xử lý trọng số: Ưu tiên cực cao (85%) cho các tín hiệu âm thanh nếu là tệp âm thanh
         signals = ai_data.get("signals", [])
         scores = ai_data.get("scores", {"stress": 0, "anxiety": 0, "sadness": 0, "happy": 0})
         
-        # Nếu có các tín hiệu âm thanh, tăng mạnh điểm tương ứng để bảo đảm trọng số âm thanh cao hơn hẳn text
-        if "shaky_voice" in signals:
-            scores["anxiety"] = float(min(10.0, scores.get("anxiety", 0) + 4.5))
-        if "laughter" in signals:
-            scores["happy"] = float(min(10.0, scores.get("happy", 0) + 4.5))
-        if "loud_voice" in signals:
-            if ai_data.get("emotion") == "HAPPY" or scores.get("happy", 0) > scores.get("stress", 0):
-                scores["happy"] = float(min(10.0, scores.get("happy", 0) + 2.5))
-            else:
-                scores["stress"] = float(min(10.0, scores.get("stress", 0) + 3.5))
-        if "fast_pace" in signals:
-            if ai_data.get("emotion") == "HAPPY" or scores.get("happy", 0) > scores.get("stress", 0):
-                scores["happy"] = float(min(10.0, scores.get("happy", 0) + 2.5))
-            else:
-                scores["stress"] = float(min(10.0, scores.get("stress", 0) + 3.5))
-        if "slow_pace" in signals:
-            scores["sadness"] = float(min(10.0, scores.get("sadness", 0) + 4.0))
-        if "quiet_voice" in signals:
-            if ai_data.get("emotion") == "ANXIETY":
-                scores["anxiety"] = float(min(10.0, scores.get("anxiety", 0) + 2.5))
-            else:
-                scores["sadness"] = float(min(10.0, scores.get("sadness", 0) + 3.0))
+        if is_audio or any(s in signals for s in ["shaky_voice", "loud_voice", "quiet_voice", "fast_pace", "slow_pace"]):
+            # Nếu có các tín hiệu âm thanh, tăng mạnh điểm tương ứng để bảo đảm trọng số âm thanh cao hơn hẳn text
+            if "shaky_voice" in signals:
+                scores["anxiety"] = float(min(10.0, max(8.0, scores.get("anxiety", 0) + 5.0)))
+                ai_data["intensity"] = max(80, ai_data.get("intensity", 75))
+            if "laughter" in signals:
+                scores["happy"] = float(min(10.0, max(8.5, scores.get("happy", 0) + 5.0)))
+                ai_data["intensity"] = max(85, ai_data.get("intensity", 80))
+            if "loud_voice" in signals:
+                if ai_data.get("emotion") == "HAPPY" or scores.get("happy", 0) > scores.get("stress", 0):
+                    scores["happy"] = float(min(10.0, scores.get("happy", 0) + 3.0))
+                else:
+                    scores["stress"] = float(min(10.0, max(8.0, scores.get("stress", 0) + 4.0)))
+                    ai_data["intensity"] = max(80, ai_data.get("intensity", 75))
+            if "fast_pace" in signals:
+                if ai_data.get("emotion") == "HAPPY" or scores.get("happy", 0) > scores.get("stress", 0):
+                    scores["happy"] = float(min(10.0, scores.get("happy", 0) + 3.0))
+                else:
+                    scores["stress"] = float(min(10.0, max(8.0, scores.get("stress", 0) + 4.0)))
+            if "slow_pace" in signals:
+                scores["sadness"] = float(min(10.0, max(7.5, scores.get("sadness", 0) + 4.5)))
+                ai_data["intensity"] = max(75, ai_data.get("intensity", 70))
+            if "quiet_voice" in signals:
+                if ai_data.get("emotion") == "ANXIETY":
+                    scores["anxiety"] = float(min(10.0, max(7.5, scores.get("anxiety", 0) + 3.5)))
+                else:
+                    scores["sadness"] = float(min(10.0, max(7.5, scores.get("sadness", 0) + 3.5)))
 
-        # Tái xác định cảm xúc chủ đạo sau khi cộng điểm tín hiệu âm học
-        dominant_emotion = ai_data.get("emotion", "NEUTRAL")
-        max_score = 0.0
-        label_map = {
-            "stress": "STRESS",
-            "anxiety": "ANXIETY",
-            "sadness": "SADNESS",
-            "happy": "HAPPY"
-        }
-        for k, val in scores.items():
-            if val > max_score:
-                max_score = val
-                dominant_emotion = label_map[k]
-        
-        if max_score < 4.0:
-            dominant_emotion = "NEUTRAL"
+            # Tái xác định cảm xúc chủ đạo dựa trên trọng số âm thanh
+            dominant_emotion = ai_data.get("emotion", "NEUTRAL")
+            max_score = 0.0
+            label_map = {
+                "stress": "STRESS",
+                "anxiety": "ANXIETY",
+                "sadness": "SADNESS",
+                "happy": "HAPPY"
+            }
+            for k, val in scores.items():
+                if val > max_score:
+                    max_score = val
+                    dominant_emotion = label_map[k]
             
-        ai_data["emotion"] = dominant_emotion
-        ai_data["scores"] = scores
+            if max_score < 3.5:
+                dominant_emotion = "NEUTRAL"
+                
+            ai_data["emotion"] = dominant_emotion
+            ai_data["scores"] = scores
 
-        # Hậu xử lý an toàn: Nếu AI trả về ANXIETY nhưng thực tế chỉ chứa ngập ngừng đệm thuần túy (không có từ khóa lo lắng)
-        from .feature_extractor import extract_features
-        features = extract_features(text)
-        if ai_data["emotion"] == "ANXIETY":
-            if features["has_hesitation"] and not any(w in text.lower() for w in ["lo", "sợ", "hồi hộp", "băn khoăn", "ngại", "bồn chồn"]):
-                ai_data["emotion"] = "NEUTRAL"
-                ai_data["intensity"] = 0
-                if "scores" in ai_data and "anxiety" in ai_data["scores"]:
-                    ai_data["scores"]["anxiety"] = 1.0
+        # 2. Chỉ áp dụng Hậu xử lý văn bản cho các tin nhắn văn bản thuần túy (is_audio=False)
+        if not is_audio:
+            from .feature_extractor import extract_features
+            features = extract_features(text)
+            if ai_data["emotion"] == "ANXIETY":
+                if features["has_hesitation"] and not any(w in text.lower() for w in ["lo", "sợ", "hồi hộp", "băn khoăn", "ngại", "bồn chồn"]):
+                    ai_data["emotion"] = "NEUTRAL"
+                    ai_data["intensity"] = 0
+                    if "scores" in ai_data and "anxiety" in ai_data["scores"]:
+                        ai_data["scores"]["anxiety"] = 1.0
                     
         # Tính toán xu hướng (trend) dựa trên lịch sử
         current_record = {
@@ -457,7 +463,7 @@ class EmotionAnalyzer:
         try:
             ai_data = self._analyze_audio_with_gemini(audio_path)
             transcript = ai_data.get("transcript", "")
-            emotion_res = self._build_result(ai_data, transcript, history)
+            emotion_res = self._build_result(ai_data, transcript, history, is_audio=True)
             print("--> [GEMINI MULTIMODAL SUCCESS] Phân tích âm thanh thành công.")
             return emotion_res, transcript
         except Exception as e_gemini:
@@ -473,7 +479,7 @@ class EmotionAnalyzer:
                 print(f"--> [GROQ WHISPER SUCCESS] Bản dịch: \"{transcript}\"")
                 print("--> [FALLBACK] Đang phân tích cảm xúc văn bản bằng Groq Llama 3.3...")
                 ai_data = self._analyze_with_groq(transcript)
-                emotion_res = self._build_result(ai_data, transcript, history)
+                emotion_res = self._build_result(ai_data, transcript, history, is_audio=True)
                 return emotion_res, transcript
             except Exception as e_groq:
                 print(f"--> [GROQ FALLBACK ERROR] Thất bại: {e_groq}")
