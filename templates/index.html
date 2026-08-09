@@ -431,19 +431,7 @@
                 document.getElementById('stressValue').innerText = val;
                 document.getElementById('mainStressBar').style.width = val + "%";
 
-                if (data.hrv) {
-                    if (data.hrv.BPM) document.getElementById('hrvBpm').innerText = Math.round(data.hrv.BPM);
-                    if (data.hrv.RMSSD) document.getElementById('hrvRmssd').innerText = data.hrv.RMSSD;
-                    if (data.hrv.z_score !== undefined) {
-                        let z = data.hrv.z_score;
-                        document.getElementById('hrvZScore').innerText = (z >= 0 ? '+' : '') + z;
-                        const zElem = document.getElementById('hrvZScore');
-                        if (z < -1.0) zElem.className = "fw-bold fs-5 text-danger";
-                        else if (z > 1.0) zElem.className = "fw-bold fs-5 text-success";
-                        else zElem.className = "fw-bold fs-5 text-primary";
-                    }
-                    if (data.hrv.status) document.getElementById('hrvStatus').innerText = data.hrv.status;
-                }
+
 
                 const setBar = (id, v) => {
                     let per = (v || 0).toFixed(0) + "%";
@@ -461,11 +449,16 @@
                 stressChart.update();
 
                 if (data.hrv) {
-                    document.getElementById('valBPM').innerText = data.hrv.bpm > 0 ? data.hrv.bpm : '--';
-                    document.getElementById('valRMSSD').innerText = data.hrv.rmssd > 0 ? data.hrv.rmssd : '--';
-                    document.getElementById('valSDNN').innerText = data.hrv.sdnn > 0 ? data.hrv.sdnn : '--';
-                    if (data.hrv.status) {
-                        const statusBadge = document.getElementById('valHRVStatus');
+                    const elemBpm = document.getElementById('valBPM');
+                    const elemRmssd = document.getElementById('valRMSSD');
+                    const elemSdnn = document.getElementById('valSDNN');
+                    const statusBadge = document.getElementById('valHRVStatus');
+
+                    if (elemBpm) elemBpm.innerText = (data.hrv.bpm > 0) ? Math.round(data.hrv.bpm) : '--';
+                    if (elemRmssd) elemRmssd.innerText = (data.hrv.rmssd > 0) ? data.hrv.rmssd : '--';
+                    if (elemSdnn) elemSdnn.innerText = (data.hrv.sdnn > 0) ? data.hrv.sdnn : '--';
+                    
+                    if (statusBadge && data.hrv.status) {
                         statusBadge.innerText = data.hrv.status;
                         if (data.hrv.status.includes('Thư giãn')) {
                             statusBadge.className = 'badge bg-success rounded-pill px-3 py-1';
@@ -475,7 +468,7 @@
                             statusBadge.className = 'badge bg-info rounded-pill px-3 py-1';
                         }
                     }
-                    if (data.hrv.signal && data.hrv.signal.length > 0) {
+                    if (typeof ppgChart !== 'undefined' && data.hrv.signal && data.hrv.signal.length > 0) {
                         ppgChart.data.datasets[0].data = data.hrv.signal;
                         ppgChart.update();
                     }
