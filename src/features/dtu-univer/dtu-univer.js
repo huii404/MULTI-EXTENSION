@@ -18,6 +18,15 @@ const DTU_SKILLS = {
     color: 'linear-gradient(135deg, #27ae60, #2ecc71)',
     htmlFile: 'skills/schedule/schedule.html',
     jsFile: 'skills/schedule/schedule.js',
+  },
+  'course-register': {
+    id: 'course-register',
+    title: 'Tự động đăng ký môn học',
+    desc: 'Săn tín chỉ & tự động điền mã đăng ký MyDTU',
+    icon: '📝',
+    color: 'linear-gradient(135deg, #2980b9, #3498db)',
+    htmlFile: 'skills/course-register/course-register.html',
+    jsFile: 'skills/course-register/course-register.js',
   }
 };
 

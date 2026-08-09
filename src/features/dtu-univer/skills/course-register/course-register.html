@@ -1,0 +1,66 @@
+<div class="form-group">
+  <label>
+    <span class="icon">📝</span> Danh sách Mã Lớp / Mã Môn Học cần đăng ký:
+  </label>
+  <textarea id="dtu-course-list" rows="4" placeholder="Nhập mã lớp/môn học (mỗi mã 1 dòng hoặc cách bởi dấu phẩy).&#10;Ví dụ:&#10;CS 417 I&#10;ENG 101 A&#10;272183"></textarea>
+  <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">
+    💡 Mẹo: Nhập đầy đủ mã lớp hoặc mã học phần để tìm kiếm chính xác nhất.
+  </span>
+</div>
+
+<div class="form-group">
+  <label><span class="icon">⚡</span> Chế độ xử lý:</label>
+  <select id="dtu-register-mode">
+    <option value="DIRECT_API" selected>🚀 Direct Network API (Bypass UI - Chống sập UI khi quá tải)</option>
+    <option value="HYBRID">🔄 Hybrid (Direct API + DOM Automation)</option>
+  </select>
+</div>
+
+<div class="form-group" style="display: flex; gap: 8px;">
+  <div style="flex: 1;">
+    <label><span class="icon">⏱️</span> Chờ thử lại (ms):</label>
+    <select id="dtu-register-delay">
+      <option value="500">0.5 giây (Nhanh)</option>
+      <option value="1000" selected>1.0 giây (Khuyên dùng)</option>
+      <option value="2000">2.0 giây (An toàn)</option>
+      <option value="3000">3.0 giây</option>
+    </select>
+  </div>
+  <div style="flex: 1;">
+    <label><span class="icon">🔁</span> Số lần thử lại:</label>
+    <select id="dtu-register-max-retry">
+      <option value="10">10 lần</option>
+      <option value="30" selected>30 lần</option>
+      <option value="50">50 lần</option>
+      <option value="100">100 lần (Săn môn)</option>
+    </select>
+  </div>
+</div>
+
+<div class="form-group" style="background: rgba(41, 128, 185, 0.08); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px dashed rgba(41, 128, 185, 0.3);">
+  <label style="display: flex; align-items: center; cursor: pointer; gap: 6px; font-weight: normal; margin: 0 0 6px 0;">
+    <input type="checkbox" id="dtu-auto-focus-captcha" checked style="width: auto;">
+    <span>🎯 Tự động cuộn & Focus vào ô Captcha</span>
+  </label>
+  <label style="display: flex; align-items: center; cursor: pointer; gap: 6px; font-weight: normal; margin: 0;">
+    <input type="checkbox" id="dtu-auto-check-all" checked style="width: auto;">
+    <span>✅ Tự chọn tất cả lớp hợp lệ khớp mã</span>
+  </label>
+</div>
+
+<div style="display: flex; gap: 6px; margin-top: 10px;">
+  <button id="dtu-save-courses-btn" class="action-btn" style="flex: 1; background: var(--surface-hover); color: var(--text);">
+    💾 Lưu danh sách
+  </button>
+  <button id="dtu-start-register-btn" class="action-btn primary" style="flex: 2; background: linear-gradient(135deg, #2980b9, #3498db);">
+    🚀 Bắt đầu đăng ký
+  </button>
+  <button id="dtu-stop-register-btn" class="action-btn" style="flex: 1; background: #e74c3c; color: white; display: none;">
+    ⏹️ Dừng
+  </button>
+</div>
+
+<div id="dtu-register-status" style="margin-top: 10px; padding: 8px 10px; background: var(--surface); border-radius: var(--radius-sm); font-size: 11px; max-height: 100px; overflow-y: auto; display: none; border: 1px solid var(--border);">
+  <div style="font-weight: bold; margin-bottom: 4px; color: var(--text);">📋 Nhật ký đăng ký:</div>
+  <div id="dtu-register-log-text" style="color: var(--text-muted); font-family: monospace; white-space: pre-wrap;"></div>
+</div>
