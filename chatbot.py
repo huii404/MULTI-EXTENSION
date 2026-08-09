@@ -50,7 +50,7 @@ class PsychologyChatbot:
         genai.configure(api_key=key)
         
         model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+            model_name="gemini-3.6-flash",
             system_instruction=self.system_prompt,
             generation_config=self.generation_config
         )
