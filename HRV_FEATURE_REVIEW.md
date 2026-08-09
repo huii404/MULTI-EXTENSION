@@ -6,7 +6,21 @@
 
 ---
 
-## 1. TỔNG QUAN TÍNH NĂNG (FEATURE OVERVIEW)
+## 1. PHÂN TÍCH SO SÁNH 2 TÍNH NĂNG (FEATURE ANALYSIS)
+
+### 📌 Mối Quan Hệ Giữa "Công nghệ đo Nhịp tim rPPG" và "Trích xuất chỉ số HRV":
+Hai tính năng này **KHÔNG HOÀN TOÀN TRÙNG NHAU**, mà có mối quan hệ **TIỀN ĐỀ & HỆ QUẢ (Phương Pháp Thu Nhận Tín Hiệu vs. Phân Tích Chỉ Số Sinh Lý)**.
+
+| Tiêu chí | Tính năng 1: Công nghệ đo Nhịp tim không tiếp xúc (rPPG) | Tính năng 2: Trích xuất chỉ số Biến thiên Nhịp tim (HRV) |
+| :--- | :--- | :--- |
+| **Bản chất** | **Công nghệ Thu nhận Tín hiệu (Input Optical Sensing)** | **Chỉ số Phân tích Sinh lý Học (Output Physiological Analytics)** |
+| **Nguyên lý** | Máu chứa Hemoglobin hấp thụ ánh sáng xanh lá. Tim đập làm sắc tố da trán/má thay đổi vi mô. Camera hoạt động như kính hiển vi quang phổ trích xuất nhịp mạch. | Phân tích chuỗi thời gian biến thiên giữa các nhịp $RR_k = t_k - t_{k-1}$ (ms) thu được từ rPPG. |
+| **Thông số hiển thị** | **Nhịp tim trung bình (BPM)**, **Tần số mạch (Hz)** & **Sóng mạch máu rPPG (Pulse Waveform)**. | **Độ biến thiên RMSSD (ms)**, **SDNN (ms)** & **Điểm Căng thẳng Sinh học (Bio-Stress Score)**. |
+| **Trải nghiệm người dùng** | Giúp người dùng nhìn thấy nhịp tim đập và sóng mạch máu nhấp nhô trực quan qua webcam không tiếp xúc. | Giúp người dùng biết cơ thể đang **Thư giãn (HRV Cao)** hay **Stress (HRV Thấp)** dựa trên độ linh hoạt của tim. |
+
+---
+
+## 2. TỔNG QUAN TÍNH NĂNG (FEATURE OVERVIEW)
 
 Tính năng **HRV & rPPG Biometrics** cho phép Bio-Gate đo lường chỉ số **Biến thiên Nhịp tim (Heart Rate Variability - HRV)** và **Nhịp tim (BPM)** của người dùng thông qua Webcam hoàn toàn **không tiếp xúc (Non-contact Photoplethysmography - rPPG)**.
 
