@@ -432,8 +432,6 @@ body {
 .form-group textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 .form-group select { cursor: pointer; }
 
-/* PAGE ENTER REMOVED */
-
 /* TOAST */
 #global-toast {
   position: fixed;
@@ -461,3 +459,460 @@ body {
   .action-btn .btn-heading { font-size: 13px; }
   .action-btn .btn-sub { font-size: 10px; }
 }
+
+/* ==========================================================================
+   ABOUT & COLORFUL SUPPORT BUTTON SECTION
+   ========================================================================== */
+.about-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(213, 43, 30, 0.2);
+}
+
+.about-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,245,245,0.9));
+  border: 1px solid rgba(213, 43, 30, 0.15);
+  border-radius: var(--radius);
+  padding: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.author-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.author-avatar {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B00, #d52b1e, #8e44ad);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(213, 43, 30, 0.25);
+  flex-shrink: 0;
+}
+
+.author-avatar .online-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 9px;
+  height: 9px;
+  background: #2ecc71;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.8);
+}
+
+.author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.author-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.author-title .by-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #d52b1e;
+  background: rgba(213, 43, 30, 0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.author-title .author-name {
+  font-size: 13px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #111, #444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.author-title .verified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  background: #1DA1F2;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  border-radius: 50%;
+}
+
+.author-sub {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* FLASHY RAINBOW SUPPORT BUTTON ("MÀU MÈ") */
+.btn-support-rainbow {
+  position: relative;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #FF007A, #7928CA, #4A00E0, #00F2FE, #FF007A);
+  background-size: 300% 300%;
+  animation: rainbowMesh 6s ease-in-out infinite;
+  box-shadow: 0 4px 15px rgba(255, 0, 122, 0.35), 0 2px 8px rgba(74, 0, 224, 0.25);
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+}
+
+@keyframes rainbowMesh {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.btn-support-rainbow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -150%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  transform: rotate(25deg);
+  transition: left 0.6s ease-out;
+}
+
+.btn-support-rainbow:hover::before {
+  left: 160%;
+}
+
+.btn-support-rainbow:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(255, 0, 122, 0.55), 0 4px 14px rgba(0, 242, 254, 0.4);
+}
+
+.btn-support-rainbow:active {
+  transform: scale(0.98);
+}
+
+.btn-support-rainbow .btn-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.btn-support-rainbow .btn-icon {
+  font-size: 20px;
+  animation: heartBeat 1.6s ease-in-out infinite;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.25) rotate(-6deg); }
+  30% { transform: scale(1) rotate(0deg); }
+  45% { transform: scale(1.2) rotate(6deg); }
+}
+
+.btn-support-rainbow .btn-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  flex: 1;
+}
+
+.btn-support-rainbow .main-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.btn-support-rainbow .sub-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.btn-support-rainbow .btn-sparkle {
+  font-size: 14px;
+  color: #fff;
+  animation: sparkleTwinkle 2s linear infinite;
+}
+
+@keyframes sparkleTwinkle {
+  0% { transform: rotate(0deg) scale(0.9); opacity: 0.7; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 1; }
+  100% { transform: rotate(360deg) scale(0.9); opacity: 0.7; }
+}
+
+.btn-support-rainbow .btn-badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: linear-gradient(135deg, #FFB000, #FF6B00);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  letter-spacing: 0.5px;
+}
+
+/* SUPPORT MODAL OVERLAY */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  padding: 16px;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal-card {
+  position: relative;
+  background: #ffffff;
+  width: 100%;
+  max-width: 340px;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  transform: translateY(20px) scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-overlay.active .modal-card {
+  transform: translateY(0) scale(1);
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 700;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.modal-close:hover {
+  background: #d52b1e;
+  color: #fff;
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.modal-header .modal-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+  animation: heartBeat 2s ease-in-out infinite;
+}
+
+.modal-header h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #222;
+}
+
+.modal-header p {
+  margin: 0;
+  font-size: 11px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* SOCIAL LINKS GRID & CARDS */
+.social-links-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.social-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.social-card-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.social-card-btn:active {
+  transform: scale(0.98);
+}
+
+.social-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  color: #fff;
+  transition: transform 0.25s ease;
+}
+
+.social-card-btn:hover .social-icon-box {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+/* Platform themes */
+.social-card-btn.youtube .social-icon-box {
+  background: linear-gradient(135deg, #FF0000, #CC0000);
+  box-shadow: 0 3px 10px rgba(255, 0, 0, 0.25);
+}
+
+.social-card-btn.facebook .social-icon-box {
+  background: linear-gradient(135deg, #1877F2, #0B5ED7);
+  box-shadow: 0 3px 10px rgba(24, 119, 242, 0.25);
+}
+
+.social-card-btn.tiktok .social-icon-box {
+  background: linear-gradient(135deg, #000000, #25F4EE, #FE2C55);
+  box-shadow: 0 3px 10px rgba(254, 44, 85, 0.25);
+}
+
+.social-card-btn.github .social-icon-box {
+  background: linear-gradient(135deg, #24292e, #1b1f23);
+  box-shadow: 0 3px 10px rgba(36, 41, 46, 0.25);
+}
+
+.social-card-btn.zalo .social-icon-box {
+  background: linear-gradient(135deg, #0068FF, #0052CC);
+  box-shadow: 0 3px 10px rgba(0, 104, 255, 0.25);
+}
+
+.social-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.social-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #222;
+}
+
+.social-desc {
+  font-size: 10px;
+  font-weight: 500;
+  color: #777;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.social-action-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.social-card-btn.youtube .social-action-badge {
+  background: rgba(255, 0, 0, 0.08);
+  color: #FF0000;
+}
+.social-card-btn.youtube:hover .social-action-badge {
+  background: #FF0000;
+  color: #fff;
+}
+
+.social-card-btn.facebook .social-action-badge {
+  background: rgba(24, 119, 242, 0.08);
+  color: #1877F2;
+}
+.social-card-btn.facebook:hover .social-action-badge {
+  background: #1877F2;
+  color: #fff;
+}
+
+.social-card-btn.tiktok .social-action-badge {
+  background: rgba(254, 44, 85, 0.08);
+  color: #FE2C55;
+}
+.social-card-btn.tiktok:hover .social-action-badge {
+  background: #FE2C55;
+  color: #fff;
+}
+
+.social-card-btn.github .social-action-badge {
+  background: rgba(36, 41, 46, 0.08);
+  color: #24292e;
+}
+.social-card-btn.github:hover .social-action-badge {
+  background: #24292e;
+  color: #fff;
+}
+
+.social-card-btn.zalo .social-action-badge {
+  background: rgba(0, 104, 255, 0.08);
+  color: #0068FF;
+}
+.social-card-btn.zalo:hover .social-action-badge {
+  background: #0068FF;
+  color: #fff;
+}
+

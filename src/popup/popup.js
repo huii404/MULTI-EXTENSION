@@ -119,11 +119,25 @@ function renderHome() {
           <span class="arrow">›</span>
         </span>
       </button>
+
+      <!-- Social & Author Feature Card -->
+      <button class="feature-card" data-page="social" style="border-left: 4px solid #FF007A;">
+        <div class="icon-box" style="background: linear-gradient(135deg, #FF007A, #7928CA); color:white;">✨</div>
+        <div class="info">
+          <span class="title">Theo dõi Kênh & Tác giả</span>
+          <span class="desc">YouTube • TikTok • GitHub • Locket</span>
+        </div>
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span class="arrow">›</span>
+        </span>
+      </button>
+
     </div>
   `;
 }
 
 function attachHomeEvents() {
+
   document.querySelectorAll('.feature-card').forEach(card => {
     card.addEventListener('click', () => {
       const page = card.getAttribute('data-page');
@@ -131,6 +145,7 @@ function attachHomeEvents() {
     });
   });
 }
+
 
 // ---------- LIVE CLOCK ----------
 function initLiveClock() {
@@ -154,3 +169,4 @@ document.addEventListener('DOMContentLoaded', () => {
   navigateTo('home');
   initLiveClock();
 });
+
