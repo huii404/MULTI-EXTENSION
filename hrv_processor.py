@@ -32,14 +32,25 @@ class HRVProcessor:
         cleaned = filtfilt(b, a, raw_signal)
         return cleaned
 
-    def extract_peaks(self, cleaned_signal: np.ndarray, distance_ms: float = 400.0) -> np.ndarray:
+    def extract_peaks(self, cleaned_signal: np.ndarray, distance_ms: float = 350.0) -> np.ndarray:
         """
         Trích xuất đỉnh R (Peak Detection) dựa trên khoảng cách tối thiểu giữa các nhịp.
         """
+        if len(cleaned_signal) < 4:
+            return np.array([])
+            
         min_distance = int((distance_ms / 1000.0) * self.fs)
         min_distance = max(1, min_distance)
         
-        peaks, _ = find_peaks(cleaned_signal, distance=min_distance, prominence=np.std(cleaned_signal) * 0.5)
+        std_val = np.std(cleaned_signal)
+        prom = std_val * 0.1 if std_val > 1e-6 else None
+        
+        peaks, _ = find_peaks(cleaned_signal, distance=min_distance, prominence=prom)
+        
+        if len(peaks) < 2:
+            # Fallback local maxima nếu prominence quá ngặt
+            peaks, _ = find_peaks(cleaned_signal, distance=min_distance)
+            
         return peaks
 
     def clean_rr_intervals(self, rpeaks: np.ndarray) -> np.ndarray:
