@@ -3,6 +3,7 @@ from functools import wraps
 from camera import VideoCamera
 from chatbot import get_gemini_response
 from data_manager import get_dashboard_stats, save_real_data, get_alerts, resolve_alert, save_chat_log, get_chat_logs
+from emotion import EmotionAnalyzer
 import base64
 import numpy as np
 import cv2
@@ -11,6 +12,7 @@ import os
 app = Flask(__name__)
 app.secret_key = 'polkijfuvfrighohdsckdzmmdsowofjsirjvmssskcke9'
 camera_stream = VideoCamera() 
+emotion_analyzer = EmotionAnalyzer()
 
 def login_required(f):
     @wraps(f)
@@ -68,14 +70,39 @@ def chat():
 def chat_api():
     data = request.json
     user_msg = data.get('message', '')
+    source = data.get('source', 'text')
     
     if not user_msg:
         return jsonify({'reply': "Bạn im lặng thế, tâm sự với mình đi!"})
-    ai_reply = get_gemini_response(user_msg)
-
-    save_chat_log(user_msg, ai_reply)
+        
+    if 'emotion_history' not in session:
+        session['emotion_history'] = []
+        
+    history = session['emotion_history']
     
-    return jsonify({'reply': ai_reply})
+    # Phân tích cảm xúc dựa trên lịch sử phiên chat
+    emotion_res = emotion_analyzer.analyze(user_msg, history)
+    emotion_data = emotion_res.to_dict()
+    
+    # Lưu vào lịch sử phiên để phân tích xu hướng ở lượt sau
+    history.append({
+        "emotion": emotion_res.emotion,
+        "scores": emotion_res.scores,
+        "intensity": emotion_res.intensity
+    })
+    session['emotion_history'] = history
+    session.modified = True
+    
+    # Lấy câu trả lời từ chatbot có chèn trạng thái cảm xúc
+    ai_reply = get_gemini_response(user_msg, emotion_data)
+
+    # Lưu log kèm cảm xúc chi tiết
+    save_chat_log(user_msg, ai_reply, source, emotion_data)
+    
+    return jsonify({
+        'reply': ai_reply,
+        'emotion_data': emotion_data
+    })
 
 @app.route('/admin')
 @login_required
