@@ -463,12 +463,21 @@ class EmotionAnalyzer:
             history = []
 
         def _inject_metrics(ai_data_dict):
+            # 1. Trích xuất tín hiệu văn bản từ transcript bằng bộ quy tắc cục bộ
+            text = ai_data_dict.get("transcript", "")
+            from .feature_extractor import extract_features
+            text_features = extract_features(text)
+            
+            signals = set(ai_data_dict.get("signals", []))
+            for sig in text_features.get("signals", []):
+                signals.add(sig)
+                
+            # 2. Trích xuất tín hiệu giọng nói từ micro
             if voice_metrics and isinstance(voice_metrics, dict):
-                signals = set(ai_data_dict.get("signals", []))
                 for key, active in voice_metrics.items():
                     if active:
                         signals.add(key)
-                ai_data_dict["signals"] = list(signals)
+            ai_data_dict["signals"] = list(signals)
 
         # Tầng 1: Sử dụng Gemini Multimodal
         try:

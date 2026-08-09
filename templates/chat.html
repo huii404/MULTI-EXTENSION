@@ -119,15 +119,24 @@
     }
 
     .signal-badge {
-        font-size: 0.75rem;
-        padding: 5px 10px;
-        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 20px;
         display: inline-block;
-        background-color: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
         margin-right: 5px;
         margin-bottom: 5px;
+        letter-spacing: 0.01em;
+    }
+    .signal-voice {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+        border: 1px solid #93c5fd;
+    }
+    .signal-text {
+        background-color: #ede9fe;
+        color: #6d28d9;
+        border: 1px solid #c4b5fd;
     }
 </style>
 
@@ -197,8 +206,8 @@
     <div class="col-lg-4 col-md-5 mb-4">
         <div class="monitor-card h-100 d-flex flex-column gap-4">
             <div>
-                <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                    <i class="bi bi-heart-pulse-fill text-danger me-2"></i>THEO DÕI CẢM XÚC
+                <h5 class="fw-bold text-dark border-bottom pb-2 mb-3 text-uppercase">
+                    Theo dõi cảm xúc
                 </h5>
                 
                 <!-- Trạng thái Cảm xúc hiện tại -->
@@ -228,8 +237,8 @@
                     </div>
                     <div class="col-6">
                         <small class="text-muted fw-bold d-block mb-1">Xu hướng</small>
-                        <div id="trendText" class="fw-bold fs-5 text-secondary d-flex align-items-center justify-content-center">
-                            <i class="bi bi-dash-circle-fill me-1 fs-5"></i> Ổn định
+                        <div id="trendText" class="fw-bold fs-5 text-secondary text-center">
+                            Ổn định
                         </div>
                     </div>
                 </div>
@@ -237,8 +246,16 @@
 
             <!-- Các tín hiệu kỹ thuật phát hiện được -->
             <div>
-                <small class="text-muted fw-bold d-block mb-2">Các tín hiệu phát hiện</small>
-                <div id="signalsContainer" class="d-flex flex-wrap">
+                <small class="text-muted fw-bold text-uppercase d-block mb-2">Tín hiệu phát hiện</small>
+                <div id="signalsVoiceRow" class="mb-1" style="display:none">
+                    <span class="text-muted" style="font-size:0.7rem; font-weight:600; letter-spacing:0.05em;">GIỌNG NÓI</span>
+                    <div id="signalsVoice" class="d-flex flex-wrap mt-1"></div>
+                </div>
+                <div id="signalsTextRow" class="mb-1" style="display:none">
+                    <span class="text-muted" style="font-size:0.7rem; font-weight:600; letter-spacing:0.05em;">NỘI DUNG</span>
+                    <div id="signalsText" class="d-flex flex-wrap mt-1"></div>
+                </div>
+                <div id="signalsEmpty">
                     <span class="text-muted small">Chưa có tín hiệu</span>
                 </div>
             </div>
@@ -270,25 +287,33 @@
         'NEUTRAL': { label: 'BÌNH THƯỜNG / TRUNG TÍNH', emoji: '😐', color: 'text-secondary', bg: 'bg-secondary' }
     };
 
-    const SIGNAL_MAP = {
-        'hesitation': 'Ngập ngừng',
-        'word_repetition': 'Lặp từ',
-        'laughter': 'Tiếng cười',
-        'negation': 'Cấu trúc phủ định',
-        'intensity_low': 'Mức độ nhẹ',
-        'intensity_high': 'Cường độ mạnh',
-        'question': 'Câu hỏi bất an',
-        'exclamation': 'Câu cảm thán',
-        'indirect_stress': 'Biểu hiện căng thẳng',
-        'indirect_anxiety': 'Biểu hiện lo lắng',
-        'indirect_sadness': 'Biểu hiện buồn bã',
-        'indirect_happy': 'Biểu hiện vui mừng',
-        'fast_pace': 'Nói dồn dập/nhanh',
-        'slow_pace': 'Nói chậm/rời rạc',
+    // Tín hiệu giọng nói (Acoustic) – hiển thị badge màu xanh dương
+    const VOICE_SIGNALS = {
+        'fast_pace':   'Nói nhanh / dồn dập',
+        'slow_pace':   'Nói chậm / rời rạc',
         'shaky_voice': 'Giọng run rẩy',
-        'loud_voice': 'Nói to/gắt',
-        'quiet_voice': 'Nói nhỏ/thì thầm'
+        'loud_voice':  'Nói to / gắt',
+        'quiet_voice': 'Nói nhỏ / thì thầm',
+        'laughter':    'Tiếng cười'
     };
+
+    // Tín hiệu văn bản (Text) – hiển thị badge màu tím
+    const TEXT_SIGNALS = {
+        'hesitation':       'Ngập ngừng',
+        'word_repetition':  'Lặp từ',
+        'negation':         'Phủ định',
+        'intensity_low':    'Cường độ nhẹ',
+        'intensity_high':   'Cường độ mạnh',
+        'question':         'Câu hỏi bất an',
+        'exclamation':      'Câu cảm thán',
+        'indirect_stress':  'Căng thẳng gián tiếp',
+        'indirect_anxiety': 'Lo lắng gián tiếp',
+        'indirect_sadness': 'Buồn bã gián tiếp',
+        'indirect_happy':   'Vui mừng gián tiếp'
+    };
+
+    // Map chung để tra nhanh nhãn
+    const SIGNAL_MAP = { ...VOICE_SIGNALS, ...TEXT_SIGNALS };
 
     const TREND_MAP = {
         'INCREASING': { label: 'Tăng', icon: 'bi-arrow-up-right-circle-fill', color: 'text-danger' },
@@ -397,24 +422,41 @@
         // 3. Cập nhật độ tin cậy
         document.getElementById('confidenceText').innerText = `${Math.round(data.confidence * 100)}%`;
         
-        // 4. Cập nhật xu hướng
+        // 4. Cập nhật xu hướng (không dùng icon)
         const trendEl = document.getElementById('trendText');
-        trendEl.innerHTML = `<i class="bi ${t.icon} me-1 fs-5"></i> ${t.label}`;
-        trendEl.className = `fw-bold fs-5 ${t.color} d-flex align-items-center justify-content-center`;
+        trendEl.innerText = t.label;
+        trendEl.className = `fw-bold fs-5 ${t.color} text-center`;
         
-        // 5. Cập nhật tín hiệu phát hiện
-        const container = document.getElementById('signalsContainer');
-        container.innerHTML = '';
+        // 5. Cập nhật tín hiệu phát hiện (phân nhóm: giọng nói vs nội dung)
+        const voiceContainer = document.getElementById('signalsVoice');
+        const textContainer = document.getElementById('signalsText');
+        const voiceRow = document.getElementById('signalsVoiceRow');
+        const textRow = document.getElementById('signalsTextRow');
+        const emptyEl = document.getElementById('signalsEmpty');
+
+        voiceContainer.innerHTML = '';
+        textContainer.innerHTML = '';
+
+        let hasVoice = false, hasText = false;
         if (data.signals && data.signals.length > 0) {
             data.signals.forEach(sig => {
                 const badge = document.createElement('span');
-                badge.className = 'signal-badge';
                 badge.innerText = SIGNAL_MAP[sig] || sig;
-                container.appendChild(badge);
+                if (VOICE_SIGNALS[sig]) {
+                    badge.className = 'signal-badge signal-voice';
+                    voiceContainer.appendChild(badge);
+                    hasVoice = true;
+                } else {
+                    badge.className = 'signal-badge signal-text';
+                    textContainer.appendChild(badge);
+                    hasText = true;
+                }
             });
-        } else {
-            container.innerHTML = '<span class="text-muted small">Không phát hiện tín hiệu đặc biệt</span>';
         }
+
+        voiceRow.style.display = hasVoice ? 'block' : 'none';
+        textRow.style.display = hasText ? 'block' : 'none';
+        emptyEl.style.display = (hasVoice || hasText) ? 'none' : 'block';
         
         // 6. Đẩy dữ liệu vào biểu đồ Chart.js
         const stepNum = emotionChart.data.labels.length + 1;
