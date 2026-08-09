@@ -1,3 +1,7 @@
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 from flask import Flask, render_template, Response, jsonify, request, session, redirect, url_for
 from functools import wraps
 from camera import VideoCamera
