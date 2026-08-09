@@ -372,7 +372,7 @@ class EmotionAnalyzer:
         }
         """
 
-        models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash-exp", "gemini-1.5-pro"]
+        models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-3.5-flash", "gemini-3.6-flash", "gemini-2.5-pro"]
         for model_name in models_to_try:
             for attempt in range(len(self.api_keys)):
                 try:

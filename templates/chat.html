@@ -439,6 +439,7 @@
     let hasSpoken = false;
 
     let rmsHistory = [];
+    let recognition = null; // Bộ nhận diện thời gian thực để hiện text ngay lúc nói
 
     async function toggleSpeech() {
         if (isRecording) {
@@ -455,6 +456,7 @@
             audioChunks = [];
             rmsHistory = [];
             hasSpoken = false;
+            userInput.value = ""; // Reset ô nhập liệu
             
             let options = { mimeType: 'audio/webm' };
             if (!MediaRecorder.isTypeSupported(options.mimeType)) {
@@ -506,6 +508,34 @@
                     await sendAudioFile(audioBlob, `voice.${extension}`, voiceMetrics);
                 }
             };
+
+            // Khởi chạy Web Speech API song song để hiển thị text ngay lập tức
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'vi-VN';
+                
+                recognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    let finalTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
+                    }
+                    userInput.value = finalTranscript || interimTranscript;
+                };
+                
+                recognition.onerror = (e) => {
+                    console.error("Speech recognition error:", e.error);
+                };
+                
+                recognition.start();
+            }
 
             // Thiết lập Web Audio API để phân tích âm lượng
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -564,6 +594,9 @@
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
         }
+        if (recognition) {
+            recognition.stop();
+        }
         isRecording = false;
         updateMicUI(false);
         if (silenceTimer) {
@@ -578,11 +611,12 @@
             micBtn.classList.add('recording-pulse');
             micBtn.innerHTML = '<i class="bi bi-mic-mute-fill fs-5"></i>';
             userInput.placeholder = "🔴 Hệ thống đang lắng nghe... Nói xong tự động gửi...";
-            userInput.disabled = true;
+            userInput.readOnly = true; 
         } else {
             micBtn.classList.remove('recording-pulse');
             micBtn.innerHTML = '<i class="bi bi-mic-fill fs-5"></i>';
             userInput.placeholder = "Nhập tâm sự của bạn...";
+            userInput.readOnly = false;
             userInput.disabled = false;
             userInput.focus();
         }
@@ -636,12 +670,13 @@
                 return;
             }
             
-            // Hiển thị lời dịch văn bản của học sinh
+            // Hiển thị lời dịch văn bản của học sinh (đẹp đẽ, không có tiền tố micro)
             if (data.transcript) {
-                appendMessage(`🎤 *[Giọng nói]*: "${data.transcript}"`, 'user');
+                appendMessage(data.transcript, 'user');
             } else {
-                appendMessage(`🎤 *[Tải lên file âm thanh: ${filename}]*`, 'user');
+                appendMessage(`Đã gửi tệp âm thanh: ${filename}`, 'user');
             }
+            userInput.value = ""; // Xóa text đã hiển thị thời gian thực
             
             // Hiển thị câu trả lời thấu cảm của Bot
             appendMessage(data.reply, 'bot');
