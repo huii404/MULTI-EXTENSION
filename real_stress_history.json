@@ -80,5 +80,25 @@
     "timestamp": "2026-03-09T02:36:49.878397",
     "stress": 99.58,
     "emotion": "angry"
+  },
+  {
+    "timestamp": "2026-08-09T14:34:17.744303",
+    "stress": 45.22,
+    "emotion": "sad"
+  },
+  {
+    "timestamp": "2026-08-09T15:15:11.373687",
+    "stress": 96.65,
+    "emotion": "fear"
+  },
+  {
+    "timestamp": "2026-08-09T15:15:43.508938",
+    "stress": 96.65,
+    "emotion": "fear"
+  },
+  {
+    "timestamp": "2026-08-09T15:47:52.248015",
+    "stress": 61.68,
+    "emotion": "fear"
   }
 ]

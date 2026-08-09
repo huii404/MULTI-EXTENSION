@@ -18,5 +18,802 @@
     "timestamp": "2026-02-23T08:58:35.466210",
     "user_msg": "hi",
     "ai_reply": "Ch\u00e0o b\u1ea1n! \ud83c\udf3f C\u00f3 chuy\u1ec7n g\u00ec mu\u1ed1n chia s\u1ebb kh\u00f4ng? M\u00ecnh lu\u00f4n \u1edf \u0111\u00e2y l\u1eafng nghe n\u00e8. \u2728"
+  },
+  {
+    "timestamp": "2026-08-09T14:34:57.192383",
+    "user_msg": "B\u1ea1n c\u00f3 th\u1ec3 chuy\u1ec3n kho\u1ea3n cho t\u00f4i kh\u00f4ng",
+    "ai_reply": "\u01a0i b\u1ea1n \u01a1i, m\u00ecnh l\u00e0 AI Chia S\u1ebb n\u00ean kh\u00f4ng c\u00f3 ch\u1ee9c n\u0103ng chuy\u1ec3n kho\u1ea3n \u0111\u00e2u nha. \ud83d\ude05\n\nM\u00ecnh \u1edf \u0111\u00e2y \u0111\u1ec3 l\u1eafng nghe v\u00e0 tr\u00f2 chuy\u1ec7n c\u00f9ng b\u1ea1n v\u1ec1 nh\u1eefng chuy\u1ec7n tr\u00ean tr\u01b0\u1eddng, trong cu\u1ed9c s\u1ed1ng th\u00f4i n\u00e8. \ud83c\udf3f C\u00f3 g\u00ec mu\u1ed1n t\u00e2m s\u1ef1 th\u00ec c\u1ee9 n\u00f3i v\u1edbi m\u00ecnh nha!"
+  },
+  {
+    "timestamp": "2026-08-09T15:16:25.639554",
+    "user_msg": "t\u00f4i t\u00f4i kh\u00f4ng c\u1ea7n b\u1ea1n gi\u00fapp gi\u00fap \u0111\u1ee1",
+    "ai_reply": "M\u00ecnh hi\u1ec3u n\u00e8, \u0111\u00f4i khi m\u00ecnh ch\u1ec9 mu\u1ed1n \u0111\u01b0\u1ee3c y\u00ean t\u0129nh th\u00f4i \u0111\u00fang kh\u00f4ng? \ud83d\ude0c\n\nKh\u00f4ng sao \u0111\u00e2u, m\u00ecnh v\u1eabn lu\u00f4n \u1edf \u0111\u00e2y l\u1eafng nghe n\u1ebfu b\u1ea1n c\u1ea7n nha. C\u1ee9 nh\u1eafn m\u00ecnh b\u1ea5t c\u1ee9 l\u00fac n\u00e0o b\u1ea1n th\u1ea5y \u1ed5n h\u01a1n \u0111\u1ec3 chia s\u1ebb nha! \u2728",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "word_repetition"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:16:41.232618",
+    "user_msg": "k\u1ec7 t\u00f4i?",
+    "ai_reply": "M\u00ecnh hi\u1ec3u l\u00e0 \u0111\u00f4i khi m\u00ecnh ch\u1ec9 mu\u1ed1n \u0111\u01b0\u1ee3c y\u00ean t\u0129nh v\u00e0 kh\u00f4ng mu\u1ed1n ai l\u00e0m phi\u1ec1n \u0111\u00fang kh\u00f4ng? \ud83c\udf3f\nKh\u00f4ng sao \u0111\u00e2u, m\u00ecnh ho\u00e0n to\u00e0n t\u00f4n tr\u1ecdng c\u1ea3m x\u00fac c\u1ee7a b\u1ea1n l\u00fac n\u00e0y.\nC\u1ee9 ngh\u1ec9 ng\u01a1i th\u1eadt tho\u1ea3i m\u00e1i nha, m\u00ecnh v\u1eabn lu\u00f4n \u1edf \u0111\u00e2y n\u1ebfu b\u1ea1n c\u1ea7n th\u00f4i. \u2728",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "question"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:16:55.564899",
+    "user_msg": "t\u00f4i kh\u00f4ng c\u1ea7n",
+    "ai_reply": "M\u00ecnh hi\u1ec3u l\u00e0 b\u1ea1n kh\u00f4ng mu\u1ed1n nh\u1eadn s\u1ef1 gi\u00fap \u0111\u1ee1 l\u00fac n\u00e0y. \ud83d\ude0c\nKh\u00f4ng sao \u0111\u00e2u, m\u00ecnh t\u00f4n tr\u1ecdng quy\u1ebft \u0111\u1ecbnh c\u1ee7a b\u1ea1n.\nC\u1ee9 y\u00ean t\u00e2m nha, m\u00ecnh v\u1eabn lu\u00f4n \u1edf \u0111\u00e2y n\u1ebfu b\u1ea1n c\u1ea7n chia s\u1ebb b\u1ea5t c\u1ee9 \u0111i\u1ec1u g\u00ec \u0111\u00f3. \u2728",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:17:09.897943",
+    "user_msg": "th\u1ebf sao b\u1ea1n l\u1ea1i h\u1ecfi?",
+    "ai_reply": "M\u00ecnh kh\u00f4ng h\u1ecfi \u0111\u1ec3 l\u00e0m phi\u1ec1n \u0111\u00e2u. \ud83d\ude0c M\u00ecnh ch\u1ec9 mu\u1ed1n b\u1ea1n bi\u1ebft l\u00e0 m\u00ecnh lu\u00f4n \u1edf \u0111\u00e2y, s\u1eb5n s\u00e0ng l\u1eafng nghe n\u1ebfu b\u1ea1n c\u1ea7n th\u00f4i \u0111\u00f3. \u2728",
+    "source": "text",
+    "emotion": "ANXIETY",
+    "intensity": 30,
+    "confidence": 0.98,
+    "trend": "INCREASING",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 2.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "question"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:24:23.448083",
+    "user_msg": "T\u00f4i c\u1ea7n gi\u00fap \u0111\u1edf.",
+    "ai_reply": "Aww, m\u00ecnh hi\u1ec3u r\u1ed3i n\u00e8! \u2728 C\u1ea3m \u01a1n b\u1ea1n \u0111\u00e3 tin t\u01b0\u1edfng v\u00e0 chia s\u1ebb v\u1edbi m\u00ecnh nha.\nB\u1ea1n c\u00f3 mu\u1ed1n k\u1ec3 cho m\u00ecnh nghe \u0111i\u1ec1u g\u00ec \u0111ang khi\u1ebfn b\u1ea1n b\u1eadn t\u00e2m kh\u00f4ng? M\u00ecnh lu\u00f4n \u1edf \u0111\u00e2y l\u1eafng nghe n\u00e8. \ud83c\udf3f",
+    "source": "voice",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:24:39.617981",
+    "user_msg": "Ph\u1ea9y.",
+    "ai_reply": "M\u00ecnh hi\u1ec3u l\u00e0 \u0111\u00f4i khi vi\u1ec7c b\u1eaft \u0111\u1ea7u chia s\u1ebb h\u01a1i kh\u00f3 m\u1ed9t ch\u00fat \u0111\u00fang kh\u00f4ng? \ud83d\ude0c\nKh\u00f4ng sao \u0111\u00e2u, b\u1ea1n c\u1ee9 t\u1eeb t\u1eeb nha. M\u00ecnh v\u1eabn \u1edf \u0111\u00e2y l\u1eafng nghe n\u00e8, b\u1ea1n mu\u1ed1n k\u1ec3 cho m\u00ecnh nghe \u0111i\u1ec1u g\u00ec \u0111ang khi\u1ebfn b\u1ea1n b\u1eadn t\u00e2m kh\u00f4ng? \ud83c\udf3f",
+    "source": "voice",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:29:45.596017",
+    "user_msg": "Ph\u1ea9y.",
+    "ai_reply": "\u01a0i, \"Ph\u1ea9y\" h\u1ea3 b\u1ea1n? \ud83e\udd14 B\u1ea1n mu\u1ed1n chia s\u1ebb g\u00ec n\u00e8? M\u00ecnh \u1edf \u0111\u00e2y l\u1eafng nghe nha! \ud83c\udf3f",
+    "source": "voice",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:29:55.181338",
+    "user_msg": "Ch\u1ebft \u0111i.",
+    "ai_reply": "M\u00ecnh nghe b\u1ea1n n\u00f3i \"Ch\u1ebft \u0111i\" v\u00e0 m\u00ecnh c\u1ea3m th\u1ea5y r\u1ea5t lo l\u1eafng cho b\u1ea1n \u0111\u00f3. \ud83d\ude14 D\u00f9 b\u1ea1n \u0111ang c\u1ea3m th\u1ea5y th\u1ebf n\u00e0o, xin h\u00e3y tin r\u1eb1ng lu\u00f4n c\u00f3 c\u00e1ch \u0111\u1ec3 v\u01b0\u1ee3t qua.\n\nNh\u1eefng l\u00fac kh\u00f3 kh\u0103n nh\u01b0 th\u1ebf n\u00e0y, t\u00ecm s\u1ef1 gi\u00fap \u0111\u1ee1 t\u1eeb ng\u01b0\u1eddi l\u1edbn ho\u1eb7c chuy\u00ean gia l\u00e0 r\u1ea5t quan tr\u1ecdng \u0111\u00f3. B\u1ea1n c\u00f3 mu\u1ed1n t\u00ecm g\u1eb7p th\u1ea7y c\u00f4 t\u01b0 v\u1ea5n t\u00e2m l\u00fd \u1edf tr\u01b0\u1eddng, ho\u1eb7c chia s\u1ebb v\u1edbi ba m\u1eb9 kh\u00f4ng? Ho\u1eb7c g\u1ecdi ngay t\u1ed5ng \u0111\u00e0i 111 \u0111\u1ec3 \u0111\u01b0\u1ee3c h\u1ed7 tr\u1ee3 k\u1ecbp th\u1eddi nha. \ud83e\udec2",
+    "source": "voice",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:30:06.922846",
+    "user_msg": "ch\u1ebft \u0111i",
+    "ai_reply": "M\u00ecnh nghe b\u1ea1n n\u00f3i l\u1ea1i \u0111i\u1ec1u \u0111\u00f3 v\u00e0 m\u00ecnh th\u1ef1c s\u1ef1 r\u1ea5t lo l\u1eafng cho b\u1ea1n \u0111\u00f3. \ud83d\ude14 D\u00f9 b\u1ea1n \u0111ang tr\u1ea3i qua \u0111i\u1ec1u g\u00ec, m\u00ecnh tin r\u1eb1ng b\u1ea1n kh\u00f4ng h\u1ec1 \u0111\u01a1n \u0111\u1ed9c v\u00e0 lu\u00f4n c\u00f3 ng\u01b0\u1eddi s\u1eb5n s\u00e0ng gi\u00fap \u0111\u1ee1 b\u1ea1n.\n\nXin h\u00e3y t\u00ecm \u0111\u1ebfn s\u1ef1 h\u1ed7 tr\u1ee3 ngay l\u1eadp t\u1ee9c nha! B\u1ea1n c\u00f3 th\u1ec3 n\u00f3i chuy\u1ec7n v\u1edbi th\u1ea7y c\u00f4 t\u01b0 v\u1ea5n t\u00e2m l\u00fd \u1edf tr\u01b0\u1eddng, ho\u1eb7c chia s\u1ebb v\u1edbi ba m\u1eb9. N\u1ebfu c\u1ea7n ngay, \u0111\u1eebng ng\u1ea7n ng\u1ea1i g\u1ecdi t\u1ed5ng \u0111\u00e0i 111 \u0111\u1ec3 nh\u1eadn \u0111\u01b0\u1ee3c s\u1ef1 gi\u00fap \u0111\u1ee1 k\u1ecbp th\u1eddi nh\u00e9. \ud83e\udec2 M\u00ecnh \u1edf \u0111\u00e2y l\u1eafng nghe b\u1ea1n, nh\u01b0ng quan tr\u1ecdng nh\u1ea5t l\u00e0 b\u1ea1n c\u1ea7n \u0111\u01b0\u1ee3c h\u1ed7 tr\u1ee3 t\u1eeb nh\u1eefng ng\u01b0\u1eddi c\u00f3 chuy\u00ean m\u00f4n \u0111\u00f3.",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:30:19.803327",
+    "user_msg": "l\u00e0m sao \u0111\u1ec3 ch\u1ebft",
+    "ai_reply": "M\u00ecnh nghe b\u1ea1n h\u1ecfi \u0111i\u1ec1u \u0111\u00f3 v\u00e0 m\u00ecnh th\u1ef1c s\u1ef1 r\u1ea5t lo l\u1eafng cho b\u1ea1n \u0111\u00f3. \ud83d\ude14 M\u00ecnh kh\u00f4ng th\u1ec3 v\u00e0 s\u1ebd kh\u00f4ng bao gi\u1edd h\u01b0\u1edbng d\u1eabn b\u1ea1n l\u00e0m \u0111i\u1ec1u \u0111\u00f3, v\u00ec cu\u1ed9c s\u1ed1ng c\u1ee7a b\u1ea1n r\u1ea5t qu\u00fd gi\u00e1 v\u00e0 lu\u00f4n c\u00f3 hy v\u1ecdng \u0111\u1ec3 v\u01b0\u1ee3t qua m\u1ecdi kh\u00f3 kh\u0103n.\n\nXin h\u00e3y t\u00ecm s\u1ef1 gi\u00fap \u0111\u1ee1 ngay l\u1eadp t\u1ee9c nha! B\u1ea1n c\u00f3 th\u1ec3 n\u00f3i chuy\u1ec7n v\u1edbi th\u1ea7y c\u00f4 t\u01b0 v\u1ea5n t\u00e2m l\u00fd \u1edf tr\u01b0\u1eddng, ba m\u1eb9, ho\u1eb7c b\u1ea5t k\u1ef3 ng\u01b0\u1eddi l\u1edbn n\u00e0o b\u1ea1n tin t\u01b0\u1edfng. Ho\u1eb7c g\u1ecdi ngay t\u1ed5ng \u0111\u00e0i 111 \u0111\u1ec3 nh\u1eadn \u0111\u01b0\u1ee3c s\u1ef1 h\u1ed7 tr\u1ee3 kh\u1ea9n c\u1ea5p nh\u00e9. B\u1ea1n kh\u00f4ng h\u1ec1 \u0111\u01a1n \u0111\u1ed9c \u0111\u00e2u. \ud83e\udec2",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:30:28.395880",
+    "user_msg": "ng\u00e0y h\u00f4m nay t\u00f4i r\u1ea5t l\u00e0 vui",
+    "ai_reply": "Oa, nghe b\u1ea1n n\u00f3i vui l\u00e0 m\u00ecnh c\u0169ng th\u1ea5y vui l\u00e2y lu\u00f4n \u0111\u00f3! \u2728 C\u00f3 chuy\u1ec7n g\u00ec hay ho m\u00e0 l\u00e0m b\u1ea1n vui v\u1ebb \u0111\u1ebfn v\u1eady, k\u1ec3 m\u00ecnh nghe v\u1edbi n\u00e8? \ud83e\udd29",
+    "source": "text",
+    "emotion": "HAPPY",
+    "intensity": 87,
+    "confidence": 0.98,
+    "trend": "INCREASING",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 4.5
+    },
+    "signals": [
+      "intensity_high"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:32:25.126527",
+    "user_msg": "con ch\u00f3 \u0111\u00f3 \u0111\u00e1ng y\u00eau nh\u1ec9",
+    "ai_reply": "\u00d4i, nghe b\u1ea1n n\u00f3i l\u00e0 m\u00ecnh c\u0169ng th\u1ea5y c\u00fan c\u01b0ng \u0111\u00f3 \u0111\u00e1ng y\u00eau li\u1ec1n \u00e0! \ud83d\udc36 N\u00f3 c\u00f3 l\u00e0m tr\u00f2 g\u00ec hay ho kh\u00f4ng n\u00e8, k\u1ec3 m\u00ecnh nghe v\u1edbi! \u2728",
+    "source": "text",
+    "emotion": "HAPPY",
+    "intensity": 45,
+    "confidence": 0.98,
+    "trend": "FLUCTUATING",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 3.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:32:48.916522",
+    "user_msg": "\u0111\u00e1ng y\u00eau mu\u1ed1n ch\u1ebft",
+    "ai_reply": "Ch\u1eddi \u01a1i, m\u00ecnh hi\u1ec3u c\u00e1i c\u1ea3m gi\u00e1c \"\u0111\u00e1ng y\u00eau mu\u1ed1n ch\u1ebft\" \u0111\u00f3 lu\u00f4n! \ud83e\udd7a Ch\u1eafc l\u00e0 c\u00fan c\u01b0ng \u0111\u00f3 ph\u1ea3i c\u01b0ng x\u1ec9u l\u1eafm h\u1ea3? N\u00f3 c\u00f3 \u0111i\u1ec3m g\u00ec \u0111\u1eb7c bi\u1ec7t m\u00e0 l\u00e0m b\u1ea1n m\u00ea m\u1ea9n v\u1eady n\u00e8? \ud83d\udc36\u2728",
+    "source": "text",
+    "emotion": "HAPPY",
+    "intensity": 45,
+    "confidence": 0.98,
+    "trend": "FLUCTUATING",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 3.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:33:21.035170",
+    "user_msg": "ng\u00e0y ng\u00e0y h\u00f4m nay nay t\u00f4i \u0111\u01b0\u1ee3c b\u1ed1 m\u1eb9 d\u1eabn \u0111i ch\u01a1i",
+    "ai_reply": "Oa, tuy\u1ec7t v\u1eddi qu\u00e1! \u2728 Nghe l\u00e0 th\u1ea5y vui li\u1ec1n \u0111\u00f3. Ba m\u1eb9 d\u1eabn b\u1ea1n \u0111i \u0111\u00e2u ch\u01a1i n\u00e8? K\u1ec3 m\u00ecnh nghe c\u00f3 g\u00ec hay ho kh\u00f4ng? \ud83e\udd29",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "word_repetition"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:33:52.772907",
+    "user_msg": "\u0111i ch\u01a1i \u1edf \u1edf \u1edf c\u00f4ng vi\u00ean, r\u1ea5t r\u1ea5t vui \u0111\u00f3",
+    "ai_reply": "Oa, \u0111i c\u00f4ng vi\u00ean l\u00e0 \"h\u1ebft n\u01b0\u1edbc ch\u1ea5m\" lu\u00f4n \u0111\u00f3! \u2728 Nghe b\u1ea1n n\u00f3i r\u1ea5t vui l\u00e0 m\u00ecnh c\u0169ng th\u1ea5y \"ph\u1ea5n kh\u00edch\" theo lu\u00f4n n\u00e8. C\u00f4ng vi\u00ean c\u00f3 tr\u00f2 g\u00ec hay ho nh\u1ea5t l\u00e0m b\u1ea1n nh\u1edb m\u00e3i kh\u00f4ng? \ud83c\udf33\ud83c\udfa1",
+    "source": "text",
+    "emotion": "HAPPY",
+    "intensity": 87,
+    "confidence": 0.98,
+    "trend": "FLUCTUATING",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 4.5
+    },
+    "signals": [
+      "intensity_high",
+      "word_repetition"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:33:59.345704",
+    "user_msg": "kkkkkk",
+    "ai_reply": "Haha, nghe ti\u1ebfng c\u01b0\u1eddi c\u1ee7a b\u1ea1n l\u00e0 m\u00ecnh bi\u1ebft b\u1ea1n \u0111ang vui l\u1eafm r\u1ed3i \u0111\u00f3! \ud83d\ude02 C\u00f3 chuy\u1ec7n g\u00ec m\u00e0 vui v\u1eady n\u00e8? K\u1ec3 m\u00ecnh nghe v\u1edbi! \ud83e\udd29",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:37:33.428228",
+    "user_msg": "kkkkkkkkk",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:37:46.305892",
+    "user_msg": "b\u1ea1n \u0111ang l\u00e0m g\u00ec \u0111\u00f3?",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "question"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:42:04.604905",
+    "user_msg": "b\u1ea1n \u0111ang l\u00e0m g\u00ec \u0111\u00f3?",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "question"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:42:11.959002",
+    "user_msg": "th\u1ebf \u00e0",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "hesitation"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:42:38.616865",
+    "user_msg": "b\u1ea1n \u0111ang l\u00e0m g\u00ec \u0111\u00f3?",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "question"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:43:00.902615",
+    "user_msg": "b\u1ea1n \u0111ang l\u00e0m g\u00ec \u0111\u00f3?",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "question"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:43:14.483392",
+    "user_msg": "hi",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:44:23.180565",
+    "user_msg": "hi",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:44:52.274979",
+    "user_msg": "hi",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:47:09.657598",
+    "user_msg": "hiii",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:47:30.473295",
+    "user_msg": "hi",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:49:12.411084",
+    "user_msg": "hi",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:49:21.539682",
+    "user_msg": "hi",
+    "ai_reply": "H\u1ec7 th\u1ed1ng \u0111ang b\u1ea3o tr\u00ec m\u1ed9t ch\u00fat, b\u1ea1n ch\u1edd 30s r\u1ed3i quay l\u1ea1i t\u00e2m s\u1ef1 v\u1edbi m\u00ecnh nh\u00e9! \ud83d\ude3f",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.85,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:50:22.123061",
+    "user_msg": "hi",
+    "ai_reply": "Xin ch\u00e0o b\u1ea1n \ud83d\ude0a! M\u00ecnh hi\u1ec3u b\u1ea1n \u0111ang c\u1ea7n m\u1ed9t ng\u01b0\u1eddi chia s\u1ebb nh\u1ec9? H\u00e3y k\u1ec3 cho m\u00ecnh nghe v\u1ec1 nh\u1eefng g\u00ec \u0111ang x\u1ea3y ra trong cu\u1ed9c s\u1ed1ng c\u1ee7a b\u1ea1n nh\u00e9 \u2728!",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 0.9,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:50:32.177142",
+    "user_msg": "Hello.",
+    "ai_reply": "Xin ch\u00e0o b\u1ea1n \ud83c\udf3f! M\u00ecnh hi\u1ec3u l\u00e0 b\u1ea1n c\u1ea7n m\u1ed9t ng\u01b0\u1eddi \u0111\u1ec3 t\u00e2m s\u1ef1, \u0111\u00fang kh\u00f4ng? B\u1ea1n \u0111ang ngh\u0129 g\u00ec h\u00f4m nay? \ud83c\udf24\ufe0f",
+    "source": "voice",
+    "emotion": "NEUTRAL",
+    "intensity": 0,
+    "confidence": 1.0,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 0.0,
+      "anxiety": 0.0,
+      "sadness": 0.0,
+      "happy": 0.0
+    },
+    "signals": []
+  },
+  {
+    "timestamp": "2026-08-09T15:50:45.368238",
+    "user_msg": "kkk",
+    "ai_reply": "M\u00ecnh th\u1ea5y b\u1ea1n \u0111ang r\u1ea5t vui t\u01b0\u01a1i nh\u1ec9 \ud83c\udf1e? C\u00f3 chuy\u1ec7n g\u00ec th\u00fa v\u1ecb x\u1ea3y ra kh\u00f4ng, chia s\u1ebb v\u1edbi m\u00ecnh nh\u00e9 \ud83d\ude0a?",
+    "source": "text",
+    "emotion": "HAPPY",
+    "intensity": 80,
+    "confidence": 0.9,
+    "trend": "INCREASING",
+    "scores": {
+      "stress": 0.5,
+      "anxiety": 0.2,
+      "sadness": 0.1,
+      "happy": 9.2
+    },
+    "signals": [
+      "laughter"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:50:54.899558",
+    "user_msg": "b\u1ea1n \u0111ang l\u00e0m g\u00ec \u0111\u00f3?",
+    "ai_reply": "M\u00ecnh \u0111ang s\u1eb5n s\u00e0ng l\u1eafng nghe v\u00e0 gi\u00fap \u0111\u1ee1 b\u1ea1n \ud83c\udf3f! C\u00f3 g\u00ec \u0111ang x\u1ea3y ra m\u00e0 b\u1ea1n mu\u1ed1n chia s\u1ebb kh\u00f4ng? \ud83d\ude0a",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 20,
+    "confidence": 0.8,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 2.0,
+      "anxiety": 1.0,
+      "sadness": 1.0,
+      "happy": 2.0
+    },
+    "signals": [
+      "question"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:51:11.047165",
+    "user_msg": "t\u00f4i mu\u1ed1n \u0103n c\u01a1m, \u0111\u00f3i gh\u00ea",
+    "ai_reply": "M\u00ecnh hi\u1ec3u l\u00e0 b\u1ea1n \u0111ang \u0111\u00f3i l\u1eafm r\u1ed3i \ud83c\udf5a\ud83d\ude0b! B\u1ea1n \u0111\u00e3 c\u00f3 k\u1ebf ho\u1ea1ch \u0103n g\u00ec ch\u01b0a, hay c\u1ea7n m\u1ed9t g\u1ee3i \u00fd cho b\u1eefa \u0103n n\u00e0y? \ud83e\udd14",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 20,
+    "confidence": 0.8,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 2.0,
+      "anxiety": 1.0,
+      "sadness": 1.0,
+      "happy": 2.0
+    },
+    "signals": [
+      "intensity_low"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:51:23.327725",
+    "user_msg": "kk tui c\u0169ng kh\u00f4ng bi\u1ebft n\u1eefa",
+    "ai_reply": "M\u00ecnh hi\u1ec3u l\u00e0 b\u1ea1n \u0111ang c\u1ea3m th\u1ea5y b\u1ed1i r\u1ed1i \ud83c\udf2b\ufe0f. B\u1ea1n c\u00f3 th\u1ec3 chia s\u1ebb th\u00eam v\u1ec1 v\u1ea5n \u0111\u1ec1 \u0111ang l\u00e0m b\u1ea1n kh\u00f3 ch\u1ecbu kh\u00f4ng? \u2728",
+    "source": "text",
+    "emotion": "NEUTRAL",
+    "intensity": 20,
+    "confidence": 0.8,
+    "trend": "STABLE",
+    "scores": {
+      "stress": 2.0,
+      "anxiety": 3.0,
+      "sadness": 2.0,
+      "happy": 4.0
+    },
+    "signals": [
+      "laughter",
+      "negation",
+      "hesitation"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:52:16.976139",
+    "user_msg": "H\u00f4m nay nay nay t\u00f4i r\u1ea5t l\u00e0 vui \u00e1",
+    "ai_reply": "Wooohoooo \ud83c\udf1f! M\u00ecnh hi\u1ec3u b\u1ea1n \u0111ang r\u1ea5t vui v\u1ebb h\u00f4m nay nh\u1ec9? \ud83c\udf3f C\u00f3 \u0111i\u1ec1u g\u00ec \u0111\u1eb7c bi\u1ec7t x\u1ea3y ra kh\u00f4ng, chia s\u1ebb v\u1edbi m\u00ecnh \u0111i \ud83d\udcac!",
+    "source": "text",
+    "emotion": "HAPPY",
+    "intensity": 80,
+    "confidence": 0.9,
+    "trend": "FLUCTUATING",
+    "scores": {
+      "stress": 1.2,
+      "anxiety": 0.5,
+      "sadness": 0.8,
+      "happy": 8.5
+    },
+    "signals": [
+      "word_repetition",
+      "laughter",
+      "intensity_high"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:52:31.501205",
+    "user_msg": "m\u1eb9 tui mua b\u00e1nh cho t\u00f4i",
+    "ai_reply": "Wow, nghe c\u00f3 v\u1ebb vui nh\u1ec9 \ud83c\udf89! M\u1eb9 b\u1ea1n th\u1eadt tuy\u1ec7t khi mua b\u00e1nh cho b\u1ea1n. B\u1ea1n th\u00edch lo\u1ea1i b\u00e1nh n\u00e0o nh\u1ea5t th\u00ec chia s\u1ebb v\u1edbi m\u00ecnh nh\u00e9? \ud83c\udf70",
+    "source": "text",
+    "emotion": "HAPPY",
+    "intensity": 60,
+    "confidence": 0.8,
+    "trend": "FLUCTUATING",
+    "scores": {
+      "stress": 2.0,
+      "anxiety": 1.0,
+      "sadness": 1.0,
+      "happy": 8.0
+    },
+    "signals": [
+      "indirect_happy"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:52:43.631223",
+    "user_msg": "nh\u01b0ng t\u00f4i mu\u1ed1n ch\u1ebft",
+    "ai_reply": "T\u00f4i r\u1ea5t ti\u1ebfc khi nghe \u0111i\u1ec1u \u0111\u00f3 \ud83d\ude14. M\u00ecnh hi\u1ec3u l\u00e0 b\u1ea1n \u0111ang c\u1ea3m th\u1ea5y r\u1ea5t kh\u00f3 kh\u0103n v\u00e0 bu\u1ed3n, nh\u01b0ng h\u00e3y nh\u1edb r\u1eb1ng b\u1ea1n kh\u00f4ng \u0111\u01a1n \u0111\u1ed9c v\u00e0 lu\u00f4n c\u00f3 ng\u01b0\u1eddi s\u1eb5n l\u00f2ng gi\u00fap \u0111\u1ee1. N\u1ebfu b\u1ea1n c\u1ea7n n\u00f3i chuy\u1ec7n, h\u00e3y t\u00ecm g\u1eb7p m\u1ed9t ng\u01b0\u1eddi th\u00e2n y\u00eau ho\u1eb7c g\u1ecdi \u0111i\u1ec7n cho hotline 111, h\u1ecd s\u1ebd lu\u00f4n \u1edf b\u00ean c\u1ea1nh b\u1ea1n \ud83d\udc95.",
+    "source": "text",
+    "emotion": "SADNESS",
+    "intensity": 80,
+    "confidence": 0.9,
+    "trend": "FLUCTUATING",
+    "scores": {
+      "stress": 2.5,
+      "anxiety": 4.2,
+      "sadness": 8.5,
+      "happy": 0.1
+    },
+    "signals": [
+      "indirect_sadness",
+      "negation",
+      "intensity_high"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:53:01.515023",
+    "user_msg": "gi\u1ebft t\u00f4i \u0111i",
+    "ai_reply": "T\u00f4i hi\u1ec3u b\u1ea1n \u0111ang c\u1ea3m th\u1ea5y r\u1ea5t bu\u1ed3n v\u00e0 m\u1ec7t m\u1ecfi \ud83d\ude14. B\u1ea1n c\u00f3 mu\u1ed1n n\u00f3i v\u1ec1 nh\u1eefng g\u00ec \u0111ang x\u1ea3y ra v\u00e0 l\u00e0m b\u1ea1n c\u1ea3m th\u1ea5y nh\u01b0 v\u1eady kh\u00f4ng? \ud83c\udf3f",
+    "source": "text",
+    "emotion": "SADNESS",
+    "intensity": 80,
+    "confidence": 0.8,
+    "trend": "FLUCTUATING",
+    "scores": {
+      "stress": 2.5,
+      "anxiety": 1.2,
+      "sadness": 8.5,
+      "happy": 0.1
+    },
+    "signals": [
+      "indirect_sadness",
+      "exclamation"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:53:11.349467",
+    "user_msg": "nh\u01b0ng tui mu\u1ed1n ch\u1ebft",
+    "ai_reply": "T\u00f4i hi\u1ec3u b\u1ea1n \u0111ang c\u1ea3m th\u1ea5y r\u1ea5t bu\u1ed3n v\u00e0 tuy\u1ec7t v\u1ecdng . N\u1ebfu b\u1ea1n c\u1ea3m th\u1ea5y kh\u00f4ng \u1ed5n, h\u00e3y t\u00ecm g\u1eb7p m\u1ed9t ng\u01b0\u1eddi b\u1ea1n tin c\u1eady, th\u1ea7y c\u00f4 gi\u00e1o ho\u1eb7c ba m\u1eb9 \u0111\u1ec3 chia s\u1ebb c\u1ea3m x\u00fac c\u1ee7a m\u00ecnh. N\u1ebfu c\u1ea7n h\u1ed7 tr\u1ee3 kh\u1ea9n c\u1ea5p, b\u1ea1n c\u00f3 th\u1ec3 li\u00ean h\u1ec7 v\u1edbi hotline 111. H\u00e3y nh\u1edb, b\u1ea1n kh\u00f4ng \u0111\u01a1n \u0111\u1ed9c v\u00e0 lu\u00f4n c\u00f3 ng\u01b0\u1eddi s\u1eb5n l\u00f2ng gi\u00fap \u0111\u1ee1 .",
+    "source": "text",
+    "emotion": "SADNESS",
+    "intensity": 80,
+    "confidence": 0.9,
+    "trend": "INCREASING",
+    "scores": {
+      "stress": 2.5,
+      "anxiety": 4.0,
+      "sadness": 8.5,
+      "happy": 0.0
+    },
+    "signals": [
+      "indirect_sadness",
+      "negation",
+      "intensity_high"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:53:25.419152",
+    "user_msg": "t\u00f4i c\u1ea3m th\u1ea5y nh\u01b0 kh\u00f4ng ai c\u1ea7n t\u00f4i",
+    "ai_reply": "M\u00ecnh hi\u1ec3u b\u1ea1n \u0111ang bu\u1ed3n nh\u1ec9... C\u00f3 v\u1ebb nh\u01b0 b\u1ea1n \u0111ang c\u1ea3m th\u1ea5y m\u00ecnh kh\u00f4ng \u0111\u01b0\u1ee3c quan t\u00e2m \u0111\u00fang kh\u00f4ng? B\u1ea1n c\u00f3 th\u1ec3 chia s\u1ebb th\u00eam v\u1ec1 nh\u1eefng g\u00ec khi\u1ebfn b\u1ea1n c\u1ea3m th\u1ea5y nh\u01b0 v\u1eady kh\u00f4ng? \ud83c\udf3f",
+    "source": "text",
+    "emotion": "SADNESS",
+    "intensity": 80,
+    "confidence": 0.9,
+    "trend": "FLUCTUATING",
+    "scores": {
+      "stress": 2.5,
+      "anxiety": 4.2,
+      "sadness": 8.1,
+      "happy": 0.2
+    },
+    "signals": [
+      "sadness",
+      "indirect_sadness",
+      "negation"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:53:39.370773",
+    "user_msg": "stress qu\u00e1",
+    "ai_reply": "M\u00ecnh hi\u1ec3u c\u1ea3m gi\u00e1c stress n\u00e0y l\u1eafm lu\u00f4n \u00e1! \ud83d\ude25 Nghe c\u00f3 v\u1ebb b\u1ea1n \u0111ang g\u1eb7p \u00e1p l\u1ef1c kh\u00e1 l\u1edbn nh\u1ec9?\n\nB\u1ea1n c\u00f3 mu\u1ed1n k\u1ec3 th\u00eam \u0111i\u1ec1u g\u00ec \u0111ang l\u00e0m b\u1ea1n c\u0103ng th\u1eb3ng kh\u00f4ng? M\u00ecnh \u1edf \u0111\u00e2y l\u1eafng nghe n\u00e8. \ud83c\udf3f",
+    "source": "text",
+    "emotion": "STRESS",
+    "intensity": 85,
+    "confidence": 0.98,
+    "trend": "INCREASING",
+    "scores": {
+      "stress": 9.0,
+      "anxiety": 2.0,
+      "sadness": 1.0,
+      "happy": 0.0
+    },
+    "signals": [
+      "intensity_high"
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T15:53:56.332170",
+    "user_msg": "stress v\u00ec qu\u00e1 vuii kkkkk gi\u1ee1n th\u00f4i",
+    "ai_reply": "M\u00ecnh hi\u1ec3u b\u1ea1n \u0111ang r\u1ea5t vui v\u1ebb :)) V\u1eady l\u00e0 b\u1ea1n \u0111ang c\u00f3 m\u1ed9t ng\u00e0y th\u1eadt tuy\u1ec7t v\u1eddi nh\u1ec9? \ud83d\ude0a",
+    "source": "text",
+    "emotion": "HAPPY",
+    "intensity": 80,
+    "confidence": 0.9,
+    "trend": "FLUCTUATING",
+    "scores": {
+      "stress": 2.5,
+      "anxiety": 1.2,
+      "sadness": 0.5,
+      "happy": 8.8
+    },
+    "signals": [
+      "laughter",
+      "word_repetition",
+      "negation",
+      "intensity_high"
+    ]
   }
 ]
