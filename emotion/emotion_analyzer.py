@@ -154,6 +154,53 @@ class EmotionAnalyzer:
         """
 
     def _build_result(self, ai_data, text, history):
+        # 1. Hậu xử lý trọng số: Ưu tiên cực cao cho các tín hiệu âm thanh nếu có
+        signals = ai_data.get("signals", [])
+        scores = ai_data.get("scores", {"stress": 0, "anxiety": 0, "sadness": 0, "happy": 0})
+        
+        # Nếu có các tín hiệu âm thanh, tăng mạnh điểm tương ứng để bảo đảm trọng số âm thanh cao hơn hẳn text
+        if "shaky_voice" in signals:
+            scores["anxiety"] = float(min(10.0, scores.get("anxiety", 0) + 4.5))
+        if "laughter" in signals:
+            scores["happy"] = float(min(10.0, scores.get("happy", 0) + 4.5))
+        if "loud_voice" in signals:
+            if ai_data.get("emotion") == "HAPPY" or scores.get("happy", 0) > scores.get("stress", 0):
+                scores["happy"] = float(min(10.0, scores.get("happy", 0) + 2.5))
+            else:
+                scores["stress"] = float(min(10.0, scores.get("stress", 0) + 3.5))
+        if "fast_pace" in signals:
+            if ai_data.get("emotion") == "HAPPY" or scores.get("happy", 0) > scores.get("stress", 0):
+                scores["happy"] = float(min(10.0, scores.get("happy", 0) + 2.5))
+            else:
+                scores["stress"] = float(min(10.0, scores.get("stress", 0) + 3.5))
+        if "slow_pace" in signals:
+            scores["sadness"] = float(min(10.0, scores.get("sadness", 0) + 4.0))
+        if "quiet_voice" in signals:
+            if ai_data.get("emotion") == "ANXIETY":
+                scores["anxiety"] = float(min(10.0, scores.get("anxiety", 0) + 2.5))
+            else:
+                scores["sadness"] = float(min(10.0, scores.get("sadness", 0) + 3.0))
+
+        # Tái xác định cảm xúc chủ đạo sau khi cộng điểm tín hiệu âm học
+        dominant_emotion = ai_data.get("emotion", "NEUTRAL")
+        max_score = 0.0
+        label_map = {
+            "stress": "STRESS",
+            "anxiety": "ANXIETY",
+            "sadness": "SADNESS",
+            "happy": "HAPPY"
+        }
+        for k, val in scores.items():
+            if val > max_score:
+                max_score = val
+                dominant_emotion = label_map[k]
+        
+        if max_score < 4.0:
+            dominant_emotion = "NEUTRAL"
+            
+        ai_data["emotion"] = dominant_emotion
+        ai_data["scores"] = scores
+
         # Hậu xử lý an toàn: Nếu AI trả về ANXIETY nhưng thực tế chỉ chứa ngập ngừng đệm thuần túy (không có từ khóa lo lắng)
         from .feature_extractor import extract_features
         features = extract_features(text)
@@ -298,8 +345,10 @@ class EmotionAnalyzer:
         Bạn là chuyên gia ngôn ngữ học và tâm lý học học đường Việt Nam.
         Hãy phân tích file âm thanh tiếng Việt được gửi kèm theo cả hai khía cạnh:
         1. [Dịch văn bản]: Trích xuất nguyên văn lời nói của học sinh (transcript).
-        2. [Tín hiệu âm thanh]: Phân tích tốc độ nói (fast_pace/slow_pace), âm lượng giọng nói (to/nhỏ), nhịp điệu ngập ngừng (hesitation), tiếng cười (laughter), giọng run rẩy lo lắng (shaky_voice).
+        2. [Tín hiệu âm thanh]: Phân tích tốc độ nói (fast_pace/slow_pace), âm lượng giọng nói (to/nhỏ/gắt), nhịp điệu ngập ngừng (hesitation), tiếng cười (laughter), giọng run rẩy lo lắng (shaky_voice).
         3. [Phân loại cảm xúc]: Chấm điểm cảm xúc và phân loại vào một nhãn duy nhất: STRESS, ANXIETY, SADNESS, HAPPY, hoặc NEUTRAL.
+           *QUAN TRỌNG*: Hãy ưu tiên cực kỳ cao các tín hiệu âm thanh thu được (tốc độ nói, âm lượng, giọng run, tiếng cười) để chấm điểm và phân loại cảm xúc (chiếm 70% trọng số). Phân tích nội dung chữ (text) chỉ chiếm 30% trọng số phụ. 
+           Ví dụ: Nếu văn bản của học sinh là trung tính ("ừm... à... để tôi xem...") nhưng giọng nói có tín hiệu run rẩy (shaky_voice) và ngập ngừng (hesitation) nhiều, nhãn cảm xúc phải được xếp là ANXIETY thay vì NEUTRAL.
         
         Vui lòng trả về kết quả dưới dạng chuỗi JSON định dạng chuẩn sau đây, không kèm từ giải thích hay thẻ markdown:
         {
