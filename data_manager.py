@@ -9,7 +9,7 @@ def init_file():
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump([], f)
 
-def save_real_data(stress_level, emotion):
+def save_real_data(stress_level, emotion, hrv_data=None):
     init_file()
     
     if stress_level > 0:
@@ -19,13 +19,19 @@ def save_real_data(stress_level, emotion):
         new_record = {
             "timestamp": datetime.now().isoformat(),
             "stress": round(stress_level, 2),
-            "emotion": emotion
+            "emotion": emotion,
+            "hrv": {
+                "bpm": hrv_data.get('bpm', 0) if hrv_data else 0,
+                "rmssd": hrv_data.get('rmssd', 0.0) if hrv_data else 0.0,
+                "sdnn": hrv_data.get('sdnn', 0.0) if hrv_data else 0.0,
+                "status": hrv_data.get('status', 'N/A') if hrv_data else 'N/A'
+            } if hrv_data else {}
         }
         history.append(new_record)
         
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=2)
-        print(f"--> Đã lưu dữ liệu thật: Stress {stress_level}% | Emotion {emotion}")
+        print(f"--> Đã lưu dữ liệu thật: Stress {stress_level}% | Emotion {emotion} | HRV RMSSD: {new_record.get('hrv', {}).get('rmssd')}ms")
 
 def get_dashboard_stats():
     init_file()
@@ -34,7 +40,7 @@ def get_dashboard_stats():
 
     if not history:
         return {
-            "summary": {"total_scans": 0, "avg_stress": 0, "high_risk_cases": 0},
+            "summary": {"total_scans": 0, "avg_stress": 0, "high_risk_cases": 0, "avg_hrv_rmssd": 0.0},
             "distribution": {"low": 0, "medium": 0, "high": 0},
             "trend": {"labels": [], "data": []}
         }
@@ -42,6 +48,9 @@ def get_dashboard_stats():
     total_scans = len(history)
     total_stress = sum(item['stress'] for item in history)
     avg_stress = total_stress / total_scans
+    
+    valid_rmssds = [item['hrv']['rmssd'] for item in history if 'hrv' in item and item['hrv'].get('rmssd', 0) > 0]
+    avg_rmssd = round(sum(valid_rmssds) / len(valid_rmssds), 1) if valid_rmssds else 0.0
 
     low_count = 0
     medium_count = 0
@@ -76,7 +85,8 @@ def get_dashboard_stats():
         "summary": {
             "total_scans": total_scans,
             "avg_stress": round(avg_stress, 1),
-            "high_risk_cases": high_count
+            "high_risk_cases": high_count,
+            "avg_hrv_rmssd": avg_rmssd
         },
         "distribution": {
             "low": low_count,

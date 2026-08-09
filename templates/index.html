@@ -135,6 +135,42 @@
                 <div style="width: 40px;" class="text-end small fw-bold" id="valHappy">0%</div>
             </div>
         </div>
+
+        <div class="card card-custom p-3 border-0 shadow-sm mt-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-info mb-0 text-uppercase small ls-1"><i class="bi bi-heart-pulse-fill text-danger me-1"></i> Biến Thiên Nhịp Tim (rPPG HRV)</h6>
+                <span id="valHRVStatus" class="badge bg-primary rounded-pill px-3 py-1">Đang đo rPPG...</span>
+            </div>
+            
+            <div class="row g-2 mb-2 text-center">
+                <div class="col-4">
+                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.06);">
+                        <small class="text-white-50 d-block mb-1 fs-7">Nhịp tim (BPM)</small>
+                        <h4 class="fw-bold mb-0 text-danger"><span id="valBPM">--</span> <small class="fs-6 text-white-50">bpm</small></h4>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.06);">
+                        <small class="text-white-50 d-block mb-1 fs-7">HRV (RMSSD)</small>
+                        <h4 class="fw-bold mb-0 text-info"><span id="valRMSSD">--</span> <small class="fs-6 text-white-50">ms</small></h4>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.06);">
+                        <small class="text-white-50 d-block mb-1 fs-7">Độ lệch (SDNN)</small>
+                        <h4 class="fw-bold mb-0 text-success"><span id="valSDNN">--</span> <small class="fs-6 text-white-50">ms</small></h4>
+                    </div>
+                </div>
+            </div>
+
+            <div style="height: 65px;" class="position-relative">
+                <canvas id="ppgChart"></canvas>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1 small text-white-50" style="font-size: 0.75rem;">
+                <span><i class="bi bi-info-circle me-1"></i> RMSSD > 45ms: Thư giãn | RMSSD < 25ms: Stress</span>
+                <span>Sóng mạch rPPG</span>
+            </div>
+        </div>
     </div>
 
     <div class="col-lg-5">
@@ -204,6 +240,33 @@
             scales: {
                 x: { display: false },
                 y: { min: 0, max: 100, grid: { display: false } }
+            },
+            animation: false
+        }
+    });
+
+    const ctxPpg = document.getElementById('ppgChart').getContext('2d');
+    const ppgChart = new Chart(ctxPpg, {
+        type: 'line',
+        data: {
+            labels: Array(30).fill(''),
+            datasets: [{
+                label: 'rPPG Signal',
+                data: Array(30).fill(0),
+                borderColor: '#38bdf8',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: false,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { display: false },
+                y: { display: false }
             },
             animation: false
         }
@@ -341,6 +404,27 @@
                 chartData.shift();
                 chartData.push(val);
                 stressChart.update();
+
+                if (data.hrv) {
+                    document.getElementById('valBPM').innerText = data.hrv.bpm > 0 ? data.hrv.bpm : '--';
+                    document.getElementById('valRMSSD').innerText = data.hrv.rmssd > 0 ? data.hrv.rmssd : '--';
+                    document.getElementById('valSDNN').innerText = data.hrv.sdnn > 0 ? data.hrv.sdnn : '--';
+                    if (data.hrv.status) {
+                        const statusBadge = document.getElementById('valHRVStatus');
+                        statusBadge.innerText = data.hrv.status;
+                        if (data.hrv.status.includes('Thư giãn')) {
+                            statusBadge.className = 'badge bg-success rounded-pill px-3 py-1';
+                        } else if (data.hrv.status.includes('Căng thẳng')) {
+                            statusBadge.className = 'badge bg-danger rounded-pill px-3 py-1';
+                        } else {
+                            statusBadge.className = 'badge bg-info rounded-pill px-3 py-1';
+                        }
+                    }
+                    if (data.hrv.signal && data.hrv.signal.length > 0) {
+                        ppgChart.data.datasets[0].data = data.hrv.signal;
+                        ppgChart.update();
+                    }
+                }
 
                 const alertBox = document.getElementById('alertStatus');
                 const normalBox = document.getElementById('normalStatus');

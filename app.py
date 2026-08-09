@@ -41,7 +41,8 @@ def stress_data():
     return jsonify({
         'stress': float(camera_stream.get_stress_level()),
         'emotion_label': camera_stream.current_emotion,
-        'details': camera_stream.current_emotions_dict if hasattr(camera_stream, 'current_emotions_dict') else {} 
+        'details': camera_stream.current_emotions_dict if hasattr(camera_stream, 'current_emotions_dict') else {},
+        'hrv': camera_stream.get_hrv_metrics()
     })
 
 
@@ -49,8 +50,9 @@ def stress_data():
 def result():
     current_stress = camera_stream.get_stress_level()
     current_emotion = getattr(camera_stream, 'current_emotion', 'Unknown')
-    save_real_data(current_stress, current_emotion)
-    return render_template('result.html')
+    hrv_data = camera_stream.get_hrv_metrics()
+    save_real_data(current_stress, current_emotion, hrv_data)
+    return render_template('result.html', stress=current_stress, emotion=current_emotion, hrv=hrv_data)
 
 @app.route('/solution/breath')
 def breath():
@@ -152,7 +154,8 @@ def analyze_frame_api():
     return jsonify({
         'stress': float(camera_stream.get_stress_level()),
         'emotion_label': getattr(camera_stream, 'current_emotion', 'Unknown'),
-        'details': getattr(camera_stream, 'current_emotions_dict', {})
+        'details': getattr(camera_stream, 'current_emotions_dict', {}),
+        'hrv': camera_stream.get_hrv_metrics()
     })    
 
 

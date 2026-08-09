@@ -28,9 +28,10 @@
 </ul>
 
 <div class="row g-4 mb-4">
-    <div class="col-md-4"><div class="card admin-card p-3"><div class="d-flex align-items-center"><div class="icon-box bg-primary bg-opacity-10 text-primary me-3"><i class="bi bi-activity"></i></div><div><h6 class="text-muted mb-1">Tổng lượt đo</h6><h3 class="fw-bold mb-0" id="totalScans">0</h3></div></div></div></div>
-    <div class="col-md-4"><div class="card admin-card p-3"><div class="d-flex align-items-center"><div class="icon-box bg-warning bg-opacity-10 text-warning me-3"><i class="bi bi-speedometer2"></i></div><div><h6 class="text-muted mb-1">Stress trung bình</h6><h3 class="fw-bold mb-0"><span id="avgStress">0</span>%</h3></div></div></div></div>
-    <div class="col-md-4"><div class="card admin-card p-3"><div class="d-flex align-items-center"><div class="icon-box bg-danger bg-opacity-10 text-danger me-3"><i class="bi bi-exclamation-triangle-fill"></i></div><div><h6 class="text-muted mb-1">Cảnh báo nguy hiểm</h6><h3 class="fw-bold mb-0 text-danger" id="highRiskCases">0</h3></div></div></div></div>
+    <div class="col-md-3"><div class="card admin-card p-3"><div class="d-flex align-items-center"><div class="icon-box bg-primary bg-opacity-10 text-primary me-3"><i class="bi bi-activity"></i></div><div><h6 class="text-muted mb-1">Tổng lượt đo</h6><h3 class="fw-bold mb-0" id="totalScans">0</h3></div></div></div></div>
+    <div class="col-md-3"><div class="card admin-card p-3"><div class="d-flex align-items-center"><div class="icon-box bg-warning bg-opacity-10 text-warning me-3"><i class="bi bi-speedometer2"></i></div><div><h6 class="text-muted mb-1">Stress trung bình</h6><h3 class="fw-bold mb-0"><span id="avgStress">0</span>%</h3></div></div></div></div>
+    <div class="col-md-3"><div class="card admin-card p-3"><div class="d-flex align-items-center"><div class="icon-box bg-info bg-opacity-10 text-info me-3"><i class="bi bi-heart-pulse-fill"></i></div><div><h6 class="text-muted mb-1">HRV (RMSSD TB)</h6><h3 class="fw-bold mb-0"><span id="avgHrv">0</span> <small class="fs-6 text-muted">ms</small></h3></div></div></div></div>
+    <div class="col-md-3"><div class="card admin-card p-3"><div class="d-flex align-items-center"><div class="icon-box bg-danger bg-opacity-10 text-danger me-3"><i class="bi bi-exclamation-triangle-fill"></i></div><div><h6 class="text-muted mb-1">Cảnh báo nguy hiểm</h6><h3 class="fw-bold mb-0 text-danger" id="highRiskCases">0</h3></div></div></div></div>
 </div>
 
 <div class="row g-4">
@@ -45,6 +46,7 @@
             const data = await res.json();
             document.getElementById('totalScans').innerText = data.summary.total_scans;
             document.getElementById('avgStress').innerText = data.summary.avg_stress;
+            if(document.getElementById('avgHrv')) document.getElementById('avgHrv').innerText = data.summary.avg_hrv_rmssd || 0;
             document.getElementById('highRiskCases').innerText = data.summary.high_risk_cases;
 
             new Chart(document.getElementById('distributionChart').getContext('2d'), {

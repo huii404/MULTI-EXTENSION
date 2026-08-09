@@ -1,9 +1,17 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="text-center mb-5">
+<div class="text-center mb-4">
     <h2 class="fw-bold" style="color: #ec4899;">Đừng lo lắng, chúng tớ ở đây để giúp bạn! ❤️</h2>
-    <p class="lead">Hệ thống phát hiện bạn đang căng thẳng. Hãy chọn một cách để thư giãn nhé:</p>
+    <p class="lead mb-2">Hệ thống phát hiện mức độ căng thẳng của bạn ở mức <strong>{{ stress|round(1) }}%</strong>.</p>
+    {% if hrv and hrv.rmssd > 0 %}
+    <div class="d-inline-flex gap-2 align-items-center bg-white px-3 py-2 rounded-pill shadow-sm mb-3 border">
+        <span class="badge bg-danger"><i class="bi bi-heart-pulse-fill"></i> {{ hrv.bpm }} BPM</span>
+        <span class="badge bg-info">HRV RMSSD: {{ hrv.rmssd }} ms</span>
+        <span class="badge bg-secondary">{{ hrv.status }}</span>
+    </div>
+    {% endif %}
+    <p class="text-muted small">Hãy chọn một giải pháp thư giãn khoa học bên dưới nhé:</p>
 </div>
 
 <div class="row g-4">
