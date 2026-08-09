@@ -243,6 +243,17 @@
                 </div>
             </div>
 
+            <!-- Hướng dẫn Tín hiệu Giọng nói -->
+            <div class="mb-3 pt-3 border-top">
+                <small class="text-muted fw-bold d-block mb-2"><i class="bi bi-info-circle me-1"></i> Cách AI chấm giọng nói của bạn</small>
+                <div class="p-2 bg-light rounded text-muted" style="font-size: 0.78rem; line-height: 1.45;">
+                    <div class="mb-1"><span class="badge bg-danger px-1.5 py-0.5">loud_voice</span> <span class="badge bg-danger px-1.5 py-0.5">fast_pace</span> &rarr; <span class="fw-bold text-danger">Stress / Hào hứng</span> (Nói to, nhanh)</div>
+                    <div class="mb-1"><span class="badge bg-warning text-dark px-1.5 py-0.5">shaky_voice</span> <span class="badge bg-warning text-dark px-1.5 py-0.5">hesitation</span> &rarr; <span class="fw-bold text-warning">Lo lắng / Run giọng</span></div>
+                    <div class="mb-1"><span class="badge bg-primary px-1.5 py-0.5">slow_pace</span> <span class="badge bg-primary px-1.5 py-0.5">quiet_voice</span> &rarr; <span class="fw-bold text-primary">Buồn bã / Thì thầm</span> (Chậm, nhỏ)</div>
+                    <div><span class="badge bg-success px-1.5 py-0.5">laughter</span> &rarr; <span class="fw-bold text-success">Vui vẻ / Tiếng cười</span></div>
+                </div>
+            </div>
+
             <!-- Biểu đồ diễn biến cảm xúc -->
             <div class="mt-auto">
                 <small class="text-muted fw-bold d-block mb-2">Diễn biến cảm xúc phiên chat</small>
@@ -280,7 +291,12 @@
         'indirect_stress': 'Biểu hiện căng thẳng',
         'indirect_anxiety': 'Biểu hiện lo lắng',
         'indirect_sadness': 'Biểu hiện buồn bã',
-        'indirect_happy': 'Biểu hiện vui mừng'
+        'indirect_happy': 'Biểu hiện vui mừng',
+        'fast_pace': 'Nói dồn dập/nhanh',
+        'slow_pace': 'Nói chậm/rời rạc',
+        'shaky_voice': 'Giọng run rẩy',
+        'loud_voice': 'Nói to/gắt',
+        'quiet_voice': 'Nói nhỏ/thì thầm'
     };
 
     const TREND_MAP = {

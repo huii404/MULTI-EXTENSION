@@ -77,3 +77,25 @@ KẾT QUẢ KIỂM THỬ: Đã vượt qua 23/23 test cases.
 | **Câu hỏi bất an** | 0 | **+2** | 0 | 0 | Câu hỏi (`?`) chứa từ nghi vấn: *"nếu... thì sao"* |
 | **Câu cảm thán tích cực** | 0 | 0 | 0 | **+2** | Câu cảm thán (`!`) chứa từ khóa vui vẻ (HAPPY) |
 | **Câu cảm thán tiêu cực** | **+2** | **+1** | **+1** | 0 | Câu cảm thán (`!`) chứa từ khóa tiêu cực |
+
+---
+
+## V. NGUYÊN TẮC PHÂN TÍCH ÂM THANH GIỌNG NÓI (ACOUSTIC SPEECH PRINCIPLES)
+
+Khi học sinh chia sẻ bằng giọng nói hoặc gửi tệp âm thanh, AI đa phương thức sẽ chấm điểm dựa trên 4 đặc trưng âm học chính để ánh xạ vào cảm xúc:
+
+1. **Âm lượng / Cường độ (Loudness/Amplitude)**:
+   - **`loud_voice` (Nói to, gắt)**: Biểu thị trạng thái **STRESS** (căng thẳng, tức giận làm co thắt thanh quản dẫn đến phát âm mạnh) hoặc **HAPPY** (phấn khích, vui mừng tông giọng cao lớn).
+   - **`quiet_voice` (Nói nhỏ, thì thầm)**: Biểu thị trạng thái **SADNESS** (buồn bã làm suy giảm năng lượng phát âm) hoặc **ANXIETY** (lo lắng, thiếu tự tin, rụt rè).
+
+2. **Tốc độ nói (Speaking Pace)**:
+   - **`fast_pace` (Nói nhanh, dồn dập)**: Kích hoạt khi nhịp tim tăng cao do trạng thái kích động. Ánh xạ trực tiếp tăng điểm **STRESS** (nôn nóng, cáu gắt) hoặc **HAPPY** (hào hứng kể chuyện).
+   - **`slow_pace` (Nói chậm, uể oải)**: Nhịp thở yếu và năng lượng thấp. Ánh xạ trực tiếp tăng điểm **SADNESS** (buồn ngủ, chán nản, u sầu).
+
+3. **Khoảng lặng ngắt quãng (Speech Pauses & Hesitations)**:
+   - **`hesitation` (Ngập ngừng, đứt quãng)**: Khoảng lặng kéo dài đan xen các từ đệm (*ừm, ờ, à*). Ánh xạ trực tiếp tăng điểm **ANXIETY** (hồi hộp suy nghĩ, sợ hãi nói sai) hoặc **SADNESS** (nghẹn ngào ngắt quãng).
+   
+4. **Sự ổn định của tần số giọng nói (Pitch Stability)**:
+   - **`shaky_voice` (Giọng run rẩy, bất ổn)**: Tần số cơ bản phát âm dao động không ổn định do hơi thở đứt quãng. Đây là tín hiệu đặc trưng nhất của **ANXIETY** (lo sợ, hoảng loạn).
+   - **`laughter` (Tiếng cười)**: Tiếng cười khúc khích, sảng khoái hoặc tiếng cười trừ viết tắt. Ánh xạ trực tiếp tăng điểm **HAPPY**.
+
