@@ -149,7 +149,7 @@ class HRVProcessor:
 
     def get_metrics(self):
         """
-        Trả về kết quả phân tích HRV hiện tại.
+        Trả về kết quả phân tích HRV và rPPG hiện tại.
         """
         status = "Đang đo rPPG..."
         if self.latest_rmssd >= 45.0:
@@ -158,6 +158,9 @@ class HRVProcessor:
             status = "Căng thẳng (HRV Thấp)"
         elif self.latest_rmssd > 0:
             status = "Cân bằng"
+
+        rppg_hz = round(self.latest_bpm / 60.0, 2) if self.latest_bpm > 0 else 0.0
+        green_val = round(float(np.mean(self.green_buffer)), 1) if len(self.green_buffer) > 0 else 0.0
 
         return {
             "bpm": self.latest_bpm,
@@ -169,7 +172,10 @@ class HRVProcessor:
             "pnn50": self.latest_pnn50,
             "hrv_stress": self.latest_hrv_stress,
             "status": status,
-            "signal": self.latest_signal
+            "signal": self.latest_signal,
+            "rppg_hz": rppg_hz,
+            "green_intensity": green_val,
+            "rppg_status": "Quang phổ mạch máu ổn định" if self.latest_bpm > 0 else "Đang bắt nhịp mạch..."
         }
 
     def run_pipeline(self, raw_signal: np.ndarray) -> dict:

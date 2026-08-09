@@ -139,37 +139,48 @@
         </div>
 
         <div class="card card-custom p-3 border-0 shadow-sm mt-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff;">
+            <!-- Tiêu đề Tính năng 1 & 2 -->
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold text-info mb-0 text-uppercase small ls-1"><i class="bi bi-heart-pulse-fill text-danger me-1"></i> Biến Thiên Nhịp Tim (rPPG HRV)</h6>
+                <div>
+                    <h6 class="fw-bold text-info mb-0 text-uppercase small ls-1"><i class="bi bi-eye-fill text-cyan me-1"></i> Công nghệ đo Nhịp tim không tiếp xúc (rPPG)</h6>
+                    <small class="text-white-50 fs-7">Phân tích sắc tố da mặt bằng kính hiển vi quang phổ xanh lá</small>
+                </div>
                 <span id="valHRVStatus" class="badge bg-primary rounded-pill px-3 py-1">Đang đo rPPG...</span>
             </div>
             
             <div class="row g-2 mb-2 text-center">
+                <!-- Tính năng 1: rPPG BPM & Hz -->
                 <div class="col-4">
                     <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.06);">
-                        <small class="text-white-50 d-block mb-1 fs-7">Nhịp tim (BPM)</small>
+                        <small class="text-white-50 d-block mb-1 fs-7"><i class="bi bi-activity text-danger me-1"></i> Nhịp tim (BPM)</small>
                         <h4 class="fw-bold mb-0 text-danger"><span id="valBPM">--</span> <small class="fs-6 text-white-50">bpm</small></h4>
+                        <small class="text-info fs-7 d-block mt-1">Tần số: <span id="valHz">0.0</span> Hz</small>
                     </div>
                 </div>
+                <!-- Tính năng 2: HRV RMSSD -->
                 <div class="col-4">
                     <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.06);">
-                        <small class="text-white-50 d-block mb-1 fs-7">HRV (RMSSD)</small>
+                        <small class="text-white-50 d-block mb-1 fs-7"><i class="bi bi-heart-pulse text-info me-1"></i> HRV (RMSSD)</small>
                         <h4 class="fw-bold mb-0 text-info"><span id="valRMSSD">--</span> <small class="fs-6 text-white-50">ms</small></h4>
+                        <small class="text-white-50 fs-7 d-block mt-1">Đối giao cảm (PNS)</small>
                     </div>
                 </div>
+                <!-- Tính năng 2: HRV SDNN -->
                 <div class="col-4">
                     <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.06);">
-                        <small class="text-white-50 d-block mb-1 fs-7">Độ lệch (SDNN)</small>
+                        <small class="text-white-50 d-block mb-1 fs-7"><i class="bi bi-graph-up-arrow text-success me-1"></i> Độ lệch (SDNN)</small>
                         <h4 class="fw-bold mb-0 text-success"><span id="valSDNN">--</span> <small class="fs-6 text-white-50">ms</small></h4>
+                        <small class="text-white-50 fs-7 d-block mt-1">Tổng biến thiên</small>
                     </div>
                 </div>
             </div>
 
+            <!-- Sóng mạch rPPG Optical Waveform -->
             <div style="height: 65px;" class="position-relative">
                 <canvas id="ppgChart"></canvas>
             </div>
             <div class="d-flex justify-content-between align-items-center mt-1 small text-white-50" style="font-size: 0.75rem;">
-                <span><i class="bi bi-info-circle me-1"></i> RMSSD > 45ms: Thư giãn | RMSSD < 25ms: Stress</span>
+                <span><i class="bi bi-info-circle me-1"></i> rPPG: Khai thác hấp thụ ánh sáng xanh lá | HRV: RMSSD > 45ms (Thư giãn) vs < 25ms (Stress)</span>
                 <span>Sóng mạch rPPG</span>
             </div>
         </div>
@@ -425,11 +436,13 @@
                     const elemBpm = document.getElementById('valBPM');
                     const elemRmssd = document.getElementById('valRMSSD');
                     const elemSdnn = document.getElementById('valSDNN');
+                    const elemHz = document.getElementById('valHz');
                     const statusBadge = document.getElementById('valHRVStatus');
 
                     if (elemBpm) elemBpm.innerText = (data.hrv.bpm > 0) ? Math.round(data.hrv.bpm) : '--';
                     if (elemRmssd) elemRmssd.innerText = (data.hrv.rmssd > 0) ? data.hrv.rmssd : '--';
                     if (elemSdnn) elemSdnn.innerText = (data.hrv.sdnn > 0) ? data.hrv.sdnn : '--';
+                    if (elemHz) elemHz.innerText = data.hrv.rppg_hz ? data.hrv.rppg_hz : '0.0';
                     
                     if (statusBadge && data.hrv.status) {
                         statusBadge.innerText = data.hrv.status;
