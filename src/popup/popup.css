@@ -35,24 +35,11 @@ body {
   overflow: hidden;
 }
 
-/* CONTAINER */
 #app-container {
   padding: 14px;
   max-height: 500px;
   overflow-y: auto;
   scroll-behavior: smooth;
-  animation: containerReveal 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-@keyframes containerReveal {
-  0% { 
-    opacity: 0; 
-    transform: translateY(10px);
-  }
-  100% { 
-    opacity: 1; 
-    transform: translateY(0);
-  }
 }
 
 #app-container::-webkit-scrollbar { width: 4px; }
@@ -167,24 +154,6 @@ body {
   overflow: hidden;
   will-change: transform;
   transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s ease, border-color 0.25s ease;
-  animation: cardReveal 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-.feature-card:nth-child(1) { animation-delay: 0.03s; }
-.feature-card:nth-child(2) { animation-delay: 0.06s; }
-.feature-card:nth-child(3) { animation-delay: 0.09s; }
-.feature-card:nth-child(4) { animation-delay: 0.12s; }
-.feature-card:nth-child(5) { animation-delay: 0.15s; }
-
-@keyframes cardReveal {
-  0% { 
-    opacity: 0; 
-    transform: translateY(12px);
-  }
-  100% { 
-    opacity: 1; 
-    transform: translateY(0);
-  }
 }
 
 /* Hiệu ứng Glow Streak (vệt sáng lướt qua) */
@@ -463,13 +432,7 @@ body {
 .form-group textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 .form-group select { cursor: pointer; }
 
-/* PAGE ENTER */
-.page-enter { animation: pageSlide 0.25s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-
-@keyframes pageSlide {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
+/* PAGE ENTER REMOVED */
 
 /* TOAST */
 #global-toast {
