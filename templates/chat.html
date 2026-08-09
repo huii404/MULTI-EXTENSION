@@ -168,6 +168,13 @@
                     <input type="text" id="userInput" class="form-control form-control-lg border-0 bg-light rounded-pill px-4" 
                            placeholder="Nhập tâm sự của bạn..." onkeypress="handleEnter(event)">
                     
+                    <!-- Nút Đính kèm file MP3 -->
+                    <button class="btn btn-outline-secondary rounded-circle ms-2 shadow-sm d-flex align-items-center justify-content-center" 
+                            style="width: 50px; height: 50px;" onclick="document.getElementById('audioUpload').click()" id="uploadBtn" type="button" title="Tải tệp âm thanh MP3/WAV">
+                        <i class="bi bi-paperclip fs-5"></i>
+                    </button>
+                    <input type="file" id="audioUpload" accept="audio/mp3,audio/mpeg,audio/wav" style="display: none;" onchange="handleAudioUpload(event)">
+
                     <!-- Nút Micro cho Voice Chat -->
                     <button class="btn btn-outline-danger rounded-circle ms-2 shadow-sm d-flex align-items-center justify-content-center" 
                             style="width: 50px; height: 50px;" onclick="toggleSpeech()" id="micBtn" type="button" title="Ghi âm giọng nói">
@@ -412,60 +419,62 @@
         emotionChart.update();
     }
 
-    // --- CẤU HÌNH WEB SPEECH API ---
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
+    // --- GHI ÂM VÀO FILE BẰNG MEDIARECORDER API ---
+    let mediaRecorder = null;
+    let audioChunks = [];
     let isRecording = false;
+    let streamRef = null;
 
-    if (SpeechRecognition) {
-        recognition = new SpeechRecognition();
-        recognition.continuous = false; // Tự động kết thúc khi người dùng ngừng nói
-        recognition.interimResults = false;
-        recognition.lang = 'vi-VN'; // Ngôn ngữ tiếng Việt có dấu
-
-        recognition.onstart = () => {
-            isRecording = true;
-            updateMicUI(true);
-        };
-
-        recognition.onend = () => {
-            isRecording = false;
-            updateMicUI(false);
-        };
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            userInput.value = transcript;
-            // Tự động gửi tin nhắn ngay lập tức sau khi nói xong
-            sendMessage('voice');
-        };
-
-        recognition.onerror = (event) => {
-            console.error("Speech recognition error:", event.error);
-            isRecording = false;
-            updateMicUI(false);
-            
-            if (event.error === 'not-allowed') {
-                alert("Bạn cần cấp quyền truy cập Microphone để sử dụng Voice Chat!");
-            } else if (event.error !== 'no-speech') {
-                alert("Lỗi ghi âm: " + event.error);
-            }
-        };
-    }
-
-    function toggleSpeech() {
-        if (!recognition) {
-            alert("Trình duyệt của bạn không hỗ trợ Speech-to-Text! Hãy sử dụng Google Chrome hoặc Microsoft Edge.");
-            return;
-        }
+    async function toggleSpeech() {
         if (isRecording) {
-            recognition.stop();
+            // Dừng ghi âm
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            isRecording = false;
+            updateMicUI(false);
         } else {
-            userInput.value = '';
+            // Bắt đầu ghi âm
             try {
-                recognition.start();
-            } catch (e) {
-                console.error("Lỗi khi kích hoạt ghi âm:", e);
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                streamRef = stream;
+                audioChunks = [];
+                
+                let options = { mimeType: 'audio/webm' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options = { mimeType: 'audio/ogg' };
+                }
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options = { mimeType: '' }; // Mặc định trình duyệt
+                }
+                
+                mediaRecorder = new MediaRecorder(stream, options);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = async () => {
+                    // Dọn dẹp luồng ghi âm giải phóng micro phần cứng
+                    if (streamRef) {
+                        streamRef.getTracks().forEach(track => track.stop());
+                    }
+                    
+                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                    if (audioBlob.size > 0) {
+                        const extension = mediaRecorder.mimeType.includes('ogg') ? 'ogg' : 'webm';
+                        await sendAudioFile(audioBlob, `voice.${extension}`);
+                    }
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                updateMicUI(true);
+            } catch (err) {
+                console.error("Lỗi truy cập micro:", err);
+                alert("Không thể truy cập Microphone! Hãy cấp quyền truy cập micro cho trang web.");
             }
         }
     }
@@ -475,7 +484,7 @@
         if (active) {
             micBtn.classList.add('recording-pulse');
             micBtn.innerHTML = '<i class="bi bi-mic-mute-fill fs-5"></i>';
-            userInput.placeholder = "🔴 Hệ thống đang lắng nghe... Hãy nói...";
+            userInput.placeholder = "🔴 Hệ thống đang ghi âm... Nhấn lại nút Mic để kết thúc nói...";
             userInput.disabled = true;
         } else {
             micBtn.classList.remove('recording-pulse');
@@ -483,6 +492,76 @@
             userInput.placeholder = "Nhập tâm sự của bạn...";
             userInput.disabled = false;
             userInput.focus();
+        }
+    }
+
+    // --- XỬ LÝ UPLOAD FILE ÂM THANH MP3 ---
+    async function handleAudioUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        // Hỗ trợ kiểm tra định dạng
+        const allowedTypes = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/webm'];
+        if (!allowedTypes.includes(file.type) && !file.name.endsWith('.mp3') && !file.name.endsWith('.wav')) {
+            alert("Vui lòng tải lên tệp âm thanh hợp lệ (.mp3 hoặc .wav)");
+            return;
+        }
+        
+        if (file.size > 10 * 1024 * 1024) {
+            alert("Dung lượng tệp tối đa được tải lên là 10MB!");
+            return;
+        }
+        
+        await sendAudioFile(file, file.name);
+        event.target.value = ''; // Reset input
+    }
+
+    // --- GỬI FILE ÂM THANH LÊN SERVER ---
+    async function sendAudioFile(audioBlob, filename) {
+        userInput.disabled = true;
+        typingIndicator.style.display = 'block';
+        scrollToBottom();
+        
+        const formData = new FormData();
+        formData.append('audio', audioBlob, filename);
+        formData.append('source', 'voice');
+        
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            typingIndicator.style.display = 'none';
+            
+            if (data.error) {
+                appendMessage(`⚠️ ${data.error}`, 'bot');
+                return;
+            }
+            
+            // Hiển thị lời dịch văn bản của học sinh
+            if (data.transcript) {
+                appendMessage(`🎤 *[Giọng nói]*: "${data.transcript}"`, 'user');
+            } else {
+                appendMessage(`🎤 *[Tải lên file âm thanh: ${filename}]*`, 'user');
+            }
+            
+            // Hiển thị câu trả lời thấu cảm của Bot
+            appendMessage(data.reply, 'bot');
+            
+            // Cập nhật biểu đồ và panel cảm xúc
+            if (data.emotion_data) {
+                updateEmotionPanel(data.emotion_data);
+            }
+        } catch (error) {
+            console.error("Audio send error:", error);
+            typingIndicator.style.display = 'none';
+            appendMessage("⚠️ Lỗi kết nối hoặc xử lý âm thanh thất bại. Bạn thử lại nhé!", 'bot');
+        } finally {
+            userInput.disabled = false;
+            userInput.focus();
+            scrollToBottom();
         }
     }
 

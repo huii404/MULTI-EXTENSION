@@ -68,20 +68,56 @@ def chat():
 
 @app.route('/api/chat', methods=['POST'])
 def chat_api():
-    data = request.json
-    user_msg = data.get('message', '')
-    source = data.get('source', 'text')
+    user_msg = ""
+    source = "text"
+    audio_path = None
     
-    if not user_msg:
+    # 1. Kiểm tra xem request gửi lên là FormData (có file âm thanh) hay JSON
+    if request.content_type and 'multipart/form-data' in request.content_type:
+        source = request.form.get('source', 'voice')
+        if 'audio' in request.files:
+            audio_file = request.files['audio']
+            filename = audio_file.filename
+            if filename:
+                temp_dir = os.path.join(app.root_path, 'temp_audio')
+                os.makedirs(temp_dir, exist_ok=True)
+                audio_path = os.path.join(temp_dir, filename)
+                audio_file.save(audio_path)
+    else:
+        data = request.json or {}
+        user_msg = data.get('message', '')
+        source = data.get('source', 'text')
+        
+    if not user_msg and not audio_path:
         return jsonify({'reply': "Bạn im lặng thế, tâm sự với mình đi!"})
         
     if 'emotion_history' not in session:
         session['emotion_history'] = []
         
     history = session['emotion_history']
+    transcript = None
+    emotion_res = None
     
-    # Phân tích cảm xúc dựa trên lịch sử phiên chat
-    emotion_res = emotion_analyzer.analyze(user_msg, history)
+    try:
+        if audio_path:
+            # Phân tích cảm xúc đa phương thức từ tệp âm thanh
+            emotion_res, transcript = emotion_analyzer.analyze_audio(audio_path, history)
+            try:
+                os.remove(audio_path)
+            except Exception as e:
+                print(f"Error removing temp audio file: {e}")
+                
+            if not transcript:
+                return jsonify({'error': "Không nhận diện được giọng nói trong file âm thanh này."})
+            user_msg = transcript
+        else:
+            # Phân tích văn bản thông thường
+            emotion_res = emotion_analyzer.analyze(user_msg, history)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f"Lỗi phân tích cảm xúc/âm thanh: {str(e)}"})
+        
     emotion_data = emotion_res.to_dict()
     
     # Lưu vào lịch sử phiên để phân tích xu hướng ở lượt sau
@@ -93,16 +129,20 @@ def chat_api():
     session['emotion_history'] = history
     session.modified = True
     
-    # Lấy câu trả lời từ chatbot có chèn trạng thái cảm xúc
+    # Lấy câu trả lời từ trợ lý có chèn trạng thái cảm xúc thấu cảm
     ai_reply = get_gemini_response(user_msg, emotion_data)
-
-    # Lưu log kèm cảm xúc chi tiết
+    
+    # Lưu log kèm nguồn và cảm xúc chi tiết
     save_chat_log(user_msg, ai_reply, source, emotion_data)
     
-    return jsonify({
+    resp = {
         'reply': ai_reply,
         'emotion_data': emotion_data
-    })
+    }
+    if transcript:
+        resp['transcript'] = transcript
+        
+    return jsonify(resp)
 
 @app.route('/admin')
 @login_required

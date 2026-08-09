@@ -257,3 +257,176 @@ class EmotionAnalyzer:
                 print(f"--> [EMOTION FALLBACK] Chuyển sang dùng Rule-based do cả 2 AI đều lỗi (Groq lỗi: {e_groq})")
                 return self._analyze_with_rules(text, history)
 
+    def _analyze_audio_with_gemini(self, audio_path):
+        """
+        [Tier 1] Sử dụng Gemini 2.5 Flash đa phương thức để trực tiếp nghe và phân tích tệp âm thanh.
+        """
+        if not self.api_keys:
+            raise ValueError("Chưa cấu hình GEMINI_API_KEYS trong file .env!")
+
+        # Xác định mime-type
+        filename = audio_path.lower()
+        mime_type = "audio/mp3"
+        if filename.endswith(".wav"):
+            mime_type = "audio/wav"
+        elif filename.endswith(".webm"):
+            mime_type = "audio/webm"
+        elif filename.endswith(".ogg"):
+            mime_type = "audio/ogg"
+
+        # Đọc tệp âm thanh dưới dạng bytes
+        with open(audio_path, "rb") as f:
+            audio_bytes = f.read()
+
+        audio_part = {
+            "mime_type": mime_type,
+            "data": audio_bytes
+        }
+
+        # Prompt hướng dẫn phân tích đa phương thức
+        prompt = """
+        Bạn là chuyên gia ngôn ngữ học và tâm lý học học đường Việt Nam.
+        Hãy phân tích file âm thanh tiếng Việt được gửi kèm theo cả hai khía cạnh:
+        1. [Dịch văn bản]: Trích xuất nguyên văn lời nói của học sinh (transcript).
+        2. [Tín hiệu âm thanh]: Phân tích tốc độ nói (fast_pace/slow_pace), âm lượng giọng nói (to/nhỏ), nhịp điệu ngập ngừng (hesitation), tiếng cười (laughter), giọng run rẩy lo lắng (shaky_voice).
+        3. [Phân loại cảm xúc]: Chấm điểm cảm xúc và phân loại vào một nhãn duy nhất: STRESS, ANXIETY, SADNESS, HAPPY, hoặc NEUTRAL.
+        
+        Vui lòng trả về kết quả dưới dạng chuỗi JSON định dạng chuẩn sau đây, không kèm từ giải thích hay thẻ markdown:
+        {
+          "transcript": "nội dung văn bản dịch từ file ghi âm",
+          "emotion": "STRESS" | "ANXIETY" | "SADNESS" | "HAPPY" | "NEUTRAL",
+          "intensity": 0 đến 100,
+          "confidence": 0.0 đến 1.0,
+          "scores": {
+            "stress": 0 đến 10 (số thực),
+            "anxiety": 0 đến 10 (số thực),
+            "sadness": 0 đến 10 (số thực),
+            "happy": 0 đến 10 (số thực)
+          },
+          "signals": ["laughter", "hesitation", "word_repetition", "negation", "fast_pace", "slow_pace", "shaky_voice", "loud_voice", "quiet_voice"]
+        }
+        """
+
+        for attempt in range(len(self.api_keys)):
+            try:
+                key = self.api_keys[self.current_key_index]
+                genai.configure(api_key=key)
+                
+                model = genai.GenerativeModel(model_name="gemini-2.5-flash")
+                response = model.generate_content([audio_part, prompt])
+                
+                res_text = response.text.strip()
+                # Làm sạch markdown nếu có
+                if res_text.startswith("```"):
+                    lines = res_text.splitlines()
+                    if lines[0].startswith("```json"):
+                        res_text = "\n".join(lines[1:-1])
+                    else:
+                        res_text = "\n".join(lines[1:-1])
+                
+                return json.loads(res_text.strip())
+                
+            except Exception as e:
+                print(f"[GEMINI AUDIO AI ERROR] Key index {self.current_key_index} failed: {e}")
+                self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
+                
+        raise RuntimeError("Tất cả các Gemini API Keys đều không khả dụng cho phân tích âm thanh.")
+
+    def _transcribe_audio_with_groq(self, audio_path):
+        """
+        [Tier 2 Fallback] Sử dụng Groq Whisper API (whisper-large-v3) để dịch file âm thanh sang văn bản.
+        """
+        api_key = os.getenv("GROQ_API_KEY", "").strip()
+        if not api_key:
+            raise ValueError("Chưa cấu hình GROQ_API_KEY trong file .env")
+            
+        import uuid
+        import urllib.request
+        
+        with open(audio_path, 'rb') as f:
+            file_data = f.read()
+            
+        filename = os.path.basename(audio_path)
+        mime_type = "audio/mpeg"
+        if filename.endswith(".wav"):
+            mime_type = "audio/wav"
+        elif filename.endswith(".webm"):
+            mime_type = "audio/webm"
+            
+        boundary = f"----Boundary{uuid.uuid4().hex}"
+        
+        # Xây dựng multipart form-data payload bằng bytes
+        parts = []
+        parts.append(f"--{boundary}".encode('utf-8'))
+        parts.append('Content-Disposition: form-data; name="model"'.encode('utf-8'))
+        parts.append(b'')
+        parts.append('whisper-large-v3'.encode('utf-8'))
+        
+        parts.append(f"--{boundary}".encode('utf-8'))
+        parts.append(f'Content-Disposition: form-data; name="file"; filename="{filename}"'.encode('utf-8'))
+        parts.append(f'Content-Type: {mime_type}'.encode('utf-8'))
+        parts.append(b'')
+        parts.append(file_data)
+        
+        parts.append(f"--{boundary}--".encode('utf-8'))
+        parts.append(b'')
+        
+        body = b'\r\n'.join(parts)
+        
+        url = "https://api.groq.com/openai/v1/audio/transcriptions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "Content-Length": str(len(body)),
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        
+        req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=20) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            return res_data.get("text", "").strip()
+
+    def analyze_audio(self, audio_path, history=None):
+        """
+        Phân tích tệp âm thanh đa phương thức (3 tầng).
+        Trả về: (EmotionResult, transcript_text)
+        """
+        if history is None:
+            history = []
+
+        # Tầng 1: Sử dụng Gemini Multimodal
+        try:
+            ai_data = self._analyze_audio_with_gemini(audio_path)
+            transcript = ai_data.get("transcript", "")
+            emotion_res = self._build_result(ai_data, transcript, history)
+            print("--> [GEMINI MULTIMODAL SUCCESS] Phân tích âm thanh thành công.")
+            return emotion_res, transcript
+        except Exception as e_gemini:
+            print(f"--> [GEMINI MULTIMODAL ERROR] Thất bại: {e_gemini}")
+
+            # Tầng 2: Dự phòng dịch qua Groq Whisper + Phân tích ngữ nghĩa qua Groq Llama 3.3
+            try:
+                print("--> [FALLBACK TIER 2] Đang dịch âm thanh bằng Groq Whisper...")
+                transcript = self._transcribe_audio_with_groq(audio_path)
+                if not transcript:
+                    raise ValueError("Groq Whisper trả về văn bản trống.")
+                
+                print(f"--> [GROQ WHISPER SUCCESS] Bản dịch: \"{transcript}\"")
+                print("--> [FALLBACK] Đang phân tích cảm xúc văn bản bằng Groq Llama 3.3...")
+                ai_data = self._analyze_with_groq(transcript)
+                emotion_res = self._build_result(ai_data, transcript, history)
+                return emotion_res, transcript
+            except Exception as e_groq:
+                print(f"--> [GROQ FALLBACK ERROR] Thất bại: {e_groq}")
+                
+                # Tầng 3: Dự phòng dịch qua Groq Whisper (nếu đã có transcript) + Rule-based Engine cục bộ
+                try:
+                    if 'transcript' in locals() and transcript:
+                        print("--> [FALLBACK TIER 3] Chạy Rule-based Engine trên bản dịch từ Groq Whisper...")
+                        emotion_res = self._analyze_with_rules(transcript, history)
+                        return emotion_res, transcript
+                except Exception as e_rule:
+                    print(f"--> [RULE FALLBACK ERROR] Thất bại: {e_rule}")
+                
+                raise RuntimeError("Tất cả các tầng dự phòng phân tích âm thanh đều thất bại.")
+
