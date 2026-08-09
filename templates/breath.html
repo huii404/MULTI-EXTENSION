@@ -1,0 +1,151 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    .circle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 400px;
+        position: relative;
+    }
+    
+    .timer-wrapper {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .timer-track {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 4px dashed #cbd5e1; 
+        border-radius: 50%;
+    }
+
+    .spinner {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        animation: spin 19s linear infinite; 
+        z-index: 10;
+    }
+
+    .ball {
+        position: absolute;
+        top: -12px; 
+        left: calc(50% - 12px);
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        animation: ballColor 19s linear infinite; 
+    }
+
+    .breath-circle {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 26px;
+        font-weight: 800;
+        color: #fff;
+        animation: breathScale 19s linear infinite; 
+        z-index: 5;
+    }
+
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes breathScale {
+        0% { transform: scale(1); background-color: #0ea5e9; box-shadow: 0 0 30px rgba(14, 165, 233, 0.5); }
+        21.04% { transform: scale(1.6); background-color: #0ea5e9; } 
+        21.05% { transform: scale(1.6); background-color: #8b5cf6; box-shadow: 0 0 30px rgba(139, 92, 246, 0.5); } 
+        57.88% { transform: scale(1.6); background-color: #8b5cf6; } 
+        57.89% { transform: scale(1.6); background-color: #ec4899; box-shadow: 0 0 30px rgba(236, 72, 153, 0.5); } 
+        100% { transform: scale(1); background-color: #ec4899; } 
+    }
+
+    @keyframes ballColor {
+        0% { background-color: #0ea5e9; box-shadow: 0 0 15px rgba(14, 165, 233, 0.8); }
+        21.04% { background-color: #0ea5e9; }
+        21.05% { background-color: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.8); }
+        57.88% { background-color: #8b5cf6; }
+        57.89% { background-color: #ec4899; box-shadow: 0 0 15px rgba(236, 72, 153, 0.8); }
+        100% { background-color: #ec4899; }
+    }
+
+    .instruction-text {
+        position: absolute;
+        bottom: 10px;
+        font-size: 24px;
+        font-weight: 600;
+        transition: color 0.3s;
+    }
+</style>
+
+<div class="card card-custom border-0 shadow-sm p-5 text-center mt-4" style="max-width: 600px; margin: auto; border-radius: 20px;">
+    <h3 class="fw-bold text-dark mb-2">Bài tập thở 4-7-8</h3>
+    <p class="text-muted mb-4">Hãy nhìn theo viên bi và điều hòa nhịp thở của bạn.</p>
+    
+    <div class="circle-container">
+        <div class="timer-wrapper">
+            <div class="timer-track"></div>
+            
+            <div class="spinner">
+                <div class="ball"></div>
+            </div>
+            
+            <div class="breath-circle" id="breathCircle">Chuẩn bị</div>
+        </div>
+
+        <div class="instruction-text" id="textGuide">Bắt đầu...</div>
+    </div>
+</div>
+
+<script>
+    let timerInterval;
+
+    function runBreathCycle() {
+        updatePhase("Hít vào sâu", 4, "HÍT", "#0ea5e9");
+        
+        setTimeout(() => {
+            updatePhase("Nín thở", 7, "GIỮ", "#8b5cf6");
+        }, 4000);
+
+        setTimeout(() => {
+            updatePhase("Thở ra từ từ", 8, "THỞ", "#ec4899");
+        }, 11000);
+    }
+
+    function updatePhase(guideText, duration, circleText, color) {
+        let t = duration;
+        const textGuide = document.getElementById('textGuide');
+        const circle = document.getElementById('breathCircle');
+        
+        textGuide.innerHTML = `${guideText}... <span class="fs-3 fw-bold">(${t}s)</span>`;
+        textGuide.style.color = color;
+        circle.innerText = circleText;
+        
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            t--;
+            if(t > 0) {
+                textGuide.innerHTML = `${guideText}... <span class="fs-3 fw-bold">(${t}s)</span>`;
+            }
+        }, 1000);
+    }
+
+    runBreathCycle();
+    setInterval(runBreathCycle, 19000);
+</script>
+{% endblock %}

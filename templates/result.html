@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h2 class="fw-bold" style="color: #ec4899;">Đừng lo lắng, chúng tớ ở đây để giúp bạn! ❤️</h2>
+    <p class="lead">Hệ thống phát hiện bạn đang căng thẳng. Hãy chọn một cách để thư giãn nhé:</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card card-custom h-100 text-center p-4">
+            <div class="display-4 mb-3">🧘‍♀️</div>
+            <h5 class="fw-bold text-primary">Bài tập Thở 4-7-8</h5>
+            <p>Điều hòa nhịp tim bằng kỹ thuật thở khoa học.</p>
+            <a href="/solution/breath" class="btn btn-pastel-blue mt-auto">Bắt đầu tập</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-custom h-100 text-center p-4">
+            <div class="display-4 mb-3">🗑️</div>
+            <h5 class="fw-bold text-success">Game Ném Giấy</h5>
+            <p>Xả stress bằng cách ném vụn giấy vào thùng rác.</p>
+            <a href="/solution/game" class="btn btn-pastel-pink mt-auto">Chơi ngay</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-custom h-100 text-center p-4">
+            <div class="display-4 mb-3">🤖</div>
+            <h5 class="fw-bold text-warning">Chatbot Tư vấn</h5>
+            <p>Tâm sự với trợ lý AI tâm lý học đường.</p>
+            <a href="/solution/chat" class="btn btn-pastel-blue mt-auto">Trò chuyện</a>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-5">
+    <a href="/" class="btn btn-outline-secondary">← Quay lại đo lường</a>
+</div>
+{% endblock %}

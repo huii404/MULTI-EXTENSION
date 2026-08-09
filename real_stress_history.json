@@ -1,0 +1,84 @@
+[
+  {
+    "timestamp": "2026-02-23T00:37:56.115993",
+    "stress": 74.52,
+    "emotion": "angry"
+  },
+  {
+    "timestamp": "2026-02-23T00:49:26.947579",
+    "stress": 68.07,
+    "emotion": "sad"
+  },
+  {
+    "timestamp": "2026-02-23T02:07:43.350960",
+    "stress": 60.74,
+    "emotion": "sad"
+  },
+  {
+    "timestamp": "2026-02-23T02:08:19.385856",
+    "stress": 70.43,
+    "emotion": "sad"
+  },
+  {
+    "timestamp": "2026-02-23T02:08:46.850647",
+    "stress": 60.62,
+    "emotion": "angry"
+  },
+  {
+    "timestamp": "2026-02-23T02:15:09.957702",
+    "stress": 70.15,
+    "emotion": "angry"
+  },
+  {
+    "timestamp": "2026-02-23T08:55:08.671461",
+    "stress": 71.42,
+    "emotion": "angry"
+  },
+  {
+    "timestamp": "2026-02-23T08:58:25.023645",
+    "stress": 78.95,
+    "emotion": "disgust",
+    "status": "resolved",
+    "id": "2026-02-23T08:58:25.023645"
+  },
+  {
+    "timestamp": "2026-03-01T03:37:44.320787",
+    "stress": 88.5,
+    "emotion": "fear"
+  },
+  {
+    "timestamp": "2026-03-01T03:57:25.337240",
+    "stress": 88.5,
+    "emotion": "fear"
+  },
+  {
+    "timestamp": "2026-03-01T04:07:32.536827",
+    "stress": 88.5,
+    "emotion": "fear"
+  },
+  {
+    "timestamp": "2026-03-01T04:08:00.719891",
+    "stress": 88.5,
+    "emotion": "fear"
+  },
+  {
+    "timestamp": "2026-03-01T04:08:31.098646",
+    "stress": 88.5,
+    "emotion": "fear"
+  },
+  {
+    "timestamp": "2026-03-01T04:31:33.430237",
+    "stress": 88.5,
+    "emotion": "fear"
+  },
+  {
+    "timestamp": "2026-03-02T16:15:06.539957",
+    "stress": 61.28,
+    "emotion": "fear"
+  },
+  {
+    "timestamp": "2026-03-09T02:36:49.878397",
+    "stress": 99.58,
+    "emotion": "angry"
+  }
+]

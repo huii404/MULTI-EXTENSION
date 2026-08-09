@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #e0f2fe 0%, #fce7f3 100%); 
+    color: #475569;
+    min-height: 100vh;
+}
+
+.school-header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 3px solid #f9a8d4; 
+    padding: 15px 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.school-name {
+    color: #0ea5e9; 
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card-custom {
+    background: white;
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.card-custom:hover {
+    transform: translateY(-5px);
+}
+
+.btn-pastel-pink {
+    background-color: #f9a8d4;
+    color: white;
+    border-radius: 50px;
+    padding: 10px 30px;
+    font-weight: bold;
+    border: none;
+}
+
+.btn-pastel-pink:hover {
+    background-color: #ec4899;
+}
+
+.btn-pastel-blue {
+    background-color: #7dd3fc;
+    color: white;
+    border-radius: 50px;
+    padding: 10px 30px;
+    font-weight: bold;
+    border: none;
+}
+
+.btn-pastel-blue:hover {
+    background-color: #0ea5e9;
+}
+
+.progress-bar-stress {
+    background: linear-gradient(90deg, #4ade80 0%, #facc15 50%, #f87171 100%);
+    border-radius: 15px;
+}

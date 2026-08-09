@@ -1,0 +1,50 @@
+<div class="row g-4 mb-4" id="summarySection">
+    <div class="col-md-4">
+        <div class="card admin-card p-3">
+            <div class="d-flex align-items-center">
+                <div class="icon-box bg-blue-light me-3"><i class="bi bi-activity"></i></div>
+                <div>
+                    <h6 class="text-muted mb-1">Tổng lượt đo</h6>
+                    <h3 class="fw-bold mb-0" id="totalScans">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card admin-card p-3">
+            <div class="d-flex align-items-center">
+                <div class="icon-box bg-orange-light me-3"><i class="bi bi-speedometer2"></i></div>
+                <div>
+                    <h6 class="text-muted mb-1">Stress trung bình</h6>
+                    <h3 class="fw-bold mb-0"><span id="avgStress">0</span>%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card admin-card p-3">
+            <div class="d-flex align-items-center">
+                <div class="icon-box bg-red-light me-3"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                <div>
+                    <h6 class="text-muted mb-1">Cảnh báo nguy hiểm</h6>
+                    <h3 class="fw-bold mb-0 text-danger" id="highRiskCases">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card admin-card h-100">
+            <div class="card-header bg-transparent fw-bold border-0 py-3">
+                <i class="bi bi-pie-chart-fill me-2 text-primary"></i>Phân bố mức độ
+            </div>
+            <div class="card-body d-flex justify-content-center" style="height: 300px;">
+                <canvas id="distributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card admin-card h-100">
+            <div class="card-header

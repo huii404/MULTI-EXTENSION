@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card card-custom p-4 text-center">
+    <h3>Game Xả Stress: Ném Giấy Vụn</h3>
+    <p>Nhấn nút <b>"NÉM NGAY"</b> khi thanh lực chạy vào vùng màu xanh!</p>
+
+    <div class="game-area position-relative mt-4" style="height: 300px; background: #f1f5f9; border-radius: 10px; overflow: hidden;">
+        <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 80px;">
+            🗑️
+        </div>
+        
+        <div id="paperBall" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 40px; transition: all 0.5s ease;">
+            📄
+        </div>
+
+        <h2 id="gameResult" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;" class="fw-bold"></h2>
+    </div>
+
+    <div class="mt-4 mx-auto" style="width: 300px; height: 30px; background: #ddd; border-radius: 15px; position: relative; overflow: hidden;">
+        <div style="position: absolute; left: 40%; width: 20%; height: 100%; background: #4ade80;"></div> 
+        <div id="powerBar" style="width: 10px; height: 100%; background: #ec4899; position: absolute; left: 0;"></div>
+    </div>
+
+    <button onclick="throwPaper()" class="btn btn-pastel-pink btn-lg mt-3 w-50 shadow mx-auto d-block">NÉM NGAY!</button>
+    <div class="mt-2 fs-5">Điểm số: <span id="score" class="fw-bold text-primary">0</span></div>
+</div>
+
+<script>
+    const soundThrow = new Audio("{{ url_for('static', filename='audio/throw.mp3') }}");
+    const soundWin   = new Audio("{{ url_for('static', filename='audio/win.mp3') }}");
+    const soundFail  = new Audio("{{ url_for('static', filename='audio/fail.mp3') }}");
+
+    soundThrow.volume = 0.5;
+    soundWin.volume = 0.6;
+    soundFail.volume = 0.6;
+
+    let bar = document.getElementById('powerBar');
+    let paper = document.getElementById('paperBall');
+    let resultText = document.getElementById('gameResult');
+    
+    let pos = 0;
+    let direction = 1;
+    let running = true;
+    let score = 0;
+
+    setInterval(() => {
+        if (!running) return;
+        pos += 3 * direction;
+        if (pos >= 290 || pos <= 0) direction *= -1;
+        bar.style.left = pos + 'px';
+    }, 10);
+
+    function throwPaper() {
+        if (!running) return;
+        running = false;
+        soundThrow.currentTime = 0; 
+        soundThrow.play();
+
+        let isHit = (pos >= 120 && pos <= 180);
+
+        paper.style.bottom = "150px";
+        paper.style.transform = "translateX(-50%) scale(0.5) rotate(720deg)"; 
+        
+        setTimeout(() => {
+            if (isHit) {
+                soundWin.currentTime = 0;
+                soundWin.play();
+
+                resultText.innerText = "TRÚNG RỒI! 🎉";
+                resultText.className = "fw-bold text-success display-4";
+                resultText.style.display = "block";
+                
+                score += 10;
+                document.getElementById('score').innerText = score;
+            } else {
+                soundFail.currentTime = 0;
+                soundFail.play();
+
+                resultText.innerText = "HỤT RỒI... 😅";
+                resultText.className = "fw-bold text-secondary display-4";
+                resultText.style.display = "block";
+                
+                paper.style.transition = "all 0.2s ease";
+                paper.style.bottom = "20px";
+                paper.style.left = "20%"; 
+            }
+
+            setTimeout(() => {
+                running = true;
+                
+                paper.style.transition = "none"; 
+                paper.style.bottom = "20px";
+                paper.style.left = "50%";
+                paper.style.transform = "translateX(-50%) rotate(0deg)";
+                
+                setTimeout(() => { paper.style.transition = "all 0.5s ease"; }, 50);
+
+                resultText.style.display = "none";
+            }, 1500);
+
+        }, 500);
+    }
+</script>
+{% endblock %}

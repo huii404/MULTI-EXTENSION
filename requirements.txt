@@ -1,0 +1,8 @@
+flask
+opencv-python
+deepface
+tf-keras
+numpy
+gunicorn
+python-dotenv
+google-generativeai

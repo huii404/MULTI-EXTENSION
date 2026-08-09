@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đo lường Stress - THCS Ngô Quyền</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        .card-custom:hover, .card:hover {
+        transform: none !important;
+        }
+        .school-header {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .school-logo-text {
+            text-align: center;
+            flex-grow: 1;
+            padding: 0 10px;
+        }
+
+        .school-name {
+            color: #0ea5e9;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        .project-name {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .btn-home {
+            background: #e0f2fe;
+            color: #0ea5e9;
+            border: none;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s;
+            text-decoration: none;
+            cursor: pointer;
+        }
+      
+
+        @media (max-width: 768px) {
+            .school-name { font-size: 1rem; }
+            .project-name { display: none; }
+            .header-content { padding: 8px 0; }
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main { flex: 1; }
+    </style>
+</head>
+<body>
+
+    <nav class="school-header" id="mainHeader">
+        <div class="container header-content">
+            <a href="/" class="btn-home shadow-sm" title="Về trang chủ">
+                <i class="bi bi-house-door-fill fs-5"></i>
+            </a>
+
+            <div class="school-logo-text">
+                <h4 class="school-name">THCS Ngô Quyền</h4>
+                <div class="project-name d-none d-md-block"> 
+                    <i class="bi bi-stars text-warning"></i> 
+                    Đề tài NCKH: Website hỗ trợ xoa dịu tâm lý học đường
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="#" class="btn-home shadow-sm" style="background: #fce7f3; color: #db2777;" title="Thông tin">
+                    <i class="bi bi-info-circle-fill fs-5"></i>
+                </a>
+
+                <button onclick="closeHeader()" class="btn-home shadow-sm" style="background: #fee2e2; color: #ef4444;" title="Đóng Menu">
+                    <i class="bi bi-x-lg fs-5"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="text-center py-4 text-muted bg-light mt-auto border-top">
+        <div class="container">
+            <small class="fw-bold">© 2026 Student Team THCS Ngô Quyền</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function closeHeader() {
+            const header = document.getElementById('mainHeader');
+        
+            header.style.transform = 'translateY(-100%)';
+            
+            setTimeout(() => {
+                header.style.display = 'none';
+            }, 300);
+        }
+    </script>
+</body>
+</html>

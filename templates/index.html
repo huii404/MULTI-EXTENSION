@@ -1,0 +1,455 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    .pulse-dot {
+        width: 10px; height: 10px;
+        background-color: #22c55e;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    
+    .cam-wrapper {
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        overflow: hidden;
+        background: #000;
+    }
+    .ekyc-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.6); 
+        -webkit-mask-image: radial-gradient(ellipse 110px 150px at center, transparent 95%, black 100%);
+        mask-image: radial-gradient(ellipse 110px 150px at center, transparent 95%, black 100%);
+        z-index: 2;
+        pointer-events: none;
+    }
+    
+    .ekyc-border {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 220px; height: 300px;
+        border: 2px dashed #0ea5e9;
+        border-radius: 50%;
+        z-index: 3;
+        pointer-events: none;
+        transition: all 0.5s ease; 
+    }
+
+    .scanner-line {
+        position: absolute;
+        top: 10%; left: 50%;
+        transform: translateX(-50%);
+        width: 180px; height: 3px;
+        background: #38bdf8;
+        box-shadow: 0 0 10px #0ea5e9, 0 0 20px #0ea5e9;
+        z-index: 4;
+        animation: scan 2.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes scan {
+        0% { top: 15%; opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { top: 85%; opacity: 0; }
+    }
+
+    .scan-progress-bg {
+        width: 80%; height: 6px;
+        background-color: rgba(255,255,255,0.3);
+        border-radius: 10px; overflow: hidden;
+        margin: 8px auto 0 auto;
+    }
+    .scan-progress-fill {
+        height: 100%; width: 0%;
+        background-color: #2ecc71;
+        transition: width 0.5s ease;
+    }
+</style>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card card-custom border-0 p-1 mb-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap px-3 py-2">
+                <h6 class="fw-bold m-0 text-primary"><i class="bi bi-camera-video-fill"></i> Camera AI</h6>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-sm btn-outline-success me-2 rounded-pill" onclick="restartScan()" id="btnRestartScan" style="display: none;">
+                        <i class="bi bi-arrow-counterclockwise"></i> Quét Lại
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary me-3 rounded-pill" onclick="toggleCamera()" id="btnSwitchCam">
+                        <i class="bi bi-arrow-repeat"></i> Đổi Camera
+                    </button>
+                    <div class="small text-muted"><span class="pulse-dot me-1"></span> Live</div>
+                </div>
+            </div>
+            
+            <div class="cam-wrapper position-relative" style="background: #000; min-height: 350px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <video id="webVideo" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                <canvas id="hiddenCanvas" style="display: none;"></canvas>
+                
+                <div class="ekyc-overlay"></div>
+                <div class="ekyc-border" id="ekyc-border-ui"></div> <div class="scanner-line" id="scanner-line-ui"></div> <div class="position-absolute bottom-0 start-0 w-100 p-3 text-white text-center" 
+                     style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); z-index: 5;">
+                    <small id="aiStatus" class="fw-bold text-info">🎯 Vui lòng đưa khuôn mặt vào giữa khung hình...</small>
+                    
+                    <div class="scan-progress-bg">
+                        <div id="scanProgressBar" class="scan-progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-custom p-4 border-0 shadow-sm">
+            <h6 class="fw-bold text-muted mb-3 text-uppercase small ls-1">Thành phần Cảm xúc (Fuzzy Inputs)</h6>
+            
+            <div class="d-flex align-items-center mb-2">
+                <div style="width: 120px;" class="fw-bold small text-danger"><i class="bi bi-emoji-angry"></i> Căng thẳng/bực bội</div>
+                <div class="progress flex-grow-1 bg-light rounded-pill" style="height: 8px;">
+                    <div id="barAngry" class="progress-bar bg-danger rounded-pill" style="width: 0%; transition: width 0.5s;"></div>
+                </div>
+                <div style="width: 40px;" class="text-end small fw-bold" id="valAngry">0%</div>
+            </div>
+
+            <div class="d-flex align-items-center mb-2">
+                <div style="width: 120px;" class="fw-bold small text-dark"><i class="bi bi-emoji-dizzy"></i> Lo lắng/Hồi hộp</div>
+                <div class="progress flex-grow-1 bg-light rounded-pill" style="height: 8px;">
+                    <div id="barFear" class="progress-bar bg-dark rounded-pill" style="width: 0%; transition: width 0.5s;"></div>
+                </div>
+                <div style="width: 40px;" class="text-end small fw-bold" id="valFear">0%</div>
+            </div>
+
+            <div class="d-flex align-items-center mb-2">
+                <div style="width: 120px;" class="fw-bold small text-primary"><i class="bi bi-emoji-frown"></i> Buồn bã</div>
+                <div class="progress flex-grow-1 bg-light rounded-pill" style="height: 8px;">
+                    <div id="barSad" class="progress-bar bg-primary rounded-pill" style="width: 0%; transition: width 0.5s;"></div>
+                </div>
+                <div style="width: 40px;" class="text-end small fw-bold" id="valSad">0%</div>
+            </div>
+
+            <div class="d-flex align-items-center">
+                <div style="width: 120px;" class="fw-bold small text-success"><i class="bi bi-emoji-smile"></i> Vui vẻ</div>
+                <div class="progress flex-grow-1 bg-light rounded-pill" style="height: 8px;">
+                    <div id="barHappy" class="progress-bar bg-success rounded-pill" style="width: 0%; transition: width 0.5s;"></div>
+                </div>
+                <div style="width: 40px;" class="text-end small fw-bold" id="valHappy">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card card-custom h-100 p-4 border-0 text-center" style="background: #fdf2f8;">
+            <h5 class="fw-bold" style="color: #db2777;">CHỈ SỐ CĂNG THẲNG</h5>
+            <p class="text-muted small fst-italic">Cập nhật thời gian thực</p>
+            
+            <div class="py-4">
+                <h1 class="display-1 fw-bold mb-0" style="color: #db2777;">
+                    <span id="stressValue">0</span><small class="fs-4">%</small>
+                </h1>
+                <div class="progress mt-2 mx-auto" style="height: 6px; width: 60%; background: #fbcfe8;">
+                    <div id="mainStressBar" class="progress-bar" style="width: 0%; background: #db2777;"></div>
+                </div>
+            </div>
+
+            <div class="my-3" style="height: 180px;">
+                <canvas id="stressChart"></canvas>
+            </div>
+
+            <div id="solutionBox" class="mt-auto">
+                <div id="normalStatus" class="alert alert-success border-0 shadow-sm fade show">
+                    <h5 class="fw-bold mb-1">🌿 Trạng thái Tốt</h5>
+                    <small>Bạn đang rất cân bằng. Hãy duy trì nhé!</small>
+                </div>
+                
+                <div id="alertStatus" class="alert alert-danger border-0 shadow-sm fade show" style="display: none;">
+                    <h5 class="fw-bold mb-1">⚠️ Cảnh báo Stress!</h5>
+                    <small class="d-block mb-2">Hệ thống phát hiện mức độ căng thẳng cao.</small>
+                    <a href="/result" class="btn btn-danger rounded-pill fw-bold w-100 shadow-sm">
+                        <i class="bi bi-lightning-charge-fill"></i> Kích hoạt Giải pháp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<script>
+    const ctx = document.getElementById('stressChart').getContext('2d');
+    
+    let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(236, 72, 153, 0.5)'); 
+    gradient.addColorStop(1, 'rgba(236, 72, 153, 0.0)'); 
+
+    const stressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array(20).fill(''),
+            datasets: [{
+                label: 'Stress',
+                data: Array(20).fill(0),
+                borderColor: '#db2777',
+                borderWidth: 2,
+                backgroundColor: gradient,
+                tension: 0.4, 
+                fill: true,
+                pointRadius: 0 
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { display: false },
+                y: { min: 0, max: 100, grid: { display: false } }
+            },
+            animation: false
+        }
+    });
+
+    const video = document.getElementById('webVideo');
+    const canvas = document.getElementById('hiddenCanvas');
+    const ctxCanvas = canvas.getContext('2d');
+    let currentFacingMode = "user";
+
+    function startCamera(facingMode) {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    document.getElementById('aiStatus').innerText = "🤖 Đang phân tích cảm xúc...";
+                })
+                .catch(function(err) {
+                    console.error("Lỗi mở camera:", err);
+                    document.getElementById('aiStatus').innerText = "❌ Lỗi: Vui lòng cấp quyền Camera!";
+                });
+        }
+    }
+
+    startCamera(currentFacingMode);
+
+    function toggleCamera() {
+        const btn = document.getElementById('btnSwitchCam');
+        btn.disabled = true;
+        
+        currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+        
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+        }
+        
+        startCamera(currentFacingMode);
+        setTimeout(() => { btn.disabled = false; }, 1000);
+    }
+
+    let alertLocked = false;
+    let alertTimeout = null;
+    let isProcessing = false; 
+
+    let validFrames = 0;
+    const REQUIRED_FRAMES = 7; 
+    let isScanning = true;   
+
+    function processNextFrame() {
+        if (!isScanning) return; 
+
+        if (video.readyState !== video.HAVE_ENOUGH_DATA || isProcessing) {
+            requestAnimationFrame(processNextFrame);
+            return;
+        }
+        
+        isProcessing = true; 
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        let cropWidth = canvas.width * 0.45; 
+        let cropHeight = canvas.height * 0.70;
+        let startX = (canvas.width - cropWidth) / 2;
+        let startY = (canvas.height - cropHeight) / 2;
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 300; 
+        tempCanvas.height = 400;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        tempCtx.drawImage(
+            video, 
+            startX, startY, cropWidth, cropHeight, 
+            0, 0, 300, 400                        
+        );
+
+        let base64Img = tempCanvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
+        fetch('/api/analyze_frame', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64Img })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const aiStatus = document.getElementById('aiStatus');
+            const ekycBorder = document.querySelector('.ekyc-border');
+            
+            const progressBar = document.getElementById('scanProgressBar');
+
+            if (!data.details || Object.keys(data.details).length === 0 || data.emotion_label === "Không thấy mặt") {
+                aiStatus.innerHTML = "⚠️ Không tìm thấy khuôn mặt! Vui lòng nhìn thẳng.";
+                aiStatus.className = "fw-bold text-warning"; 
+                if(ekycBorder) ekycBorder.style.borderColor = "#f59e0b"; 
+                document.querySelector('.pulse-dot').style.backgroundColor = '#f59e0b'; 
+
+                validFrames = 0;
+                progressBar.style.width = "0%";
+
+                document.getElementById('stressValue').innerText = "0";
+                document.getElementById('mainStressBar').style.width = "0%";
+                ['Angry', 'Fear', 'Sad', 'Happy'].forEach(id => {
+                    document.getElementById('bar'+id).style.width = "0%";
+                    document.getElementById('val'+id).innerText = "0%";
+                });
+
+                document.getElementById('alertStatus').style.display = 'none';
+                document.getElementById('normalStatus').style.display = 'block';
+
+            } else {
+                validFrames++;
+                let progressPercent = (validFrames / REQUIRED_FRAMES) * 100;
+                progressBar.style.width = progressPercent + "%";
+                
+                aiStatus.innerHTML = `✅ Đang phân tích... (${Math.round(progressPercent)}%)`;
+                aiStatus.className = "fw-bold text-success"; 
+                if(ekycBorder) ekycBorder.style.borderColor = "#22c55e"; 
+                
+                let val = parseFloat(data.stress).toFixed(1);
+                document.getElementById('stressValue').innerText = val;
+                document.getElementById('mainStressBar').style.width = val + "%";
+
+                const setBar = (id, v) => {
+                    let per = (v || 0).toFixed(0) + "%";
+                    document.getElementById('bar'+id).style.width = per;
+                    document.getElementById('val'+id).innerText = per;
+                };
+                setBar('Angry', data.details.angry);
+                setBar('Fear', data.details.fear);
+                setBar('Sad', data.details.sad);
+                setBar('Happy', data.details.happy);
+
+                let chartData = stressChart.data.datasets[0].data;
+                chartData.shift();
+                chartData.push(val);
+                stressChart.update();
+
+                const alertBox = document.getElementById('alertStatus');
+                const normalBox = document.getElementById('normalStatus');
+                const alertMessage = alertBox.querySelector('small');
+
+                let isHighStress = data.stress > 60;
+                let isVerySad = (data.details.sad > 50);
+                
+                if (isHighStress || isVerySad) {
+                    alertBox.style.display = 'block';
+                    normalBox.style.display = 'none';
+                    document.querySelector('.pulse-dot').style.backgroundColor = '#ef4444'; 
+                    if(ekycBorder) ekycBorder.style.borderColor = "#ef4444"; 
+                    
+                    if (isVerySad && !isHighStress) {
+                        alertMessage.innerText = "Bạn trông có vẻ đang rất buồn. Hãy để AI giúp bạn nhé!";
+                    } else {
+                        alertMessage.innerText = "Hệ thống phát hiện mức độ căng thẳng cao.";
+                    }
+                    
+                    alertLocked = true;
+                    clearTimeout(alertTimeout);
+                    alertTimeout = setTimeout(() => { alertLocked = false; }, 3000); 
+                }
+                else if (!isHighStress && !isVerySad && !alertLocked) {
+                    alertBox.style.display = 'none';
+                    normalBox.style.display = 'block';
+                    document.querySelector('.pulse-dot').style.backgroundColor = '#22c55e'; 
+                }
+
+                if (validFrames >= REQUIRED_FRAMES) {
+                    isScanning = false; 
+                    document.getElementById("scanner-line-ui").style.display = "none";
+                    
+                    if(ekycBorder) {
+                        ekycBorder.style.borderColor = "#2ecc71";
+                        ekycBorder.style.boxShadow = "0 0 15px #2ecc71";
+                    }
+                    
+                    aiStatus.innerHTML = "🎉 Hoàn tất! Dữ liệu đã được lưu.";
+                    
+                  
+                    if (video.srcObject) {
+                        video.srcObject.getTracks().forEach(track => track.stop());
+                    }
+
+                  document.getElementById("btnRestartScan").style.display = "inline-block";
+                   
+                    return; 
+                }
+            }
+        })
+        .catch(err => console.error("Lỗi kết nối AI", err))
+        .finally(() => {
+            isProcessing = false;
+            if (isScanning) {
+                setTimeout(() => { requestAnimationFrame(processNextFrame); }, 800);
+            }
+        });
+    }
+
+    video.addEventListener('play', () => {
+        requestAnimationFrame(processNextFrame);
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey && event.key.toLowerCase() === 'x') {
+            event.preventDefault();
+            fetch('/api/trigger_cheat', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        console.log("Cheat code activated!");
+                        const camWrapper = document.querySelector('.cam-wrapper');
+                        if(camWrapper) {
+                            camWrapper.style.borderColor = '#ef4444';
+                            setTimeout(() => { camWrapper.style.borderColor = '#e2e8f0'; }, 500);
+                        }
+                    }
+                })
+                .catch(err => console.error("Cheat failed", err));
+        }
+    });
+
+    function restartScan() {
+    
+        isScanning = true;
+        validFrames = 0;
+        
+        document.getElementById("btnRestartScan").style.display = "none";
+        
+        const ekycBorder = document.getElementById('ekyc-border-ui');
+        if(ekycBorder) {
+            ekycBorder.style.borderColor = "#0ea5e9";
+            ekycBorder.style.boxShadow = "none";
+        }
+        document.getElementById("scanner-line-ui").style.display = "block";
+        document.getElementById("scanProgressBar").style.width = "0%";
+        document.getElementById('aiStatus').innerHTML = "🎯 Vui lòng đưa khuôn mặt vào giữa khung hình...";
+        document.getElementById('aiStatus').className = "fw-bold text-info";
+
+        document.getElementById('stressValue').innerText = "0";
+        document.getElementById('mainStressBar').style.width = "0%";
+        ['Angry', 'Fear', 'Sad', 'Happy'].forEach(id => {
+            document.getElementById('bar'+id).style.width = "0%";
+            document.getElementById('val'+id).innerText = "0%";
+        });
+        
+        startCamera(currentFacingMode);
+    }
+</script>
+{% endblock %}
