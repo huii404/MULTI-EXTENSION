@@ -72,9 +72,17 @@ def chat_api():
     source = "text"
     audio_path = None
     
+    voice_metrics = None
     # 1. Kiểm tra xem request gửi lên là FormData (có file âm thanh) hay JSON
     if request.content_type and 'multipart/form-data' in request.content_type:
         source = request.form.get('source', 'voice')
+        voice_metrics_raw = request.form.get('voice_metrics', None)
+        if voice_metrics_raw:
+            try:
+                voice_metrics = json.loads(voice_metrics_raw)
+            except Exception:
+                voice_metrics = None
+
         if 'audio' in request.files:
             audio_file = request.files['audio']
             filename = audio_file.filename
@@ -101,7 +109,7 @@ def chat_api():
     try:
         if audio_path:
             # Phân tích cảm xúc đa phương thức từ tệp âm thanh
-            emotion_res, transcript = emotion_analyzer.analyze_audio(audio_path, history)
+            emotion_res, transcript = emotion_analyzer.analyze_audio(audio_path, history, voice_metrics=voice_metrics)
             try:
                 os.remove(audio_path)
             except Exception as e:

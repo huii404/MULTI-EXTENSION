@@ -372,30 +372,33 @@ class EmotionAnalyzer:
         }
         """
 
-        for attempt in range(len(self.api_keys)):
-            try:
-                key = self.api_keys[self.current_key_index]
-                genai.configure(api_key=key)
+        models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash-exp", "gemini-1.5-pro"]
+        for model_name in models_to_try:
+            for attempt in range(len(self.api_keys)):
+                try:
+                    key = self.api_keys[self.current_key_index]
+                    genai.configure(api_key=key)
+                    
+                    model = genai.GenerativeModel(model_name=model_name)
+                    response = model.generate_content([audio_part, prompt])
+                    
+                    res_text = response.text.strip()
+                    # Làm sạch markdown nếu có
+                    if res_text.startswith("```"):
+                        lines = res_text.splitlines()
+                        if lines[0].startswith("```json"):
+                            res_text = "\n".join(lines[1:-1])
+                        else:
+                            res_text = "\n".join(lines[1:-1])
+                    
+                    print(f"--> [GEMINI MULTIMODAL SUCCESS] Phân tích bằng mô hình {model_name} thành công.")
+                    return json.loads(res_text.strip())
+                    
+                except Exception as e:
+                    print(f"[GEMINI AUDIO AI ERROR] Key index {self.current_key_index} (model {model_name}) failed: {e}")
+                    self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
                 
-                model = genai.GenerativeModel(model_name="gemini-2.5-flash")
-                response = model.generate_content([audio_part, prompt])
-                
-                res_text = response.text.strip()
-                # Làm sạch markdown nếu có
-                if res_text.startswith("```"):
-                    lines = res_text.splitlines()
-                    if lines[0].startswith("```json"):
-                        res_text = "\n".join(lines[1:-1])
-                    else:
-                        res_text = "\n".join(lines[1:-1])
-                
-                return json.loads(res_text.strip())
-                
-            except Exception as e:
-                print(f"[GEMINI AUDIO AI ERROR] Key index {self.current_key_index} failed: {e}")
-                self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
-                
-        raise RuntimeError("Tất cả các Gemini API Keys đều không khả dụng cho phân tích âm thanh.")
+        raise RuntimeError("Tất cả các Gemini API Keys và Models đều không khả dụng cho phân tích âm thanh.")
 
     def _transcribe_audio_with_groq(self, audio_path):
         """
@@ -451,7 +454,7 @@ class EmotionAnalyzer:
             res_data = json.loads(response.read().decode("utf-8"))
             return res_data.get("text", "").strip()
 
-    def analyze_audio(self, audio_path, history=None):
+    def analyze_audio(self, audio_path, history=None, voice_metrics=None):
         """
         Phân tích tệp âm thanh đa phương thức (3 tầng).
         Trả về: (EmotionResult, transcript_text)
@@ -459,9 +462,18 @@ class EmotionAnalyzer:
         if history is None:
             history = []
 
+        def _inject_metrics(ai_data_dict):
+            if voice_metrics and isinstance(voice_metrics, dict):
+                signals = set(ai_data_dict.get("signals", []))
+                for key, active in voice_metrics.items():
+                    if active:
+                        signals.add(key)
+                ai_data_dict["signals"] = list(signals)
+
         # Tầng 1: Sử dụng Gemini Multimodal
         try:
             ai_data = self._analyze_audio_with_gemini(audio_path)
+            _inject_metrics(ai_data)
             transcript = ai_data.get("transcript", "")
             emotion_res = self._build_result(ai_data, transcript, history, is_audio=True)
             print("--> [GEMINI MULTIMODAL SUCCESS] Phân tích âm thanh thành công.")
@@ -479,6 +491,7 @@ class EmotionAnalyzer:
                 print(f"--> [GROQ WHISPER SUCCESS] Bản dịch: \"{transcript}\"")
                 print("--> [FALLBACK] Đang phân tích cảm xúc văn bản bằng Groq Llama 3.3...")
                 ai_data = self._analyze_with_groq(transcript)
+                _inject_metrics(ai_data)
                 emotion_res = self._build_result(ai_data, transcript, history, is_audio=True)
                 return emotion_res, transcript
             except Exception as e_groq:

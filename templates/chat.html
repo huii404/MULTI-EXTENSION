@@ -438,6 +438,8 @@
     const SILENCE_DURATION = 1500;  // Thời gian im lặng (ms) trước khi tự dừng (1.5 giây)
     let hasSpoken = false;
 
+    let rmsHistory = [];
+
     async function toggleSpeech() {
         if (isRecording) {
             stopRecordingAndAnalyze();
@@ -451,6 +453,7 @@
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             streamRef = stream;
             audioChunks = [];
+            rmsHistory = [];
             hasSpoken = false;
             
             let options = { mimeType: 'audio/webm' };
@@ -477,11 +480,30 @@
                 if (audioContext) {
                     audioContext.close();
                 }
+
+                // Tính toán chỉ số giọng nói từ phần cứng Micro
+                let voiceMetrics = null;
+                if (rmsHistory.length > 0) {
+                    const maxRms = Math.max(...rmsHistory);
+                    const avgRms = rmsHistory.reduce((a, b) => a + b, 0) / rmsHistory.length;
+                    let varianceSum = 0;
+                    for (let v of rmsHistory) {
+                        varianceSum += (v - avgRms) * (v - avgRms);
+                    }
+                    const variance = varianceSum / rmsHistory.length;
+                    
+                    voiceMetrics = {
+                        loud_voice: maxRms > 0.07,
+                        quiet_voice: avgRms < 0.02,
+                        shaky_voice: variance > 0.0008,
+                        fast_pace: rmsHistory.length > 30 && rmsHistory.length < 180
+                    };
+                }
                 
                 const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
                 if (audioBlob.size > 0) {
                     const extension = mediaRecorder.mimeType.includes('ogg') ? 'ogg' : 'webm';
-                    await sendAudioFile(audioBlob, `voice.${extension}`);
+                    await sendAudioFile(audioBlob, `voice.${extension}`, voiceMetrics);
                 }
             };
 
@@ -506,6 +528,7 @@
                     sum += dataArray[i] * dataArray[i];
                 }
                 const rms = Math.sqrt(sum / bufferLength);
+                rmsHistory.push(rms);
 
                 if (rms > SILENCE_THRESHOLD) {
                     hasSpoken = true;
@@ -587,7 +610,7 @@
     }
 
     // --- GỬI FILE ÂM THANH LÊN SERVER ---
-    async function sendAudioFile(audioBlob, filename) {
+    async function sendAudioFile(audioBlob, filename, extraMetrics = null) {
         userInput.disabled = true;
         typingIndicator.style.display = 'block';
         scrollToBottom();
@@ -595,6 +618,9 @@
         const formData = new FormData();
         formData.append('audio', audioBlob, filename);
         formData.append('source', 'voice');
+        if (extraMetrics) {
+            formData.append('voice_metrics', JSON.stringify(extraMetrics));
+        }
         
         try {
             const response = await fetch('/api/chat', {
