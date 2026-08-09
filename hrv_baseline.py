@@ -21,7 +21,11 @@ class HRVBaselineManager:
             mean = self.default_mean
             std = self.default_std
         else:
-            rmssd_values = [item.get('RMSSD', self.default_mean) for item in baseline_history if isinstance(item, dict) and 'RMSSD' in item]
+            rmssd_values = [
+                item.get('rmssd', item.get('RMSSD', self.default_mean)) 
+                for item in baseline_history 
+                if isinstance(item, dict) and ('rmssd' in item or 'RMSSD' in item)
+            ]
             if len(rmssd_values) >= 3:
                 mean = float(np.mean(rmssd_values))
                 std = float(np.std(rmssd_values, ddof=1))

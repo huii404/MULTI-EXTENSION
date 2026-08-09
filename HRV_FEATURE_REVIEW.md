@@ -55,10 +55,11 @@ bio-gate/
 ## 3. CHI TIẾT CÁC CHỈ SỐ HRV & THUẬT TOÁN
 
 ### Các Chỉ Số Sinh Lý Đo Được
-1. **BPM (Beats Per Minute):** Nhịp tim trung bình trong 1 phút.
-2. **RMSSD (Root Mean Square of Successive Differences):** Chỉ số chính đo hoạt động thần kinh đối giao cảm (khả năng hồi phục/thư giãn).
+1. **BPM (Beats Per Minute):** Nhịp tim trung bình trong 1 phút & Tần số nhịp mạch (Hz).
+2. **RMSSD (Root Mean Square of Successive Differences):** Chỉ số đo hoạt động thần kinh đối giao cảm (khả năng hồi phục/thư giãn).
 3. **SDNN (Standard Deviation of NN intervals):** Độ lệch chuẩn tổng thể của các khoảng nhịp tim.
-4. **HRV Stress Score (%):** Quy đổi từ RMSSD sang thang đo căng thẳng 0 – 100%.
+4. **Z-Score (7 ngày):** Chỉ số lệch chuẩn cá nhân hóa $Z = \frac{\text{RMSSD} - \mu_{7d}}{\sigma_{7d}}$, đánh giá biến thiên dựa trên lịch sử 7 ngày của chính người dùng.
+5. **HRV Stress Score (%):** Quy đổi từ Z-Score và RMSSD sang thang đo căng thẳng 0 – 100%.
 
 ### Quy Trình Xử Lý Tín Hiệu Tốc Độ Cao (Low-Latency rPPG Pipeline)
 1. **Cắt vùng ROI khuôn mặt:** Lấy khu vực trán và má trung tâm nơi mao mạch máu dưới da dồi dào.

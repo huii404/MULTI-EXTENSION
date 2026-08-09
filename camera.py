@@ -5,6 +5,8 @@ import numpy as np
 import time
 from collections import deque
 from hrv_processor import HRVProcessor
+from hrv_baseline import HRVBaselineManager
+from data_manager import get_hrv_baseline_7days
 
 class VideoCamera(object):
     def __init__(self):
@@ -15,6 +17,7 @@ class VideoCamera(object):
         self.emotion_history = deque(maxlen=self.history_len)
         self.force_stress = False
         self.hrv_processor = HRVProcessor()
+        self.baseline_manager = HRVBaselineManager()
         self.current_hrv_metrics = self.hrv_processor.get_metrics()
         self.latest_hrv_metrics = self.current_hrv_metrics
 
@@ -31,6 +34,7 @@ class VideoCamera(object):
             "sdnn": 18.5,
             "SDNN": 18.5,
             "pnn50": 0.0,
+            "z_score": -1.8,
             "hrv_stress": 88.5,
             "status": "Căng thẳng (HRV Thấp)",
             "signal": []
@@ -56,7 +60,19 @@ class VideoCamera(object):
             if roi.size > 0:
                 green_mean = float(np.mean(roi[:, :, 1]))
                 self.hrv_processor.add_sample(time.time(), green_mean)
-                self.current_hrv_metrics = self.hrv_processor.get_metrics()
+                metrics = self.hrv_processor.get_metrics()
+                
+                # Tính Z-Score so với baseline 7 ngày cá nhân hóa
+                if metrics.get('rmssd', 0.0) > 0:
+                    baseline_hist = get_hrv_baseline_7days()
+                    z_score = self.baseline_manager.calculate_zscore(metrics['rmssd'], baseline_hist)
+                    metrics['z_score'] = z_score
+                    metrics['Z_Score'] = z_score
+                else:
+                    metrics['z_score'] = 0.0
+                    metrics['Z_Score'] = 0.0
+
+                self.current_hrv_metrics = metrics
                 self.latest_hrv_metrics = self.current_hrv_metrics
             
             # 2. Phân tích cảm xúc khuôn mặt bằng DeepFace
@@ -138,7 +154,13 @@ class VideoCamera(object):
             if roi.size > 0:
                 green_mean = float(np.mean(roi[:, :, 1]))
                 self.hrv_processor.add_sample(time.time(), green_mean)
-                self.current_hrv_metrics = self.hrv_processor.get_metrics()
+                metrics = self.hrv_processor.get_metrics()
+                if metrics.get('rmssd', 0.0) > 0:
+                    baseline_hist = get_hrv_baseline_7days()
+                    z_score = self.baseline_manager.calculate_zscore(metrics['rmssd'], baseline_hist)
+                    metrics['z_score'] = z_score
+                    metrics['Z_Score'] = z_score
+                self.current_hrv_metrics = metrics
                 self.latest_hrv_metrics = self.current_hrv_metrics
             
             objs = DeepFace.analyze(img, 
