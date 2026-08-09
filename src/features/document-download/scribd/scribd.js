@@ -53,34 +53,17 @@ PAGES.scribd = {
   }
 
   try {
-    const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    // Chuyển đổi URL để dùng dịch vụ Bypass (Scribd.vpdfs.com)
+    // Ví dụ: https://www.scribd.com/document/123/name -> https://scribd.vpdfs.com/document/123/name
+    const targetUrl = new URL(urlValue);
+    const bypassUrl = `https://scribd.vpdfs.com${targetUrl.pathname}`;
+
+    // Mở một tab mới tới trang bypass
+    await chrome.tabs.create({ url: bypassUrl, active: true });
     
-    // So sánh đường dẫn sạch (Loại bỏ URL trùng)
-    const cleanTargetUrl = new URL(urlValue).origin + new URL(urlValue).pathname;
-    const cleanCurrentUrl = currentTab?.url ? (new URL(currentTab.url).origin + new URL(currentTab.url).pathname) : '';
-
-    let targetTabId = currentTab?.id;
-
-    // Nếu khác tab hiện tại -> Mở tab mới với URL chuẩn
-    if (cleanTargetUrl !== cleanCurrentUrl) {
-      const newTab = await chrome.tabs.create({ url: cleanTargetUrl, active: true });
-      targetTabId = newTab.id;
-      await new Promise(r => setTimeout(r, 2500)); // Chờ tab mới load
-    }
-
-    // Gửi tín hiệu thực thi tới Content Script
-    chrome.tabs.sendMessage(targetTabId, { action: 'START_SCRIBD_AUTO_PDF' }, (response) => {
-      if (chrome.runtime.lastError) {
-        chrome.scripting.executeScript({
-          target: { tabId: targetTabId },
-          files: ['src/features/document-download/scribd/scribd-content.js']
-        }, () => {
-          chrome.tabs.sendMessage(targetTabId, { action: 'START_SCRIBD_AUTO_PDF' });
-        });
-      }
-    });
-
-    if (typeof showToast === 'function') showToast('🚀 Đang bắt đầu xử lý...', 'success');
+    if (typeof showToast === 'function') showToast('🚀 Đang chuyển hướng đến trang tải xuống...', 'success');
+    
+    // Đóng popup sau khi xử lý xong
     setTimeout(() => window.close(), 500);
   } catch (e) {
     if (typeof showToast === 'function') showToast('❌ Lỗi xử lý đường dẫn!', 'error');

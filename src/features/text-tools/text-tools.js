@@ -117,10 +117,6 @@ const SKILL_HTML = {
       <span style="font-size:16px; margin-right:6px;">📁</span>
       <span style="font-size:13px; font-weight:700;">Chọn file ảnh</span>
     </button>
-    <button id="ocr-paste-btn" class="action-btn secondary" style="flex:1; padding:12px; margin-bottom:0; justify-content:center;">
-      <span style="font-size:16px; margin-right:6px;">📋</span>
-      <span style="font-size:13px; font-weight:700;">Dán Clipboard</span>
-    </button>
   </div>
 
   <!-- Trạng thái xử lý -->
@@ -130,16 +126,18 @@ const SKILL_HTML = {
 
   <!-- Kết quả hiển thị -->
   <div class="form-group" id="ocr-result-area" style="margin-bottom:8px; display:none;">
-    <label style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:6px;">
-      <span>✨</span> Kết quả quét:
-      <span style="margin-left:auto; font-size:10px; color:#999;">(Double-click để copy)</span>
-    </label>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+      <label style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:6px; margin:0;">
+        <span>✨</span> Kết quả quét:
+      </label>
+      <button id="ocr-copy-btn" class="action-btn secondary" style="padding:4px 8px; font-size:11px; margin:0; width:auto; border-radius:4px;">📋 Copy Text</button>
+    </div>
     <textarea id="ocr-output" rows="6" readonly placeholder="Kết quả chữ sẽ xuất hiện ở đây..." style="background:#f8f9fa; cursor:default; width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:13px; resize:vertical; line-height:1.6;"></textarea>
   </div>
 
   <div id="ocr-hint" style="text-align:center; padding:16px; color:var(--text-muted); font-size:12px;">
     <div style="font-size:28px; margin-bottom:8px; opacity:0.5;">🖼️</div>
-    <div>Chọn file ảnh, bấm dán từ <strong>Clipboard</strong></div>
+    <div>Chọn file ảnh từ máy tính hoặc bấm <strong>Ctrl+V</strong> để dán</div>
     <div style="margin-top:4px; font-size:11px;">Hoặc kéo thả file ảnh vào đây</div>
   </div>
 </div>
@@ -596,12 +594,12 @@ function fileToBase64(file) {
 function attachOcrEvents() {
   const browseBtn = document.getElementById('ocr-browse-btn');
   const fileInput = document.getElementById('ocr-file-input');
-  const pasteBtn = document.getElementById('ocr-paste-btn');
   const statusEl = document.getElementById('ocr-status');
   const progressEl = document.getElementById('ocr-progress');
   const resultArea = document.getElementById('ocr-result-area');
   const outputEl = document.getElementById('ocr-output');
   const hintEl = document.getElementById('ocr-hint');
+  const copyBtn = document.getElementById('ocr-copy-btn');
 
   if (!browseBtn || !fileInput) return;
 
@@ -630,8 +628,10 @@ function attachOcrEvents() {
       if (statusEl) statusEl.innerHTML = '⏳ Đang phân tích hình ảnh... <span id="ocr-progress">0%</span>';
 
       // 2. Cấu hình Tesseract Worker chạy mượt trong Extension
-      // Cấu hình Tesseract cấm tự tải Worker qua Blob URL/CDN
-      const worker = await Tesseract.createWorker('eng', 1, {
+      // Sử dụng 'vie' thay vì 'vie+eng'. 
+      // Model 'vie' đã bao gồm bảng chữ cái Latin/ASCII cơ bản. 
+      // Việc gộp 2 model khiến Tesseract xử lý chậm đi gấp đôi và dễ bị "nhiễm" ký tự rác khi chữ có dấu nằm sát chữ/số tiếng Anh.
+      const worker = await Tesseract.createWorker('vie', 1, {
         workerPath: chrome.runtime.getURL('libs/tesseract/worker.min.js'),
         corePath: chrome.runtime.getURL('libs/tesseract/tesseract-core.wasm.js'),
         workerBlobURL: false,
@@ -648,7 +648,22 @@ function attachOcrEvents() {
       const ret = await worker.recognize(imageSource);
       await worker.terminate();
 
-      const extractedText = ret && ret.data && ret.data.text ? ret.data.text.trim() : '';
+      let extractedText = ret && ret.data && ret.data.text ? ret.data.text.trim() : '';
+
+      if (extractedText) {
+        // Xóa dấu gạch nối từ ở cuối dòng (ví dụ: infor-\nmation -> information)
+        extractedText = extractedText.replace(/-\n/g, '');
+        // Chuyển đổi \r\n thành \n chuẩn
+        extractedText = extractedText.replace(/\r\n/g, '\n');
+        // Đánh dấu các đoạn văn (2+ dấu xuống dòng liên tiếp)
+        extractedText = extractedText.replace(/\n{2,}/g, '___PARAGRAPH___');
+        // Biến các dấu xuống dòng đơn lẻ (do lỗi bẻ dòng của OCR) thành khoảng trắng
+        extractedText = extractedText.replace(/\n/g, ' ');
+        // Khôi phục lại các đoạn văn
+        extractedText = extractedText.replace(/___PARAGRAPH___/g, '\n\n');
+        // Rút gọn các khoảng trắng lặp lại
+        extractedText = extractedText.replace(/[ \t]+/g, ' ').trim();
+      }
 
       if (!extractedText) {
         if (statusEl) statusEl.style.display = 'none';
@@ -701,22 +716,28 @@ function attachOcrEvents() {
     }
   });
 
-  // 2. DÁN TỪ CLIPBOARD (Đã fix lỗi đọc ảnh)
-  pasteBtn?.addEventListener('click', async function() {
-    try {
-      const items = await navigator.clipboard.read();
-      for (const item of items) {
-        const type = item.types.find(t => t.startsWith('image/'));
-        if (type) {
-          const blob = await item.getType(type);
-          const base64Image = await fileToBase64(blob);
-          runOCR(base64Image); // Truyền Base64
+  // 2. DÁN TỪ CLIPBOARD (Bằng sự kiện Paste toàn cục)
+  document.addEventListener('paste', async function(e) {
+    // Chỉ kích hoạt khi đang ở màn hình OCR (có thể check ocr-container hiển thị)
+    const ocrContainer = document.querySelector('.ocr-container');
+    if (!ocrContainer || ocrContainer.parentElement.parentElement.style.display === 'none') return;
+    
+    if (e.clipboardData && e.clipboardData.items) {
+      for (const item of e.clipboardData.items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            try {
+              const base64Image = await fileToBase64(file);
+              runOCR(base64Image);
+            } catch (err) {
+              if (typeof showToast === 'function') showToast('❌ Lỗi đọc ảnh từ clipboard!', 'error');
+            }
+          }
           return;
         }
       }
-      if (typeof showToast === 'function') showToast('⚠️ Không tìm thấy ảnh trong Clipboard!', 'warning');
-    } catch (e) {
-      if (typeof showToast === 'function') showToast('❌ Hãy cấp quyền truy cập Clipboard', 'error');
     }
   });
 
@@ -734,7 +755,15 @@ function attachOcrEvents() {
     }
   });
 
-  // Double click copy kết quả
+  // Double click hoặc bấm nút Copy
+  copyBtn?.addEventListener('click', function() {
+    if (!outputEl || !outputEl.value) return;
+    outputEl.select();
+    navigator.clipboard.writeText(outputEl.value).then(() => {
+      if (typeof showToast === 'function') showToast('📋 Đã copy kết quả!', 'success');
+    });
+  });
+
   outputEl?.addEventListener('dblclick', function() {
     if (!this.value) return;
     this.select();

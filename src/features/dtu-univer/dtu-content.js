@@ -77,6 +77,16 @@ if (!window.dtuMasterInjected) {
       }
       return true;
     }
+
+    if (request.action === 'EXPORT_DTU_SMART_SCHEDULE') {
+      try {
+        handleDTUScheduleProcess(request.rangeMode, request.formatType);
+        sendResponse({ success: true });
+      } catch (err) {
+        sendResponse({ success: false, error: err.message });
+      }
+      return true;
+    }
   });
 }
 
@@ -84,12 +94,42 @@ function getOptionLetter(val) {
   const map = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '5': 'E' };
   return map[val] || 'D';
 }
+
 // LOGIC XUẤT LỊCH HỌC
 async function handleDTUScheduleProcess(rangeMode, formatType) {
-  const courses = parseExactCourseBlocks();
+  // 1. Tự động click vào các nút Ngày/Tuần/Tháng tương ứng trên MyDTU
+  const textsToFind = {
+    'MONTH': ['Tháng', 'Month'],
+    'WEEK': ['Tuần', 'Week'],
+    'SEMESTER': ['Học kỳ', 'Semester', 'Năm học']
+  }[rangeMode] || [];
+
+  if (textsToFind.length > 0) {
+    let clicked = false;
+    const buttons = document.querySelectorAll('button, a, input[type="button"], input[type="submit"], .btn, .nav-link');
+    for (const btn of buttons) {
+      const text = (btn.innerText || btn.value || '').trim();
+      if (textsToFind.some(t => text.toLowerCase() === t.toLowerCase())) {
+        btn.click();
+        clicked = true;
+        break;
+      }
+    }
+  }
+
+  // 2. Tiến hành cào dữ liệu (Polling để chờ bảng load xong)
+  let courses = [];
+  for (let i = 0; i < 10; i++) {
+    courses = parseExactCourseBlocks();
+    if (courses && courses.length > 0) {
+      break;
+    }
+    await new Promise(r => setTimeout(r, 500));
+  }
+
   if (!courses || courses.length === 0) {
-    alert('⚠️ Không tìm thấy môn học nào trên màn hình!');
-    throw new Error('Không tìm thấy môn học.');
+    alert('⚠️ Không tìm thấy môn học nào trên màn hình! Có thể tuần này/tháng này bạn không có lịch.');
+    return;
   }
 
   if (formatType === 'CSV') {
@@ -101,20 +141,62 @@ async function handleDTUScheduleProcess(rangeMode, formatType) {
 
 function parseExactCourseBlocks() {
   const courseList = [];
-  const allDivs = document.querySelectorAll('div, td');
+  const allDivs = document.querySelectorAll('.table-responsive td, .calendar td, #tb_LichHoc td, table td, div.course-item');
+  const elementsToScan = allDivs.length > 0 ? allDivs : document.querySelectorAll('div, td');
 
-  allDivs.forEach((el) => {
+  elementsToScan.forEach((el) => {
+    // Bỏ qua cột 0 (cột chứa nhãn Thời gian/Ca học) để tránh cào nhầm rác thành "Không rõ ngày"
+    if (el.cellIndex === 0) return;
+
     const text = el.innerText || '';
     if (text.includes('|') && (text.includes('07:00') || text.includes('09:15') || text.includes('14:00') || text.includes('Online') || text.includes('P.'))) {
-      if (el.children.length <= 3) {
-        const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
-        if (lines.length >= 2 && !courseList.some((c) => c.rawText === text)) {
-          courseList.push({
-            rawText: text,
-            subject: lines[0] || 'Môn học DTU',
-            location: lines[1] || 'MyDTU',
-            time: lines[2] || lines[1] || 'Theo lịch'
-          });
+      if (el.closest('nav') || el.closest('.menu') || el.closest('header')) return;
+
+      if (el.children.length <= 5) {
+        // Gom text và tách bằng dấu '|' chuẩn xác hơn
+        const cleanRaw = text.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+        const parts = cleanRaw.split('|').map(p => p.trim()).filter(Boolean);
+
+        if (parts.length >= 2) {
+          if (!courseList.some((c) => c.rawText === cleanRaw)) {
+            let dayStr = 'Không rõ ngày';
+            let dateStr = '';
+            let code = parts[0];
+            
+            // Xử lý Lịch Tuần (Thứ 2 - CN) làm cột X
+            if (el.cellIndex !== undefined) {
+              const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
+              if (el.cellIndex >= 1 && el.cellIndex <= 7) {
+                dayStr = days[el.cellIndex - 1];
+              }
+            }
+            
+            // Xử lý Ngày bị dính liền Mã Môn (VD: "16 CS 417 I" hoặc "16CS 417 I")
+            const datePrefixMatch = code.match(/^(\d{1,2})\s*([A-Z].*)/);
+            if (datePrefixMatch) {
+              dateStr = `Ngày ${datePrefixMatch[1].padStart(2, '0')}`; // VD: Ngày 16
+              code = datePrefixMatch[2].trim();
+            } 
+
+            // Lấy thời gian và phòng học
+            const timeStr = parts.find(p => p.includes(':')) || 'Theo lịch';
+            const locStr = parts.find(p => p.includes('P.') || p.includes('Phòng') || p.includes('Online')) || 'MyDTU';
+            
+            // Lấy tên môn
+            let subjectName = code;
+            if (parts[1] && parts[1] !== timeStr && parts[1] !== locStr) {
+              subjectName += ' - ' + parts[1];
+            }
+
+            courseList.push({
+              rawText: cleanRaw,
+              subject: subjectName,
+              location: locStr,
+              time: timeStr,
+              day: dayStr,
+              dateObj: dateStr // Lưu riêng Ngày 16 để render bên trong ô
+            });
+          }
         }
       }
     }
@@ -124,16 +206,78 @@ function parseExactCourseBlocks() {
 }
 
 function exportExactCSV(courses, rangeMode) {
-  let csv = 'sep=;\n\uFEFFSTT;Tên Môn Học & Mã LHP;Địa Điểm / Phòng Học;Khung Giờ Học\n';
-  courses.forEach((item, index) => {
-    csv += `"${index + 1}";"${item.subject.replace(/;/g, '-')}";"${item.location.replace(/;/g, '-')}";"${item.time.replace(/;/g, '-')}"\n`;
+  // 1. Tạo danh sách các Ngày (X) và Giờ (Y)
+  const xSet = new Set();
+  const ySet = new Set();
+  
+  courses.forEach(c => {
+    xSet.add(c.day);
+    ySet.add(c.time);
   });
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const times = Array.from(ySet).sort();
+  const daysOrder = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
+  const days = Array.from(xSet).sort((a, b) => {
+    const ia = daysOrder.indexOf(a);
+    const ib = daysOrder.indexOf(b);
+    if (ia !== -1 && ib !== -1) return ia - ib;
+    return a.localeCompare(b);
+  });
+
+  // 2. Build file HTML-Excel dạng Grid 2D
+  let html = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="utf-8">
+  <style>
+    table { font-family: "Times New Roman", serif; font-size: 13pt; border-collapse: collapse; }
+    th { background-color: #d9ead3; font-weight: bold; border: 1px solid #000; text-align: center; vertical-align: middle; padding: 10px; }
+    td { border: 1px solid #000; padding: 8px; vertical-align: top; width: 180px; text-align: left; }
+    .date-tag { color: #e65100; font-weight: bold; font-size: 11pt; }
+    .subject { font-weight: bold; color: #1e88e5; }
+    .location { color: #d32f2f; font-style: italic; }
+    .time { color: #4CAF50; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <table>
+    <tr>
+      <th>Giờ \\ Ngày</th>
+      ${days.map(d => `<th>${d}</th>`).join('')}
+    </tr>`;
+
+  times.forEach(t => {
+    html += `<tr><th>${t}</th>`;
+    days.forEach(d => {
+      const cellCourses = courses.filter(c => c.time === t && c.day === d);
+      if (cellCourses.length > 0) {
+        // Mỗi thông tin 1 dòng bằng thẻ <br>
+        const cellHtml = cellCourses.map(c => {
+          let block = '';
+          if (c.dateObj) block += `<span class="date-tag">[${c.dateObj}]</span> `;
+          block += `<span class="subject">${c.subject.replace(/</g, '&lt;')}</span><br>
+                    <span class="location">${c.location.replace(/</g, '&lt;')}</span><br>
+                    <span class="time">${c.time.replace(/</g, '&lt;')}</span>`;
+          return block;
+        }).join('<br><hr><br>');
+        html += `<td>${cellHtml}</td>`;
+      } else {
+        html += `<td></td>`;
+      }
+    });
+    html += `</tr>`;
+  });
+
+  html += `
+  </table>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `LichHoc_DTU_${rangeMode}_${Date.now()}.csv`;
+  a.download = `LichHoc_DTU_${rangeMode}_${Date.now()}.xls`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
