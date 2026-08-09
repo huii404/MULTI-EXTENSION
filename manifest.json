@@ -66,12 +66,14 @@
         "*://*.scribd.vn/*"
       ],
       "js": [
+        "libs/html2canvas/html2canvas.min.js",
+        "libs/jsPDF/jspdf.umd.min.js",
         "src/features/document-download/scribd/scribd-content.js"
       ],
       "css": [
         "styles/custom-styles.css"
       ],
-      "run_at": "document_start"
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
