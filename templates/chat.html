@@ -419,63 +419,126 @@
         emotionChart.update();
     }
 
-    // --- GHI ÂM VÀO FILE BẰNG MEDIARECORDER API ---
+    // --- GHI ÂM VÀO FILE BẰNG MEDIARECORDER API (TỰ ĐỘNG PHÁT HIỆN IM LẶNG) ---
     let mediaRecorder = null;
     let audioChunks = [];
     let isRecording = false;
     let streamRef = null;
+    let audioContext = null;
+    let analyser = null;
+    let silenceTimer = null;
+    const SILENCE_THRESHOLD = 0.015; // Ngưỡng âm lượng được coi là im lặng
+    const SILENCE_DURATION = 1500;  // Thời gian im lặng (ms) trước khi tự dừng (1.5 giây)
+    let hasSpoken = false;
 
     async function toggleSpeech() {
         if (isRecording) {
-            // Dừng ghi âm
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-            }
-            isRecording = false;
-            updateMicUI(false);
+            stopRecordingAndAnalyze();
         } else {
-            // Bắt đầu ghi âm
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                streamRef = stream;
-                audioChunks = [];
-                
-                let options = { mimeType: 'audio/webm' };
-                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-                    options = { mimeType: 'audio/ogg' };
-                }
-                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-                    options = { mimeType: '' }; // Mặc định trình duyệt
-                }
-                
-                mediaRecorder = new MediaRecorder(stream, options);
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
-                };
-                
-                mediaRecorder.onstop = async () => {
-                    // Dọn dẹp luồng ghi âm giải phóng micro phần cứng
-                    if (streamRef) {
-                        streamRef.getTracks().forEach(track => track.stop());
-                    }
-                    
-                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-                    if (audioBlob.size > 0) {
-                        const extension = mediaRecorder.mimeType.includes('ogg') ? 'ogg' : 'webm';
-                        await sendAudioFile(audioBlob, `voice.${extension}`);
-                    }
-                };
-                
-                mediaRecorder.start();
-                isRecording = true;
-                updateMicUI(true);
-            } catch (err) {
-                console.error("Lỗi truy cập micro:", err);
-                alert("Không thể truy cập Microphone! Hãy cấp quyền truy cập micro cho trang web.");
+            await startRecording();
+        }
+    }
+
+    async function startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef = stream;
+            audioChunks = [];
+            hasSpoken = false;
+            
+            let options = { mimeType: 'audio/webm' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: 'audio/ogg' };
             }
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: '' }; // Mặc định trình duyệt
+            }
+            
+            mediaRecorder = new MediaRecorder(stream, options);
+            
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+            
+            mediaRecorder.onstop = async () => {
+                // Dọn dẹp luồng ghi âm giải phóng micro phần cứng
+                if (streamRef) {
+                    streamRef.getTracks().forEach(track => track.stop());
+                }
+                if (audioContext) {
+                    audioContext.close();
+                }
+                
+                const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                if (audioBlob.size > 0) {
+                    const extension = mediaRecorder.mimeType.includes('ogg') ? 'ogg' : 'webm';
+                    await sendAudioFile(audioBlob, `voice.${extension}`);
+                }
+            };
+
+            // Thiết lập Web Audio API để phân tích âm lượng
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const sourceNode = audioContext.createMediaStreamSource(stream);
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 512;
+            sourceNode.connect(analyser);
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Float32Array(bufferLength);
+
+            function checkVolume() {
+                if (!isRecording) return;
+
+                analyser.getFloatTimeDomainData(dataArray);
+                
+                // Tính toán RMS (Root Mean Square) để đo âm lượng trung bình
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i] * dataArray[i];
+                }
+                const rms = Math.sqrt(sum / bufferLength);
+
+                if (rms > SILENCE_THRESHOLD) {
+                    hasSpoken = true;
+                    // Reset bộ đếm im lặng nếu phát hiện tiếng nói
+                    if (silenceTimer) {
+                        clearTimeout(silenceTimer);
+                        silenceTimer = null;
+                    }
+                } else if (hasSpoken) {
+                    // Bắt đầu đếm ngược im lặng để tự dừng
+                    if (!silenceTimer) {
+                        silenceTimer = setTimeout(() => {
+                            console.log("Tự động dừng ghi âm do phát hiện im lặng...");
+                            stopRecordingAndAnalyze();
+                        }, SILENCE_DURATION);
+                    }
+                }
+
+                requestAnimationFrame(checkVolume);
+            }
+            
+            mediaRecorder.start();
+            isRecording = true;
+            updateMicUI(true);
+            requestAnimationFrame(checkVolume);
+        } catch (err) {
+            console.error("Lỗi truy cập micro:", err);
+            alert("Không thể truy cập Microphone! Hãy cấp quyền truy cập micro cho trang web.");
+        }
+    }
+
+    function stopRecordingAndAnalyze() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        isRecording = false;
+        updateMicUI(false);
+        if (silenceTimer) {
+            clearTimeout(silenceTimer);
+            silenceTimer = null;
         }
     }
 
@@ -484,7 +547,7 @@
         if (active) {
             micBtn.classList.add('recording-pulse');
             micBtn.innerHTML = '<i class="bi bi-mic-mute-fill fs-5"></i>';
-            userInput.placeholder = "🔴 Hệ thống đang ghi âm... Nhấn lại nút Mic để kết thúc nói...";
+            userInput.placeholder = "🔴 Hệ thống đang lắng nghe... Nói xong tự động gửi...";
             userInput.disabled = true;
         } else {
             micBtn.classList.remove('recording-pulse');

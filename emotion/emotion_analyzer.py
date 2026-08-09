@@ -154,6 +154,16 @@ class EmotionAnalyzer:
         """
 
     def _build_result(self, ai_data, text, history):
+        # Hậu xử lý an toàn: Nếu AI trả về ANXIETY nhưng thực tế chỉ chứa ngập ngừng đệm thuần túy (không có từ khóa lo lắng)
+        from .feature_extractor import extract_features
+        features = extract_features(text)
+        if ai_data["emotion"] == "ANXIETY":
+            if features["has_hesitation"] and not any(w in text.lower() for w in ["lo", "sợ", "hồi hộp", "băn khoăn", "ngại", "bồn chồn"]):
+                ai_data["emotion"] = "NEUTRAL"
+                ai_data["intensity"] = 0
+                if "scores" in ai_data and "anxiety" in ai_data["scores"]:
+                    ai_data["scores"]["anxiety"] = 1.0
+                    
         # Tính toán xu hướng (trend) dựa trên lịch sử
         current_record = {
             "emotion": ai_data["emotion"],
