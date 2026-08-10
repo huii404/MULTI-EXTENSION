@@ -100,6 +100,8 @@
             </div>
         </div>
 
+
+
         <div class="card card-custom p-4 border-0 shadow-sm">
             <h6 class="fw-bold text-muted mb-3 text-uppercase small ls-1">Thành phần Cảm xúc (Fuzzy Inputs)</h6>
             
@@ -133,6 +135,53 @@
                     <div id="barHappy" class="progress-bar bg-success rounded-pill" style="width: 0%; transition: width 0.5s;"></div>
                 </div>
                 <div style="width: 40px;" class="text-end small fw-bold" id="valHappy">0%</div>
+            </div>
+        </div>
+
+        <div class="card card-custom p-3 border-0 shadow-sm mt-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff;">
+            <!-- Tiêu đề Tính năng 1 & 2 -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <h6 class="fw-bold text-info mb-0 text-uppercase small ls-1"><i class="bi bi-eye-fill text-cyan me-1"></i> Công nghệ đo Nhịp tim không tiếp xúc (rPPG)</h6>
+                    <small class="text-white-50 fs-7">Phân tích sắc tố da mặt bằng kính hiển vi quang phổ xanh lá</small>
+                </div>
+                <span id="valHRVStatus" class="badge bg-primary rounded-pill px-3 py-1">Đang đo rPPG...</span>
+            </div>
+            
+            <div class="row g-2 mb-2 text-center">
+                <!-- Tính năng 1: rPPG BPM & Hz -->
+                <div class="col-4">
+                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.06);">
+                        <small class="text-white-50 d-block mb-1 fs-7"><i class="bi bi-activity text-danger me-1"></i> Nhịp tim (BPM)</small>
+                        <h4 class="fw-bold mb-0 text-danger"><span id="valBPM">--</span> <small class="fs-6 text-white-50">bpm</small></h4>
+                        <small class="text-info fs-7 d-block mt-1">Tần số: <span id="valHz">0.0</span> Hz</small>
+                    </div>
+                </div>
+                <!-- Tính năng 2: HRV RMSSD -->
+                <div class="col-4">
+                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.06);">
+                        <small class="text-white-50 d-block mb-1 fs-7"><i class="bi bi-heart-pulse text-info me-1"></i> HRV (RMSSD)</small>
+                        <h4 class="fw-bold mb-0 text-info"><span id="valRMSSD">--</span> <small class="fs-6 text-white-50">ms</small></h4>
+                        <small class="text-info fs-7 d-block mt-1">Z-Score (7d): <span id="valZScore">0.0</span></small>
+                    </div>
+                </div>
+                <!-- Tính năng 2: HRV SDNN -->
+                <div class="col-4">
+                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.06);">
+                        <small class="text-white-50 d-block mb-1 fs-7"><i class="bi bi-graph-up-arrow text-success me-1"></i> Độ lệch (SDNN)</small>
+                        <h4 class="fw-bold mb-0 text-success"><span id="valSDNN">--</span> <small class="fs-6 text-white-50">ms</small></h4>
+                        <small class="text-white-50 fs-7 d-block mt-1">Tổng biến thiên</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sóng mạch rPPG Optical Waveform -->
+            <div style="height: 65px;" class="position-relative">
+                <canvas id="ppgChart"></canvas>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1 small text-white-50" style="font-size: 0.75rem;">
+                <span><i class="bi bi-info-circle me-1"></i> rPPG: Khai thác hấp thụ ánh sáng xanh lá | HRV: RMSSD > 45ms (Thư giãn) vs < 25ms (Stress)</span>
+                <span>Sóng mạch rPPG</span>
             </div>
         </div>
     </div>
@@ -204,6 +253,33 @@
             scales: {
                 x: { display: false },
                 y: { min: 0, max: 100, grid: { display: false } }
+            },
+            animation: false
+        }
+    });
+
+    const ctxPpg = document.getElementById('ppgChart').getContext('2d');
+    const ppgChart = new Chart(ctxPpg, {
+        type: 'line',
+        data: {
+            labels: Array(30).fill(''),
+            datasets: [{
+                label: 'rPPG Signal',
+                data: Array(30).fill(0),
+                borderColor: '#38bdf8',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: false,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { display: false },
+                y: { display: false }
             },
             animation: false
         }
@@ -311,6 +387,18 @@
                     document.getElementById('val'+id).innerText = "0%";
                 });
 
+                if(document.getElementById('valBPM')) document.getElementById('valBPM').innerText = "--";
+                if(document.getElementById('valRMSSD')) document.getElementById('valRMSSD').innerText = "--";
+                if(document.getElementById('valSDNN')) document.getElementById('valSDNN').innerText = "--";
+                if(document.getElementById('valHRVStatus')) {
+                    document.getElementById('valHRVStatus').innerText = "Đang đo rPPG...";
+                    document.getElementById('valHRVStatus').className = "badge bg-primary rounded-pill px-3 py-1";
+                }
+                if (typeof ppgChart !== 'undefined') {
+                    ppgChart.data.datasets[0].data = Array(30).fill(0);
+                    ppgChart.update();
+                }
+
                 document.getElementById('alertStatus').style.display = 'none';
                 document.getElementById('normalStatus').style.display = 'block';
 
@@ -327,6 +415,8 @@
                 document.getElementById('stressValue').innerText = val;
                 document.getElementById('mainStressBar').style.width = val + "%";
 
+
+
                 const setBar = (id, v) => {
                     let per = (v || 0).toFixed(0) + "%";
                     document.getElementById('bar'+id).style.width = per;
@@ -341,6 +431,39 @@
                 chartData.shift();
                 chartData.push(val);
                 stressChart.update();
+
+                if (data.hrv) {
+                    const elemBpm = document.getElementById('valBPM');
+                    const elemRmssd = document.getElementById('valRMSSD');
+                    const elemSdnn = document.getElementById('valSDNN');
+                    const elemHz = document.getElementById('valHz');
+                    const elemZScore = document.getElementById('valZScore');
+                    const statusBadge = document.getElementById('valHRVStatus');
+
+                    if (elemBpm) elemBpm.innerText = (data.hrv.bpm > 0) ? Math.round(data.hrv.bpm) : '--';
+                    if (elemRmssd) elemRmssd.innerText = (data.hrv.rmssd > 0) ? data.hrv.rmssd : '--';
+                    if (elemSdnn) elemSdnn.innerText = (data.hrv.sdnn > 0) ? data.hrv.sdnn : '--';
+                    if (elemHz) elemHz.innerText = data.hrv.rppg_hz ? data.hrv.rppg_hz : '0.0';
+                    if (elemZScore) {
+                        let z = (data.hrv.z_score !== undefined) ? data.hrv.z_score : 0.0;
+                        elemZScore.innerText = (z >= 0 ? '+' : '') + z;
+                    }
+                    
+                    if (statusBadge && data.hrv.status) {
+                        statusBadge.innerText = data.hrv.status;
+                        if (data.hrv.status.includes('Thư giãn')) {
+                            statusBadge.className = 'badge bg-success rounded-pill px-3 py-1';
+                        } else if (data.hrv.status.includes('Căng thẳng')) {
+                            statusBadge.className = 'badge bg-danger rounded-pill px-3 py-1';
+                        } else {
+                            statusBadge.className = 'badge bg-info rounded-pill px-3 py-1';
+                        }
+                    }
+                    if (typeof ppgChart !== 'undefined' && data.hrv.signal && data.hrv.signal.length > 0) {
+                        ppgChart.data.datasets[0].data = data.hrv.signal;
+                        ppgChart.update();
+                    }
+                }
 
                 const alertBox = document.getElementById('alertStatus');
                 const normalBox = document.getElementById('normalStatus');
@@ -426,6 +549,7 @@
     });
 
     function restartScan() {
+        fetch('/api/reset_scan', { method: 'POST' }).catch(err => console.error(err));
     
         isScanning = true;
         validFrames = 0;
@@ -448,6 +572,18 @@
             document.getElementById('bar'+id).style.width = "0%";
             document.getElementById('val'+id).innerText = "0%";
         });
+
+        if(document.getElementById('valBPM')) document.getElementById('valBPM').innerText = "--";
+        if(document.getElementById('valRMSSD')) document.getElementById('valRMSSD').innerText = "--";
+        if(document.getElementById('valSDNN')) document.getElementById('valSDNN').innerText = "--";
+        if(document.getElementById('valHRVStatus')) {
+            document.getElementById('valHRVStatus').innerText = "Đang đo rPPG...";
+            document.getElementById('valHRVStatus').className = "badge bg-primary rounded-pill px-3 py-1";
+        }
+        if (typeof ppgChart !== 'undefined') {
+            ppgChart.data.datasets[0].data = Array(30).fill(0);
+            ppgChart.update();
+        }
         
         startCamera(currentFacingMode);
     }

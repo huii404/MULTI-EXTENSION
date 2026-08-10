@@ -166,3 +166,6 @@ cython_debug/
 .Trashes
 ehthumbs.db
 Thumbs.db
+hrv_history.json
+real_stress_history.json
+chat_logs.json  

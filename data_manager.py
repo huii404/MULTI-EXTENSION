@@ -9,7 +9,7 @@ def init_file():
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump([], f)
 
-def save_real_data(stress_level, emotion):
+def save_real_data(stress_level, emotion, hrv_data=None):
     init_file()
     
     if stress_level > 0:
@@ -19,12 +19,22 @@ def save_real_data(stress_level, emotion):
         new_record = {
             "timestamp": datetime.now().isoformat(),
             "stress": round(stress_level, 2),
-            "emotion": emotion
+            "emotion": emotion,
+            "hrv": {
+                "bpm": hrv_data.get('bpm', hrv_data.get('BPM', 0)) if hrv_data else 0,
+                "rmssd": hrv_data.get('rmssd', hrv_data.get('RMSSD', 0.0)) if hrv_data else 0.0,
+                "sdnn": hrv_data.get('sdnn', hrv_data.get('SDNN', 0.0)) if hrv_data else 0.0,
+                "status": hrv_data.get('status', 'N/A') if hrv_data else 'N/A'
+            } if hrv_data else {}
         }
         history.append(new_record)
         
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=2)
+            
+        if hrv_data:
+            save_hrv_data(hrv_data)
+            
         print(f"--> Đã lưu dữ liệu thật: Stress {stress_level}% | Emotion {emotion}")
 
 def get_dashboard_stats():
@@ -34,7 +44,7 @@ def get_dashboard_stats():
 
     if not history:
         return {
-            "summary": {"total_scans": 0, "avg_stress": 0, "high_risk_cases": 0},
+            "summary": {"total_scans": 0, "avg_stress": 0, "high_risk_cases": 0, "avg_hrv_rmssd": 0.0},
             "distribution": {"low": 0, "medium": 0, "high": 0},
             "trend": {"labels": [], "data": []}
         }
@@ -42,6 +52,9 @@ def get_dashboard_stats():
     total_scans = len(history)
     total_stress = sum(item['stress'] for item in history)
     avg_stress = total_stress / total_scans
+    
+    valid_rmssds = [item['hrv']['rmssd'] for item in history if 'hrv' in item and item['hrv'].get('rmssd', 0) > 0]
+    avg_rmssd = round(sum(valid_rmssds) / len(valid_rmssds), 1) if valid_rmssds else 0.0
 
     low_count = 0
     medium_count = 0
@@ -76,7 +89,8 @@ def get_dashboard_stats():
         "summary": {
             "total_scans": total_scans,
             "avg_stress": round(avg_stress, 1),
-            "high_risk_cases": high_count
+            "high_risk_cases": high_count,
+            "avg_hrv_rmssd": avg_rmssd
         },
         "distribution": {
             "low": low_count,
@@ -88,7 +102,6 @@ def get_dashboard_stats():
             "data": trend_values
         }
     }
-
 
 def get_alerts():
     init_file()
@@ -131,7 +144,6 @@ def resolve_alert(alert_id):
         return True
     return False
 
-
 CHAT_LOG_FILE = 'chat_logs.json'
 
 def init_chat_file():
@@ -160,3 +172,52 @@ def get_chat_logs():
         
     logs.sort(key=lambda x: x['timestamp'], reverse=True)
     return logs
+
+# ==========================================
+# QUẢN LÝ DỮ LIỆU HRV & BASELINE 7 NGÀY
+# ==========================================
+HRV_FILE = 'hrv_history.json'
+
+def init_hrv_file():
+    if not os.path.exists(HRV_FILE):
+        with open(HRV_FILE, 'w', encoding='utf-8') as f:
+            json.dump([], f)
+
+def save_hrv_data(hrv_metrics: dict):
+    init_hrv_file()
+    if not hrv_metrics:
+        return
+        
+    with open(HRV_FILE, 'r', encoding='utf-8') as f:
+        history = json.load(f)
+        
+    record = {
+        "timestamp": datetime.now().isoformat(),
+        **hrv_metrics
+    }
+    history.append(record)
+    
+    with open(HRV_FILE, 'w', encoding='utf-8') as f:
+        json.dump(history, f, indent=2)
+    print(f"--> Đã lưu dữ liệu HRV: RMSSD={hrv_metrics.get('rmssd', hrv_metrics.get('RMSSD', 0))}ms")
+
+def get_hrv_history(limit: int = 50):
+    init_hrv_file()
+    with open(HRV_FILE, 'r', encoding='utf-8') as f:
+        history = json.load(f)
+    return history[-limit:]
+
+def get_hrv_baseline_7days():
+    init_hrv_file()
+    with open(HRV_FILE, 'r', encoding='utf-8') as f:
+        history = json.load(f)
+        
+    now = datetime.now()
+    seven_days_ago = now - timedelta(days=7)
+    
+    recent = []
+    for item in history:
+        ts = datetime.fromisoformat(item['timestamp'])
+        if ts >= seven_days_ago:
+            recent.append(item)
+    return recent

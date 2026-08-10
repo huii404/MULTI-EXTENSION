@@ -1,7 +1,11 @@
+import sys
 import os
 import random
 import google.generativeai as genai
 from dotenv import load_dotenv
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 load_dotenv()
 
@@ -56,7 +60,10 @@ class PsychologyChatbot:
         )
         
         self.chat_session = model.start_chat(history=[])
-        print(f"--> Đã khởi tạo Bot với Key: ...{key[-5:]}")
+        try:
+            print(f"--> Da khoi tao Bot voi Key: ...{key[-5:]}")
+        except Exception:
+            pass
 
     def get_response(self, user_message):
         for attempt in range(len(self.api_keys)):
@@ -67,7 +74,10 @@ class PsychologyChatbot:
                 return text
 
             except Exception as e:
-                print(f"[LỖI API] Key hiện tại bị lỗi: {e}")
+                try:
+                    print(f"[LOI API] Key hien tai bi loi: {e}")
+                except Exception:
+                    pass
                 print("--> Đang đổi Key và thử lại...")
                 self.initialize_chat()
                 
