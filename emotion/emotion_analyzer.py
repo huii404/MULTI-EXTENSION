@@ -8,11 +8,12 @@ from .feature_extractor import extract_features
 from .emotion_scorer import score_emotion
 from .confidence_calculator import calculate_confidence
 from .trend_analyzer import analyze_trend
+from voice_stress_processor import VoiceStressProcessor
 
 load_dotenv(override=True)
 
 class EmotionResult:
-    def __init__(self, emotion, intensity, confidence, trend, scores, signals, text):
+    def __init__(self, emotion, intensity, confidence, trend, scores, signals, text, voice_analysis=None):
         self.emotion = emotion
         self.intensity = intensity
         self.confidence = confidence
@@ -20,6 +21,7 @@ class EmotionResult:
         self.scores = scores
         self.signals = signals
         self.text = text
+        self.voice_analysis = voice_analysis
 
     def to_dict(self):
         return {
@@ -29,7 +31,8 @@ class EmotionResult:
             "trend": self.trend,
             "scores": self.scores,
             "signals": self.signals,
-            "text": self.text
+            "text": self.text,
+            "voice_analysis": self.voice_analysis
         }
 
 class EmotionAnalyzer:
@@ -38,6 +41,7 @@ class EmotionAnalyzer:
         keys_str = os.getenv("GEMINI_API_KEYS", "")
         self.api_keys = [k.strip() for k in keys_str.split(",") if k.strip()]
         self.current_key_index = 0
+        self.voice_processor = VoiceStressProcessor()
 
     def _analyze_with_ai(self, text):
         """
@@ -153,40 +157,47 @@ class EmotionAnalyzer:
         }
         """
 
-    def _build_result(self, ai_data, text, history, is_audio=False):
-        # 1. Hậu xử lý trọng số: Ưu tiên cực cao (85%) cho các tín hiệu âm thanh nếu là tệp âm thanh
+    def _build_result(self, ai_data, text, history, is_audio=False, voice_analysis=None):
+        # Acoustic evidence is quality-gated and only supports transcript semantics.
         signals = ai_data.get("signals", [])
         scores = ai_data.get("scores", {"stress": 0, "anxiety": 0, "sadness": 0, "happy": 0})
         
-        if is_audio or any(s in signals for s in ["shaky_voice", "loud_voice", "quiet_voice", "fast_pace", "slow_pace"]):
-            # Nếu có các tín hiệu âm thanh, tăng mạnh điểm tương ứng để bảo đảm trọng số âm thanh cao hơn hẳn text
+        acoustic_evidence_valid = bool(
+            voice_analysis
+            and voice_analysis.get("valid")
+            and voice_analysis.get("elevated_cues")
+        )
+        if "laughter" in signals or acoustic_evidence_valid:
             if "shaky_voice" in signals:
-                scores["anxiety"] = float(min(10.0, max(8.0, scores.get("anxiety", 0) + 5.0)))
-                ai_data["intensity"] = max(80, ai_data.get("intensity", 75))
+                scores["anxiety"] = float(min(10.0, scores.get("anxiety", 0) + 1.2))
+                ai_data["intensity"] = min(100, ai_data.get("intensity", 0) + 8)
             if "laughter" in signals:
-                scores["happy"] = float(min(10.0, max(8.5, scores.get("happy", 0) + 5.0)))
-                ai_data["intensity"] = max(85, ai_data.get("intensity", 80))
+                scores["happy"] = float(min(10.0, scores.get("happy", 0) + 1.5))
             if "loud_voice" in signals:
                 if ai_data.get("emotion") == "HAPPY" or scores.get("happy", 0) > scores.get("stress", 0):
-                    scores["happy"] = float(min(10.0, scores.get("happy", 0) + 3.0))
+                    scores["happy"] = float(min(10.0, scores.get("happy", 0) + 0.6))
                 else:
-                    scores["stress"] = float(min(10.0, max(8.0, scores.get("stress", 0) + 4.0)))
-                    ai_data["intensity"] = max(80, ai_data.get("intensity", 75))
+                    scores["stress"] = float(min(10.0, scores.get("stress", 0) + 1.0))
             if "fast_pace" in signals:
                 if ai_data.get("emotion") == "HAPPY" or scores.get("happy", 0) > scores.get("stress", 0):
-                    scores["happy"] = float(min(10.0, scores.get("happy", 0) + 3.0))
+                    scores["happy"] = float(min(10.0, scores.get("happy", 0) + 0.6))
                 else:
-                    scores["stress"] = float(min(10.0, max(8.0, scores.get("stress", 0) + 4.0)))
+                    scores["stress"] = float(min(10.0, scores.get("stress", 0) + 1.0))
             if "slow_pace" in signals:
-                scores["sadness"] = float(min(10.0, max(7.5, scores.get("sadness", 0) + 4.5)))
-                ai_data["intensity"] = max(75, ai_data.get("intensity", 70))
+                scores["sadness"] = float(min(10.0, scores.get("sadness", 0) + 0.8))
             if "quiet_voice" in signals:
                 if ai_data.get("emotion") == "ANXIETY":
-                    scores["anxiety"] = float(min(10.0, max(7.5, scores.get("anxiety", 0) + 3.5)))
+                    scores["anxiety"] = float(min(10.0, scores.get("anxiety", 0) + 0.8))
                 else:
-                    scores["sadness"] = float(min(10.0, max(7.5, scores.get("sadness", 0) + 3.5)))
+                    scores["sadness"] = float(min(10.0, scores.get("sadness", 0) + 0.8))
 
-            # Tái xác định cảm xúc chủ đạo dựa trên trọng số âm thanh
+            if acoustic_evidence_valid and ai_data.get("emotion") != "HAPPY":
+                acoustic_confidence = float(voice_analysis.get("confidence", 0.0))
+                scores["stress"] = float(min(10.0, scores.get("stress", 0) + acoustic_confidence))
+                if "frequent_pauses" in signals or "shaky_voice" in signals:
+                    scores["anxiety"] = float(min(10.0, scores.get("anxiety", 0) + 0.8 * acoustic_confidence))
+
+            # Re-rank after small contextual adjustments; no single voice cue is sufficient.
             dominant_emotion = ai_data.get("emotion", "NEUTRAL")
             max_score = 0.0
             label_map = {
@@ -233,7 +244,8 @@ class EmotionAnalyzer:
             trend=trend,
             scores=ai_data["scores"],
             signals=ai_data["signals"],
-            text=text
+            text=text,
+            voice_analysis=voice_analysis
         )
 
     def _analyze_with_rules(self, text, history):
@@ -353,8 +365,9 @@ class EmotionAnalyzer:
         1. [Dịch văn bản]: Trích xuất nguyên văn lời nói của học sinh (transcript).
         2. [Tín hiệu âm thanh]: Phân tích tốc độ nói (fast_pace/slow_pace), âm lượng giọng nói (to/nhỏ/gắt), nhịp điệu ngập ngừng (hesitation), tiếng cười (laughter), giọng run rẩy lo lắng (shaky_voice).
         3. [Phân loại cảm xúc]: Chấm điểm cảm xúc và phân loại vào một nhãn duy nhất: STRESS, ANXIETY, SADNESS, HAPPY, hoặc NEUTRAL.
-           *QUAN TRỌNG*: Hãy ưu tiên cực kỳ cao các tín hiệu âm thanh thu được (tốc độ nói, âm lượng, giọng run, tiếng cười) để chấm điểm và phân loại cảm xúc (chiếm 70% trọng số). Phân tích nội dung chữ (text) chỉ chiếm 30% trọng số phụ. 
-           Ví dụ: Nếu văn bản của học sinh là trung tính ("ừm... à... để tôi xem...") nhưng giọng nói có tín hiệu run rẩy (shaky_voice) và ngập ngừng (hesitation) nhiều, nhãn cảm xúc phải được xếp là ANXIETY thay vì NEUTRAL.
+           *QUAN TRỌNG*: Tín hiệu âm thanh chỉ là bằng chứng hỗ trợ và phụ thuộc thiết bị, môi trường,
+           ngôn ngữ, sức khỏe và phong cách nói cá nhân. Không kết luận stress từ một đặc trưng đơn lẻ.
+           Kết hợp thận trọng với nội dung lời nói; nếu mâu thuẫn, ưu tiên hỏi mở để xác nhận cảm nhận.
         
         Vui lòng trả về kết quả dưới dạng chuỗi JSON định dạng chuẩn sau đây, không kèm từ giải thích hay thẻ markdown:
         {
@@ -473,18 +486,21 @@ class EmotionAnalyzer:
                 signals.add(sig)
                 
             # 2. Trích xuất tín hiệu giọng nói từ micro
-            if voice_metrics and isinstance(voice_metrics, dict):
-                for key, active in voice_metrics.items():
-                    if active:
-                        signals.add(key)
+            voice_analysis = self.voice_processor.analyze(voice_metrics)
+            if voice_analysis.get("valid"):
+                for signal in voice_analysis.get("signals", []):
+                    signals.add(signal)
             ai_data_dict["signals"] = list(signals)
+            return voice_analysis
 
         # Tầng 1: Sử dụng Gemini Multimodal
         try:
             ai_data = self._analyze_audio_with_gemini(audio_path)
-            _inject_metrics(ai_data)
+            voice_analysis = _inject_metrics(ai_data)
             transcript = ai_data.get("transcript", "")
-            emotion_res = self._build_result(ai_data, transcript, history, is_audio=True)
+            emotion_res = self._build_result(
+                ai_data, transcript, history, is_audio=True, voice_analysis=voice_analysis
+            )
             print("--> [GEMINI MULTIMODAL SUCCESS] Phân tích âm thanh thành công.")
             return emotion_res, transcript
         except Exception as e_gemini:
@@ -500,8 +516,10 @@ class EmotionAnalyzer:
                 print(f"--> [GROQ WHISPER SUCCESS] Bản dịch: \"{transcript}\"")
                 print("--> [FALLBACK] Đang phân tích cảm xúc văn bản bằng Groq Llama 3.3...")
                 ai_data = self._analyze_with_groq(transcript)
-                _inject_metrics(ai_data)
-                emotion_res = self._build_result(ai_data, transcript, history, is_audio=True)
+                voice_analysis = _inject_metrics(ai_data)
+                emotion_res = self._build_result(
+                    ai_data, transcript, history, is_audio=True, voice_analysis=voice_analysis
+                )
                 return emotion_res, transcript
             except Exception as e_groq:
                 print(f"--> [GROQ FALLBACK ERROR] Thất bại: {e_groq}")
@@ -511,6 +529,12 @@ class EmotionAnalyzer:
                     if 'transcript' in locals() and transcript:
                         print("--> [FALLBACK TIER 3] Chạy Rule-based Engine trên bản dịch từ Groq Whisper...")
                         emotion_res = self._analyze_with_rules(transcript, history)
+                        voice_analysis = self.voice_processor.analyze(voice_metrics)
+                        emotion_res.voice_analysis = voice_analysis
+                        if voice_analysis.get("valid"):
+                            emotion_res.signals = list(dict.fromkeys(
+                                emotion_res.signals + voice_analysis.get("signals", [])
+                            ))
                         return emotion_res, transcript
                 except Exception as e_rule:
                     print(f"--> [RULE FALLBACK ERROR] Thất bại: {e_rule}")

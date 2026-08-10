@@ -140,7 +140,13 @@
     }
 </style>
 
-<div class="row">
+<section class="page-hero">
+    <span class="eyebrow"><i class="bi bi-chat-heart-fill"></i> Góc chia sẻ</span>
+    <h1>Trò chuyện theo cách bạn thấy thoải mái</h1>
+    <p>Nhắn tin, ghi âm trực tiếp hoặc gửi tệp âm thanh. Trợ lý sẽ lắng nghe và gợi ý nhẹ nhàng, không phán xét.</p>
+</section>
+
+<div class="row g-4">
     <!-- Cột bên trái: Chatbot -->
     <div class="col-lg-8 col-md-7 mb-4">
         <div class="chat-card">
@@ -161,9 +167,7 @@
                 <div class="message bot">
                     <div class="avatar bot"><i class="bi bi-robot"></i></div>
                     <div class="bubble">
-                        Chào bạn! 👋 <br>
-                        Mình là trợ lý tâm lý học đường. Hôm nay bạn cảm thấy thế nào? Có chuyện gì làm bạn áp lực không? 
-                        <br><i>(Hãy nói hoặc nhắn tin chia sẻ với mình nhé, mình luôn ở đây lắng nghe ❤️)</i>
+                        Chào bạn! 👋 Hôm nay bạn cảm thấy thế nào? Bạn có thể nhắn hoặc nói để chia sẻ cùng mình nhé.
                     </div>
                 </div>
             </div>
@@ -207,12 +211,12 @@
         <div class="monitor-card h-100 d-flex flex-column gap-4">
             <div>
                 <h5 class="fw-bold text-dark border-bottom pb-2 mb-3 text-uppercase">
-                    Theo dõi cảm xúc
+                    Tín hiệu trong cuộc trò chuyện
                 </h5>
                 
                 <!-- Trạng thái Cảm xúc hiện tại -->
                 <div class="p-3 rounded-4 bg-light border mb-3 text-center">
-                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Cảm xúc hiện tại</small>
+                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Trạng thái tham khảo</small>
                     <span id="currentEmotionEmoji" style="font-size: 3rem;">😐</span>
                     <h4 id="currentEmotionLabel" class="fw-bold mb-0 text-secondary">BÌNH THƯỜNG / TRUNG TÍNH</h4>
                 </div>
@@ -220,7 +224,7 @@
                 <!-- Cường độ (Intensity) -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <small class="text-muted fw-bold">Mức độ cảm xúc (Cường độ)</small>
+                        <small class="text-muted fw-bold">Mức độ biểu hiện</small>
                         <small id="intensityValue" class="fw-bold text-primary">0/100</small>
                     </div>
                     <div class="progress" style="height: 12px; border-radius: 6px;">
@@ -263,6 +267,20 @@
 
 
             <!-- Biểu đồ diễn biến cảm xúc -->
+            <div id="voiceAnalysisCard" class="p-3 rounded-4 bg-light border" style="display:none">
+                <div class="d-flex justify-content-between mb-2">
+                    <small class="fw-bold text-uppercase">Phân tích giọng nói</small>
+                    <small id="voiceQuality" class="fw-bold text-primary">--</small>
+                </div>
+                <div class="row g-2 small">
+                    <div class="col-6">Tốc độ: <strong id="voicePace">--</strong></div>
+                    <div class="col-6">Khoảng ngắt: <strong id="voicePauses">--</strong></div>
+                    <div class="col-6">Cao độ: <strong id="voicePitch">--</strong></div>
+                    <div class="col-6">Trạng thái: <strong id="voiceStatus">--</strong></div>
+                </div>
+                <div class="text-muted mt-2" style="font-size:.72rem">Dấu hiệu âm học chỉ mang tính tham khảo, không phải chẩn đoán stress.</div>
+            </div>
+
             <div class="mt-auto">
                 <small class="text-muted fw-bold d-block mb-2">Diễn biến cảm xúc phiên chat</small>
                 <div style="height: 180px; position: relative;">
@@ -294,7 +312,9 @@
         'shaky_voice': 'Giọng run rẩy',
         'loud_voice':  'Nói to / gắt',
         'quiet_voice': 'Nói nhỏ / thì thầm',
-        'laughter':    'Tiếng cười'
+        'laughter':    'Tiếng cười',
+        'frequent_pauses': 'Nhiều khoảng ngắt',
+        'high_energy_variation': 'Năng lượng giọng biến thiên'
     };
 
     // Tín hiệu văn bản (Text) – hiển thị badge màu tím
@@ -459,6 +479,27 @@
         emptyEl.style.display = (hasVoice || hasText) ? 'none' : 'block';
         
         // 6. Đẩy dữ liệu vào biểu đồ Chart.js
+        const voiceCard = document.getElementById('voiceAnalysisCard');
+        const voice = data.voice_analysis;
+        if (voice && voice.status !== 'unavailable') {
+            const metrics = voice.metrics || {};
+            const statusLabels = {
+                stable: 'Ổn định', some_cues: 'Có dấu hiệu', elevated_cues: 'Cần xác nhận',
+                insufficient_signal: 'Chưa đủ tín hiệu'
+            };
+            voiceCard.style.display = 'block';
+            document.getElementById('voiceQuality').innerText = `${Math.round(voice.quality || 0)}%`;
+            document.getElementById('voicePace').innerText = metrics.words_per_minute
+                ? `${Math.round(metrics.words_per_minute)} từ/phút` : 'Chưa đủ dữ liệu';
+            document.getElementById('voicePauses').innerText = Number.isFinite(metrics.pause_count)
+                ? `${metrics.pause_count}` : '--';
+            document.getElementById('voicePitch').innerText = metrics.pitch_mean_hz
+                ? `${Math.round(metrics.pitch_mean_hz)} Hz` : 'Không đủ tin cậy';
+            document.getElementById('voiceStatus').innerText = statusLabels[voice.status] || voice.status;
+        } else {
+            voiceCard.style.display = 'none';
+        }
+
         const stepNum = emotionChart.data.labels.length + 1;
         emotionChart.data.labels.push(`L lượt ${stepNum}`);
         emotionChart.data.datasets[0].data.push(data.scores.stress);
@@ -476,11 +517,95 @@
     let audioContext = null;
     let analyser = null;
     let silenceTimer = null;
-    const SILENCE_THRESHOLD = 0.015; // Ngưỡng âm lượng được coi là im lặng
     const SILENCE_DURATION = 1500;  // Thời gian im lặng (ms) trước khi tự dừng (1.5 giây)
     let hasSpoken = false;
 
     let rmsHistory = [];
+    let pitchHistory = [];
+    let speechHistory = [];
+    let clippingHistory = [];
+    let recordingStartedAt = 0;
+    let recognizedTranscript = '';
+
+    function percentile(values, ratio) {
+        if (!values.length) return 0;
+        const sorted = [...values].sort((a, b) => a - b);
+        return sorted[Math.min(sorted.length - 1, Math.floor(ratio * (sorted.length - 1)))];
+    }
+
+    function estimatePitch(buffer, sampleRate) {
+        let energy = 0;
+        for (let i = 0; i < buffer.length; i++) energy += buffer[i] * buffer[i];
+        if (Math.sqrt(energy / buffer.length) < 0.012) return null;
+        const minLag = Math.floor(sampleRate / 350);
+        const maxLag = Math.min(Math.floor(sampleRate / 75), buffer.length - 1);
+        let bestLag = -1, bestCorrelation = 0;
+        for (let lag = minLag; lag <= maxLag; lag++) {
+            let correlation = 0, leftEnergy = 0, rightEnergy = 0;
+            for (let i = 0; i < buffer.length - lag; i++) {
+                const left = buffer[i], right = buffer[i + lag];
+                correlation += left * right;
+                leftEnergy += left * left;
+                rightEnergy += right * right;
+            }
+            correlation /= Math.sqrt(leftEnergy * rightEnergy) || 1;
+            if (correlation > bestCorrelation) {
+                bestCorrelation = correlation;
+                bestLag = lag;
+            }
+        }
+        return bestCorrelation >= 0.55 && bestLag > 0 ? sampleRate / bestLag : null;
+    }
+
+    function buildVoiceMetrics() {
+        if (!rmsHistory.length) return null;
+        const duration = Math.max(0, (performance.now() - recordingStartedAt) / 1000);
+        const noiseRms = percentile(rmsHistory, 0.2);
+        const speechValues = rmsHistory.filter((_, index) => speechHistory[index]);
+        const rmsMean = speechValues.length
+            ? speechValues.reduce((sum, value) => sum + value, 0) / speechValues.length
+            : 0;
+        const rmsVariance = speechValues.length
+            ? speechValues.reduce((sum, value) => sum + Math.pow(value - rmsMean, 2), 0) / speechValues.length
+            : 0;
+        const pitchMean = pitchHistory.length
+            ? pitchHistory.reduce((sum, value) => sum + value, 0) / pitchHistory.length
+            : 0;
+        const pitchVariance = pitchHistory.length
+            ? pitchHistory.reduce((sum, value) => sum + Math.pow(value - pitchMean, 2), 0) / pitchHistory.length
+            : 0;
+        const speechRatio = speechHistory.filter(Boolean).length / speechHistory.length;
+        const speechSeconds = duration * speechRatio;
+        const words = recognizedTranscript.trim() ? recognizedTranscript.trim().split(/\s+/).length : 0;
+        let pauseCount = 0, silentRun = 0, enteredSpeech = false;
+        speechHistory.forEach(active => {
+            if (active) {
+                if (enteredSpeech && silentRun >= 3) pauseCount++;
+                enteredSpeech = true;
+                silentRun = 0;
+            } else if (enteredSpeech) {
+                silentRun++;
+            }
+        });
+        return {
+            duration_seconds: duration,
+            speech_seconds: speechSeconds,
+            sample_count: rmsHistory.length,
+            pitch_sample_count: pitchHistory.length,
+            silence_ratio: 1 - speechRatio,
+            rms_mean: rmsMean,
+            rms_p95: percentile(speechValues, 0.95),
+            rms_cv: rmsMean > 0 ? Math.sqrt(rmsVariance) / rmsMean : 0,
+            noise_rms: noiseRms,
+            speech_to_noise_ratio: rmsMean / Math.max(noiseRms, 0.001),
+            pitch_mean_hz: pitchMean,
+            pitch_cv: pitchMean > 0 ? Math.sqrt(pitchVariance) / pitchMean : 0,
+            voiced_ratio: pitchHistory.length / Math.max(1, speechHistory.filter(Boolean).length),
+            pause_count: pauseCount,
+            words_per_minute: words >= 3 && speechSeconds > 0 ? words * 60 / speechSeconds : 0,
+            clipping_ratio: clippingHistory.reduce((sum, value) => sum + value, 0) / clippingHistory.length
+        };
+    }
     let recognition = null; // Bộ nhận diện thời gian thực để hiện text ngay lúc nói
 
     async function toggleSpeech() {
@@ -497,6 +622,11 @@
             streamRef = stream;
             audioChunks = [];
             rmsHistory = [];
+            pitchHistory = [];
+            speechHistory = [];
+            clippingHistory = [];
+            recordingStartedAt = performance.now();
+            recognizedTranscript = '';
             hasSpoken = false;
             userInput.value = ""; // Reset ô nhập liệu
             
@@ -526,23 +656,7 @@
                 }
 
                 // Tính toán chỉ số giọng nói từ phần cứng Micro
-                let voiceMetrics = null;
-                if (rmsHistory.length > 0) {
-                    const maxRms = Math.max(...rmsHistory);
-                    const avgRms = rmsHistory.reduce((a, b) => a + b, 0) / rmsHistory.length;
-                    let varianceSum = 0;
-                    for (let v of rmsHistory) {
-                        varianceSum += (v - avgRms) * (v - avgRms);
-                    }
-                    const variance = varianceSum / rmsHistory.length;
-                    
-                    voiceMetrics = {
-                        loud_voice: maxRms > 0.07,
-                        quiet_voice: avgRms < 0.02,
-                        shaky_voice: variance > 0.0008,
-                        fast_pace: rmsHistory.length > 30 && rmsHistory.length < 180
-                    };
-                }
+                const voiceMetrics = buildVoiceMetrics();
                 
                 const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
                 if (audioBlob.size > 0) {
@@ -561,15 +675,14 @@
                 
                 recognition.onresult = (event) => {
                     let interimTranscript = '';
-                    let finalTranscript = '';
                     for (let i = event.resultIndex; i < event.results.length; ++i) {
                         if (event.results[i].isFinal) {
-                            finalTranscript += event.results[i][0].transcript;
+                            recognizedTranscript += `${event.results[i][0].transcript} `;
                         } else {
                             interimTranscript += event.results[i][0].transcript;
                         }
                     }
-                    userInput.value = finalTranscript || interimTranscript;
+                    userInput.value = `${recognizedTranscript}${interimTranscript}`.trim();
                 };
                 
                 recognition.onerror = (e) => {
@@ -583,10 +696,10 @@
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const sourceNode = audioContext.createMediaStreamSource(stream);
             analyser = audioContext.createAnalyser();
-            analyser.fftSize = 512;
+            analyser.fftSize = 2048;
             sourceNode.connect(analyser);
 
-            const bufferLength = analyser.frequencyBinCount;
+            const bufferLength = analyser.fftSize;
             const dataArray = new Float32Array(bufferLength);
 
             function checkVolume() {
@@ -596,13 +709,25 @@
                 
                 // Tính toán RMS (Root Mean Square) để đo âm lượng trung bình
                 let sum = 0;
+                let clipped = 0;
                 for (let i = 0; i < bufferLength; i++) {
                     sum += dataArray[i] * dataArray[i];
+                    if (Math.abs(dataArray[i]) >= 0.98) clipped++;
                 }
                 const rms = Math.sqrt(sum / bufferLength);
                 rmsHistory.push(rms);
+                clippingHistory.push(clipped / bufferLength);
 
-                if (rms > SILENCE_THRESHOLD) {
+                const observedFloor = rmsHistory.length < 10 ? 0.005 : percentile(rmsHistory.slice(-100), 0.2);
+                const noiseFloor = Math.min(observedFloor, 0.01);
+                const speechThreshold = Math.max(0.012, noiseFloor * 2.2);
+                const isSpeech = rms > speechThreshold;
+                speechHistory.push(isSpeech);
+                const pitch = isSpeech && speechHistory.length % 3 === 0
+                    ? estimatePitch(dataArray, audioContext.sampleRate) : null;
+                if (pitch) pitchHistory.push(pitch);
+
+                if (isSpeech) {
                     hasSpoken = true;
                     // Reset bộ đếm im lặng nếu phát hiện tiếng nói
                     if (silenceTimer) {
@@ -619,13 +744,13 @@
                     }
                 }
 
-                requestAnimationFrame(checkVolume);
+                setTimeout(checkVolume, 80);
             }
             
             mediaRecorder.start();
             isRecording = true;
             updateMicUI(true);
-            requestAnimationFrame(checkVolume);
+            setTimeout(checkVolume, 80);
         } catch (err) {
             console.error("Lỗi truy cập micro:", err);
             alert("Không thể truy cập Microphone! Hãy cấp quyền truy cập micro cho trang web.");

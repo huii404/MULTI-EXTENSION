@@ -13,6 +13,14 @@ class HRVBaselineManager:
         self.default_mean = default_mean_rmssd
         self.default_std = default_std_rmssd
 
+    @staticmethod
+    def has_personal_baseline(baseline_history: list = None) -> bool:
+        valid = [
+            item for item in (baseline_history or [])
+            if isinstance(item, dict) and float(item.get('rmssd', item.get('RMSSD', 0)) or 0) > 0
+        ]
+        return len(valid) >= 3
+
     def calculate_zscore(self, current_rmssd: float, baseline_history: list = None) -> float:
         """
         Tính Z-Score cá nhân: Z = (RMSSD_today - mean_baseline) / std_baseline
@@ -56,14 +64,14 @@ class HRVBaselineManager:
         và Mức độ Stress từ HRV (Z-Score nhịp tim sinh học).
         Trọng số: 60% HRV + 40% Facial Emotion.
         """
-        if hrv_rmssd <= 0:
-            # Nếu chưa có dữ liệu HRV, sử dụng 100% chỉ số cảm xúc khuôn mặt
+        if hrv_rmssd <= 0 or not self.has_personal_baseline(baseline_history):
+            # Không suy diễn stress từ một RMSSD đơn lẻ khi chưa có baseline cá nhân.
             return {
                 'combined_stress': round(float(facial_stress), 1),
                 'hrv_stress': 0.0,
                 'facial_stress': round(float(facial_stress), 1),
                 'z_score': 0.0,
-                'status': 'Chờ dữ liệu HRV...'
+                'status': 'Chưa đủ baseline HRV cá nhân để ước tính'
             }
 
         z_score = self.calculate_zscore(hrv_rmssd, baseline_history)

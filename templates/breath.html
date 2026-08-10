@@ -91,11 +91,32 @@
         font-weight: 600;
         transition: color 0.3s;
     }
+    .breath-tip {
+        display: inline-flex; align-items: center; gap: .4rem;
+        padding: .55rem .8rem; border-radius: 12px;
+        color: #36536f; background: #eef7ff;
+        font-size: .82rem; font-weight: 600;
+    }
+    @media (max-width: 576px) {
+        .circle-container { height: 340px; }
+        .timer-wrapper { width: 230px; height: 230px; }
+        .instruction-text { font-size: 19px; }
+        .breath-card { padding: 1.25rem !important; }
+    }
 </style>
 
-<div class="card card-custom border-0 shadow-sm p-5 text-center mt-4" style="max-width: 600px; margin: auto; border-radius: 20px;">
-    <h3 class="fw-bold text-dark mb-2">Bài tập thở 4-7-8</h3>
-    <p class="text-muted mb-4">Hãy nhìn theo viên bi và điều hòa nhịp thở của bạn.</p>
+<section class="page-hero text-center">
+    <span class="eyebrow"><i class="bi bi-wind"></i> Thư giãn có hướng dẫn</span>
+    <h1>Bài tập thở 4–7–8</h1>
+    <p class="mx-auto">Chỉ cần nhìn vào vòng tròn và làm theo từng bước.</p>
+</section>
+
+<div class="card card-custom breath-card border-0 shadow-sm p-5 text-center" style="max-width: 650px; margin: auto;">
+    <div class="d-flex justify-content-center flex-wrap gap-2">
+        <span class="breath-tip"><strong>4 giây</strong> hít vào</span>
+        <span class="breath-tip"><strong>7 giây</strong> giữ</span>
+        <span class="breath-tip"><strong>8 giây</strong> thở ra</span>
+    </div>
     
     <div class="circle-container">
         <div class="timer-wrapper">
@@ -110,6 +131,7 @@
 
         <div class="instruction-text" id="textGuide">Bắt đầu...</div>
     </div>
+    <p class="text-muted small mb-0">Nếu thấy khó chịu hoặc chóng mặt, hãy dừng lại và thở bình thường.</p>
 </div>
 
 <script>

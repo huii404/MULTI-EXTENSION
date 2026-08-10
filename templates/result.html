@@ -1,49 +1,86 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="text-center mb-4">
-    <h2 class="fw-bold" style="color: #ec4899;">Đừng lo lắng, chúng tớ ở đây để giúp bạn! ❤️</h2>
-    <p class="lead mb-2">Hệ thống phát hiện mức độ căng thẳng của bạn ở mức <strong>{{ stress|round(1) }}%</strong>.</p>
-    {% if hrv and hrv.rmssd > 0 %}
-    <div class="d-inline-flex gap-2 align-items-center bg-white px-3 py-2 rounded-pill shadow-sm mb-3 border">
-        <span class="badge bg-danger"><i class="bi bi-heart-pulse-fill"></i> {{ hrv.bpm }} BPM</span>
-        <span class="badge bg-info">HRV RMSSD: {{ hrv.rmssd }} ms</span>
-        <span class="badge bg-secondary">{{ hrv.status }}</span>
+<section class="page-hero text-center">
+    <span class="eyebrow"><i class="bi bi-check-circle-fill"></i> Đo thành công</span>
+    <h1>Kết quả tham khảo của bạn</h1>
+    <p class="mx-auto">Hãy xem các chỉ số chính, sau đó chọn một hoạt động phù hợp để thư giãn.</p>
+</section>
+
+<section class="row g-3 justify-content-center mb-4" aria-label="Kết quả đo">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 p-3 text-center">
+            <small class="text-muted fw-bold">MỨC CĂNG THẲNG THAM KHẢO</small>
+            <div class="display-5 fw-bold my-2" style="color:#e34f5b">{{ stress|round(1) }}%</div>
+            <small class="text-muted">Từ các tín hiệu hệ thống thu được</small>
+        </div>
     </div>
-    {% endif %}
-    <p class="text-muted small">Hãy chọn một giải pháp thư giãn khoa học bên dưới nhé:</p>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 p-3 text-center">
+            <small class="text-muted fw-bold">NHỊP TIM</small>
+            <div class="display-5 fw-bold my-2 text-primary">{{ hrv.bpm if hrv and hrv.signal_valid else '--' }}</div>
+            <small class="text-muted">BPM · tim đập nhanh hay chậm</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 p-3 text-center">
+            <small class="text-muted fw-bold">HRV · RMSSD</small>
+            <div class="display-5 fw-bold my-2" style="color:#16a085">{{ hrv.rmssd if hrv and hrv.hrv_valid else '--' }}</div>
+            <small class="text-muted">ms · biến thiên giữa các nhịp</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 p-3 text-center">
+            <small class="text-muted fw-bold">NHỊP THỞ</small>
+            <div class="display-5 fw-bold my-2" style="color:#7657d5">{{ hrv.behavior.respiration_rate if hrv and hrv.behavior and hrv.behavior.respiration_valid else '--' }}</div>
+            <small class="text-muted">lần/phút</small>
+        </div>
+    </div>
+</section>
+
+{% if hrv and hrv.hrv_valid %}
+<div class="friendly-note mb-4 text-center">
+    SDNN: <strong>{{ hrv.sdnn }} ms</strong> · Mean NN: <strong>{{ hrv.mean_nn }} ms</strong> · {{ hrv.hrv_interpretation }}
+</div>
+{% else %}
+<div class="friendly-note mb-4 text-center"><strong>HRV chưa sẵn sàng.</strong> Hãy đo lâu hơn và giữ yên để thu thêm nhịp rõ.</div>
+{% endif %}
+
+<div class="text-center mb-3">
+    <span class="eyebrow"><i class="bi bi-sun"></i> Chọn một hoạt động</span>
+    <h2 class="fw-bold mb-1">Bạn muốn thư giãn theo cách nào?</h2>
+    <p class="text-muted">Mỗi hoạt động chỉ cần vài phút.</p>
 </div>
 
 <div class="row g-4">
     <div class="col-md-4">
-        <div class="card card-custom h-100 text-center p-4">
-            <div class="display-4 mb-3">🧘‍♀️</div>
-            <h5 class="fw-bold text-primary">Bài tập Thở 4-7-8</h5>
-            <p>Điều hòa nhịp tim bằng kỹ thuật thở khoa học.</p>
-            <a href="/solution/breath" class="btn btn-pastel-blue mt-auto">Bắt đầu tập</a>
+        <div class="card card-custom solution-card h-100 text-center p-4">
+            <div class="display-4 mb-3">🫁</div>
+            <h4 class="fw-bold">Thở 4–7–8</h4>
+            <p class="text-muted">Theo nhịp hướng dẫn để thả lỏng cơ thể.</p>
+            <a href="/solution/breath" class="btn btn-primary mt-auto">Bắt đầu thở</a>
         </div>
     </div>
-
     <div class="col-md-4">
-        <div class="card card-custom h-100 text-center p-4">
+        <div class="card card-custom solution-card h-100 text-center p-4">
             <div class="display-4 mb-3">🗑️</div>
-            <h5 class="fw-bold text-success">Game Ném Giấy</h5>
-            <p>Xả stress bằng cách ném vụn giấy vào thùng rác.</p>
+            <h4 class="fw-bold">Ném giấy vui</h4>
+            <p class="text-muted">Một trò chơi ngắn để đổi không khí.</p>
             <a href="/solution/game" class="btn btn-pastel-pink mt-auto">Chơi ngay</a>
         </div>
     </div>
-
     <div class="col-md-4">
-        <div class="card card-custom h-100 text-center p-4">
-            <div class="display-4 mb-3">🤖</div>
-            <h5 class="fw-bold text-warning">Chatbot Tư vấn</h5>
-            <p>Tâm sự với trợ lý AI tâm lý học đường.</p>
-            <a href="/solution/chat" class="btn btn-pastel-blue mt-auto">Trò chuyện</a>
+        <div class="card card-custom solution-card h-100 text-center p-4">
+            <div class="display-4 mb-3">💬</div>
+            <h4 class="fw-bold">Trò chuyện cùng AI</h4>
+            <p class="text-muted">Chia sẻ bằng chữ hoặc giọng nói trong không gian thân thiện.</p>
+            <a href="/solution/chat" class="btn btn-primary mt-auto">Mở trò chuyện</a>
         </div>
     </div>
 </div>
 
-<div class="text-center mt-5">
-    <a href="/" class="btn btn-outline-secondary">← Quay lại đo lường</a>
+<div class="d-flex justify-content-center mt-4">
+    <a href="/" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-1"></i> Đo lại</a>
 </div>
+<p class="text-center text-muted small mt-3">Các giá trị chỉ phục vụ tham khảo trong đề tài NCKH, không thay thế thiết bị hoặc tư vấn y tế.</p>
 {% endblock %}

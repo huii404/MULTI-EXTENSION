@@ -1,11 +1,25 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="card card-custom p-4 text-center">
-    <h3>Game Xả Stress: Ném Giấy Vụn</h3>
-    <p>Nhấn nút <b>"NÉM NGAY"</b> khi thanh lực chạy vào vùng màu xanh!</p>
+<style>
+    .power-meter { width: min(100%, 420px); height: 30px; background: #e6edf5; border-radius: 15px; position: relative; overflow: hidden; }
+    .game-area { min-height: 320px; background: linear-gradient(180deg, #eef8ff, #fff7ed); border: 1px solid #dfeaf5; border-radius: 20px; overflow: hidden; }
+    @media (max-width: 576px) { .game-area { min-height: 280px; } }
+</style>
 
-    <div class="game-area position-relative mt-4" style="height: 300px; background: #f1f5f9; border-radius: 10px; overflow: hidden;">
+<section class="page-hero text-center">
+    <span class="eyebrow"><i class="bi bi-controller"></i> Nghỉ giải lao</span>
+    <h1>Ném giấy vui</h1>
+    <p class="mx-auto">Canh thanh lực vào vùng xanh rồi nhấn nút ném. Cùng xem bạn ghi được bao nhiêu điểm!</p>
+</section>
+
+<div class="card card-custom p-3 p-md-4 text-center mx-auto" style="max-width:850px">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted fw-bold">Mục tiêu: vùng màu xanh</span>
+        <span class="badge rounded-pill bg-primary fs-6">Điểm: <span id="score">0</span></span>
+    </div>
+
+    <div class="game-area position-relative">
         <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 80px;">
             🗑️
         </div>
@@ -14,16 +28,15 @@
             📄
         </div>
 
-        <h2 id="gameResult" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;" class="fw-bold"></h2>
+        <h2 id="gameResult" aria-live="polite" style="position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); display: none;" class="fw-bold"></h2>
     </div>
 
-    <div class="mt-4 mx-auto" style="width: 300px; height: 30px; background: #ddd; border-radius: 15px; position: relative; overflow: hidden;">
+    <div class="power-meter mt-4 mx-auto" aria-label="Thanh lực">
         <div style="position: absolute; left: 40%; width: 20%; height: 100%; background: #4ade80;"></div> 
-        <div id="powerBar" style="width: 10px; height: 100%; background: #ec4899; position: absolute; left: 0;"></div>
+        <div id="powerBar" style="width: 10px; height: 100%; background: #e34f5b; position: absolute; left: 0;"></div>
     </div>
 
-    <button onclick="throwPaper()" class="btn btn-pastel-pink btn-lg mt-3 w-50 shadow mx-auto d-block">NÉM NGAY!</button>
-    <div class="mt-2 fs-5">Điểm số: <span id="score" class="fw-bold text-primary">0</span></div>
+    <button onclick="throwPaper()" class="btn btn-pastel-pink btn-lg mt-3 mx-auto d-block px-5">NÉM NGAY!</button>
 </div>
 
 <script>
@@ -47,7 +60,9 @@
     setInterval(() => {
         if (!running) return;
         pos += 3 * direction;
-        if (pos >= 290 || pos <= 0) direction *= -1;
+        const maxPosition = bar.parentElement.clientWidth - bar.offsetWidth;
+        if (pos >= maxPosition || pos <= 0) direction *= -1;
+        pos = Math.max(0, Math.min(maxPosition, pos));
         bar.style.left = pos + 'px';
     }, 10);
 
@@ -57,7 +72,8 @@
         soundThrow.currentTime = 0; 
         soundThrow.play();
 
-        let isHit = (pos >= 120 && pos <= 180);
+        const trackWidth = bar.parentElement.clientWidth;
+        let isHit = (pos >= trackWidth * 0.4 && pos <= trackWidth * 0.6);
 
         paper.style.bottom = "150px";
         paper.style.transform = "translateX(-50%) scale(0.5) rotate(720deg)"; 

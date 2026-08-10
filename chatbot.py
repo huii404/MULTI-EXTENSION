@@ -103,6 +103,15 @@ class PsychologyChatbot:
 
     def get_response(self, user_message, emotion_data=None):
         final_message = user_message
+        voice_context = ""
+        if emotion_data:
+            voice = emotion_data.get("voice_analysis") or {}
+            if voice.get("valid"):
+                voice_context = (
+                    f"\n[Dữ liệu giọng nói tham khảo: trạng thái={voice.get('status', 'stable')}, "
+                    f"chất lượng={voice.get('quality', 0)}%. Không chẩn đoán stress chỉ từ "
+                    "giọng nói; hãy hỏi mở để xác nhận cảm nhận của người dùng.]"
+                )
         if emotion_data and emotion_data.get('emotion') != 'NEUTRAL':
             vn_emotions = {
                 "STRESS": "Căng thẳng / Bực bội",
@@ -121,6 +130,8 @@ class PsychologyChatbot:
             final_message = f"[Trạng thái cảm xúc học sinh: {emotion_name} (Mức độ: {emotion_data['intensity']}/100, Xu hướng: {trend_name})]\n{user_message}"
 
         # 1. Thử dùng Gemini (quay vòng các key)
+        final_message = f"{final_message}{voice_context}"
+
         for attempt in range(len(self.api_keys)):
             try:
                 response = self.chat_session.send_message(final_message)
@@ -162,4 +173,4 @@ def reset_conversation():
 # Test
 if __name__ == "__main__":
     print(get_gemini_response("Chào bạn, mình thấy buồn quá"))
-    print(get_gemini_response("Mình bị điểm kém môn Toán")) 
+    print(get_gemini_response("Mình bị điểm kém môn Toán"))

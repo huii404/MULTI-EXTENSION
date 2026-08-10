@@ -3,6 +3,7 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
 from flask import Flask, render_template, Response, jsonify, request, session, redirect, url_for
+from werkzeug.utils import secure_filename
 from functools import wraps
 from camera import VideoCamera
 from chatbot import get_gemini_response
@@ -12,6 +13,8 @@ import base64
 import numpy as np
 import cv2
 import os
+import json
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'polkijfuvfrighohdsckdzmmdsowofjsirjvmssskcke9'
@@ -102,10 +105,11 @@ def chat_api():
 
         if 'audio' in request.files:
             audio_file = request.files['audio']
-            filename = audio_file.filename
+            filename = secure_filename(audio_file.filename or "")
             if filename:
                 temp_dir = os.path.join(app.root_path, 'temp_audio')
                 os.makedirs(temp_dir, exist_ok=True)
+                filename = f"{uuid.uuid4().hex}_{filename}"
                 audio_path = os.path.join(temp_dir, filename)
                 audio_file.save(audio_path)
     else:

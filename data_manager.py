@@ -24,6 +24,11 @@ def save_real_data(stress_level, emotion, hrv_data=None):
                 "bpm": hrv_data.get('bpm', hrv_data.get('BPM', 0)) if hrv_data else 0,
                 "rmssd": hrv_data.get('rmssd', hrv_data.get('RMSSD', 0.0)) if hrv_data else 0.0,
                 "sdnn": hrv_data.get('sdnn', hrv_data.get('SDNN', 0.0)) if hrv_data else 0.0,
+                "mean_nn": hrv_data.get('mean_nn', hrv_data.get('MeanNN', 0.0)) if hrv_data else 0.0,
+                "pnn50": hrv_data.get('pnn50', 0.0) if hrv_data else 0.0,
+                "signal_quality": hrv_data.get('signal_quality', 0.0) if hrv_data else 0.0,
+                "hrv_valid": hrv_data.get('hrv_valid', False) if hrv_data else False,
+                "behavior": hrv_data.get('behavior', {}) if hrv_data else {},
                 "status": hrv_data.get('status', 'N/A') if hrv_data else 'N/A'
             } if hrv_data else {}
         }
