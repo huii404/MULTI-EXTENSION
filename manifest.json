@@ -97,6 +97,8 @@
         "src/features/dtu-univer/skills/course-register/course-register.html",
         "src/features/dtu-univer/skills/course-register/course-register.js",
         "src/features/qrcode/qrcode.html",
+        "src/features/text-tools/skills/scraper/scraper.html",
+        "src/features/text-tools/skills/scraper/scraper.js",
         "src/features/document-download/document-download.html",
         "src/features/document-download/studocu/studocu.html",
         "src/features/document-download/scribd/scribd.html"

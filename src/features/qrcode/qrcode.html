@@ -1,34 +1,89 @@
 <div class="qrcode-container">
-  <!-- Input -->
-  <div class="form-group">
-    <label>
-      <span class="icon">📝</span> Nhập nội dung:
-    </label>
-    <textarea id="qr-input" rows="3" placeholder="Nhập text, URL, số điện thoại..."></textarea>
+  <!-- TAB NAVIGATION -->
+  <div class="qr-tabs">
+    <button class="qr-tab-btn active" data-tab="generate">📝 Tạo mã QR</button>
+    <button class="qr-tab-btn" data-tab="decode">🔍 Quét & Giải mã QR</button>
   </div>
 
-  <!-- Buttons -->
-  <div style="display:flex; gap:8px; margin-bottom:10px;">
-    <button id="qr-generate-btn" class="action-btn primary" style="flex:1; padding:8px 12px; background: linear-gradient(135deg, #8e44ad, #9b59b6); margin-bottom:0;">
-      <span class="icon-circle" style="font-size:14px;">▶️</span>
-      <span>Tạo QR</span>
-    </button>
-    
-    <button id="qr-download-btn" class="action-btn secondary" style="flex:0.6; padding:8px 12px; margin-bottom:0; opacity:0.5; pointer-events:none;">
-      <span>💾 Tải</span>
-    </button>
-    
-    <button id="qr-reset-btn" class="action-btn secondary" style="flex:0.5; padding:8px 12px; margin-bottom:0; opacity:0.5; pointer-events:none;">
-      <span>🔄 Reset</span>
-    </button>
-  </div>
+  <!-- TAB 1: GENERATE QR -->
+  <div id="qr-tab-generate" class="qr-tab-content active">
+    <div class="form-group">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <label style="margin:0;"><span class="icon">📝</span> Nhập nội dung:</label>
+        <button id="qr-get-current-url-btn" class="text-link-btn" title="Chèn URL trang web đang xem">
+          🔗 Dùng URL tab hiện tại
+        </button>
+      </div>
+      <textarea id="qr-input" rows="3" placeholder="Nhập text, URL, số điện thoại..."></textarea>
+      <div id="qr-char-counter" style="font-size:11px; color:var(--text-muted); text-align:right; margin-top:4px;">0 / 200</div>
+    </div>
 
-  <!-- QR Code Preview -->
-  <div id="qr-preview" style="display:none; text-align:center; padding:16px; background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow);">
-    <img id="qr-image" style="max-width:100%; border-radius:8px; image-rendering:pixelated;">
-    <div style="margin-top:8px; font-size:12px; color:var(--text-muted);">
-      <span id="qr-info"></span>
+    <!-- Buttons -->
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <button id="qr-generate-btn" class="action-btn primary" style="flex:1; padding:8px 12px; background: linear-gradient(135deg, #8e44ad, #9b59b6); margin-bottom:0;">
+        <span class="icon-circle" style="font-size:14px;">▶️</span>
+        <span>Tạo QR</span>
+      </button>
+      
+      <button id="qr-download-btn" class="action-btn secondary" style="flex:0.6; padding:8px 12px; margin-bottom:0; opacity:0.5; pointer-events:none;">
+        <span>💾 Tải</span>
+      </button>
+      
+      <button id="qr-reset-btn" class="action-btn secondary" style="flex:0.5; padding:8px 12px; margin-bottom:0; opacity:0.5; pointer-events:none;">
+        <span>🔄 Reset</span>
+      </button>
+    </div>
+
+    <!-- QR Code Preview -->
+    <div id="qr-preview" style="display:none; text-align:center; padding:16px; background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow);">
+      <img id="qr-image" style="max-width:100%; border-radius:8px; image-rendering:pixelated;">
+      <div style="margin-top:8px; font-size:12px; color:var(--text-muted);">
+        <span id="qr-info"></span>
+      </div>
     </div>
   </div>
 
+  <!-- TAB 2: DECODE QR -->
+  <div id="qr-tab-decode" class="qr-tab-content">
+    <!-- Screen Scan Button -->
+    <button id="qr-scan-screen-btn" class="action-btn primary" style="width:100%; padding:10px; background: linear-gradient(135deg, #0284c7, #2563eb); margin-bottom:10px; display:flex; align-items:center; justify-content:center; gap:6px;">
+      <span>💻 Quét QR từ trang web đang xem</span>
+    </button>
+
+    <!-- Dropzone for file upload -->
+    <div id="qr-dropzone" class="qr-dropzone">
+      <input type="file" id="qr-file-input" accept="image/*" style="display:none;">
+      <div class="dropzone-content">
+        <span class="dropzone-icon">📁</span>
+        <span class="dropzone-text">Nhấp để chọn file ảnh QR hoặc kéo thả vào đây</span>
+        <span class="dropzone-hint">💡 Hoặc nhấn <b>Ctrl + V</b> để dán ảnh QR từ clipboard</span>
+      </div>
+    </div>
+
+    <!-- Selected Image Preview -->
+    <div id="qr-decode-img-container" style="display:none; text-align:center; margin-top:10px;">
+      <img id="qr-decode-preview-img" style="max-height:120px; border-radius:8px; border:1px solid var(--border);">
+    </div>
+
+    <!-- Decoding Status / Loading -->
+    <div id="qr-decode-status" style="display:none; text-align:center; margin-top:10px; font-size:12px; color:var(--text-muted);">
+      ⏳ Đang quét và giải mã...
+    </div>
+
+    <!-- Result Box -->
+    <div id="qr-decode-result" class="qr-result-box" style="display:none;">
+      <div class="result-header">
+        <span>✅ Kết quả giải mã:</span>
+      </div>
+      <div id="qr-decode-output" class="result-content"></div>
+      <div class="result-actions" style="display:flex; gap:8px; margin-top:10px;">
+        <button id="qr-copy-result-btn" class="action-btn secondary" style="flex:1; margin-bottom:0; padding:8px;">
+          📋 Copy nội dung
+        </button>
+        <button id="qr-open-url-btn" class="action-btn primary" style="flex:1; margin-bottom:0; padding:8px; display:none; background:#10b981;">
+          🔗 Mở liên kết ↗
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

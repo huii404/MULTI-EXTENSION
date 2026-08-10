@@ -1,349 +1,181 @@
 /* ==========================================================================
-   SOCIAL & AUTHOR FEATURE PAGE STYLES (SUPER DECORATIVE & FLASHY)
+   MINIMALIST SOCIAL & AUTHOR PAGE STYLES
    ========================================================================== */
 
 .social-page-container {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-bottom: 10px;
-  position: relative;
+  gap: 12px;
+  padding-bottom: 8px;
 }
 
-/* FLOATING DECORATION SPARKLES */
-.sparkle-particles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
+/* AUTHOR PROFILE CARD */
+.author-profile-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.sparkle-particle {
-  position: absolute;
-  font-size: 12px;
-  opacity: 0.6;
-  animation: floatParticle 8s infinite linear;
-}
-
-@keyframes floatParticle {
-  0% { transform: translateY(100px) rotate(0deg); opacity: 0; }
-  20% { opacity: 0.8; }
-  80% { opacity: 0.8; }
-  100% { transform: translateY(-300px) rotate(360deg); opacity: 0; }
-}
-
-/* HERO AUTHOR BANNER */
-.author-hero-banner {
-  position: relative;
-  background: linear-gradient(135deg, #FF007A, #7928CA, #4A00E0, #00F2FE);
-  background-size: 300% 300%;
-  animation: heroMeshGlow 8s ease-in-out infinite;
-  border-radius: 16px;
-  padding: 16px;
-  color: #ffffff;
-  box-shadow: 0 10px 25px rgba(121, 40, 202, 0.35);
-  overflow: hidden;
-  z-index: 1;
-}
-
-@keyframes heroMeshGlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.author-hero-banner::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -150%;
-  width: 60%;
-  height: 200%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  transform: rotate(25deg);
-  animation: bannerShimmer 4s ease-in-out infinite;
-}
-
-@keyframes bannerShimmer {
-  0% { left: -150%; }
-  40%, 100% { left: 160%; }
-}
-
-.hero-main-content {
+.profile-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  position: relative;
-  z-index: 2;
-  margin-bottom: 12px;
 }
 
-.hero-avatar-wrapper {
+.avatar-container {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #ffffff;
-  padding: 2px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  flex-shrink: 0;
-}
-
-.hero-avatar-inner {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #FF6B00, #d52b1e);
+  background: linear-gradient(135deg, #f0f2f5, #e4e7eb);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  flex-shrink: 0;
 }
 
-.hero-online-badge {
+.avatar-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.online-indicator {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 11px;
-  height: 11px;
-  background: #00FF87;
-  border: 2px solid #ffffff;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  background: #10b981;
+  border: 2px solid var(--surface);
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(0, 255, 135, 0.9);
 }
 
-.hero-author-details {
+.profile-info {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-.hero-name-row {
+.profile-name-row {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.hero-by-tag {
-  font-size: 10px;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.25);
-  padding: 1px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.5px;
-}
-
-.hero-author-name {
+.profile-name {
   font-size: 15px;
-  font-weight: 900;
-  color: #ffffff;
+  font-weight: 700;
+  color: var(--text);
   letter-spacing: -0.2px;
 }
 
-.hero-verified {
+.verified-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 15px;
   height: 15px;
-  background: #00F2FE;
-  color: #000;
-  font-size: 10px;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 9px;
   font-weight: 900;
   border-radius: 50%;
 }
 
-.hero-author-bio {
+.profile-tagline {
   font-size: 11px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  color: var(--text-muted);
   margin-top: 2px;
-}
-
-/* HERO STATS BAR */
-.hero-stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(8px);
-  border-radius: 10px;
-  padding: 8px;
-  position: relative;
-  z-index: 2;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.hero-stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.hero-stat-num {
-  font-size: 12px;
-  font-weight: 900;
-  color: #FFF;
-}
-
-.hero-stat-label {
-  font-size: 9px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* HEART BURST INTERACTIVE BUTTON */
-.heart-burst-container {
-  display: flex;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-}
-
-.btn-heart-burst {
-  width: 100%;
-  padding: 10px 16px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, #FF007A, #FF4D94);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 14px rgba(255, 0, 122, 0.35);
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
-  position: relative;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.btn-heart-burst:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px rgba(255, 0, 122, 0.5);
-}
-
-.btn-heart-burst:active {
-  transform: scale(0.96);
-}
-
-.btn-heart-burst .heart-icon {
-  font-size: 16px;
-  animation: heartPulse 1.4s ease-in-out infinite;
-}
-
-@keyframes heartPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.3) rotate(-8deg); }
-}
-
-.heart-count-badge {
-  background: rgba(255, 255, 255, 0.25);
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-/* DECORATIVE SOCIAL CHANNELS SECTION */
-.social-channels-title {
+/* SECTION HEADER */
+.social-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 4px 0 2px 0;
+  margin-top: 4px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
 }
 
-.social-channels-title span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.header-subtext {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
-.social-grid-fancy {
+/* SOCIAL LIST & CARDS */
+.social-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  position: relative;
-  z-index: 1;
+  gap: 8px;
 }
 
 .social-card-fancy {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  border-radius: 14px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.07);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease, border-color 0.25s;
-}
-
-.social-card-fancy::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -150%;
-  width: 50%;
-  height: 200%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  transform: rotate(25deg);
-  transition: left 0.5s ease-out;
-}
-
-.social-card-fancy:hover::after {
-  left: 150%;
+  transition: all 0.2s ease;
 }
 
 .social-card-fancy:hover {
-  transform: translateY(-3px) scale(1.015);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .social-card-fancy:active {
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 
-/* Individual Platform Accents */
-.social-card-fancy.youtube { border-left: 4px solid #FF0000; }
-.social-card-fancy.tiktok { border-left: 4px solid #FE2C55; }
-.social-card-fancy.github { border-left: 4px solid #24292e; }
-.social-card-fancy.locket { border-left: 4px solid #FFC800; }
-
 .social-card-icon-wrapper {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  color: #ffffff;
   flex-shrink: 0;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease;
 }
 
 .social-card-fancy:hover .social-card-icon-wrapper {
-  transform: scale(1.15) rotate(-6deg);
+  transform: scale(1.05);
 }
 
-.social-card-fancy.youtube .social-card-icon-wrapper { background: linear-gradient(135deg, #FF0000, #CC0000); }
-.social-card-fancy.tiktok .social-card-icon-wrapper { background: linear-gradient(135deg, #000000, #25F4EE, #FE2C55); }
-.social-card-fancy.github .social-card-icon-wrapper { background: linear-gradient(135deg, #24292e, #1b1f23); }
-.social-card-fancy.locket .social-card-icon-wrapper { background: linear-gradient(135deg, #FFC800, #FF9500); }
+/* Platform specific icon colors */
+.social-card-fancy.youtube .social-card-icon-wrapper {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.social-card-fancy.tiktok .social-card-icon-wrapper {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.social-card-fancy.github .social-card-icon-wrapper {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.social-card-fancy.locket .social-card-icon-wrapper {
+  background: #fefce8;
+  color: #d97706;
+}
 
 .social-card-info {
   display: flex;
@@ -352,20 +184,14 @@
   min-width: 0;
 }
 
-.social-card-title-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .social-card-name {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--text);
 }
 
 .social-card-desc {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   color: var(--text-muted);
   white-space: nowrap;
@@ -376,51 +202,44 @@
 
 .social-card-badge {
   font-size: 10px;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 8px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
-.social-card-fancy.youtube .social-card-badge { background: rgba(255, 0, 0, 0.1); color: #FF0000; }
-.social-card-fancy.youtube:hover .social-card-badge { background: #FF0000; color: #fff; }
+.social-card-fancy:hover .social-card-badge {
+  background: var(--text);
+  color: var(--surface);
+  border-color: var(--text);
+}
 
-.social-card-fancy.tiktok .social-card-badge { background: rgba(254, 44, 85, 0.1); color: #FE2C55; }
-.social-card-fancy.tiktok:hover .social-card-badge { background: #FE2C55; color: #fff; }
-
-.social-card-fancy.github .social-card-badge { background: rgba(36, 41, 46, 0.1); color: #24292e; }
-.social-card-fancy.github:hover .social-card-badge { background: #24292e; color: #fff; }
-
-.social-card-fancy.locket .social-card-badge { background: rgba(255, 200, 0, 0.15); color: #D48800; }
-.social-card-fancy.locket:hover .social-card-badge { background: #FFC800; color: #fff; }
-
-
-/* GRATITUDE & QUOTE CARD */
+/* GRATITUDE FOOTER CARD */
 .gratitude-card {
-  background: linear-gradient(135deg, #FFF9F5, #FFF0F5);
-  border: 1px solid rgba(255, 0, 122, 0.15);
-  border-radius: 14px;
-  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
   text-align: center;
-  position: relative;
-  overflow: hidden;
+  margin-top: 2px;
 }
 
 .gratitude-quote {
   font-size: 11px;
-  font-weight: 600;
-  color: #444;
-  line-height: 1.5;
-  font-style: italic;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
 }
 
 .gratitude-author {
+  display: inline-block;
   font-size: 10px;
-  font-weight: 800;
-  color: #FF007A;
+  font-weight: 700;
+  color: #e11d48;
   margin-top: 4px;
 }

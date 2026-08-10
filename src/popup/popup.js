@@ -112,8 +112,8 @@ function renderHome() {
       <button class="feature-card" data-page="qrcode" style="border-left: 4px solid #8e44ad;">
         <div class="icon-box" style="background: linear-gradient(135deg, #8e44ad, #9b59b6); color:white;">📱</div>
         <div class="info">
-          <span class="title">Tạo mã QR</span>
-          <span class="desc">Tạo QR Code từ văn bản, URL, số điện thoại...</span>
+          <span class="title">Tạo & Quét mã QR</span>
+          <span class="desc">Tạo QR Code và quét/giải mã QR từ màn hình, ảnh</span>
         </div>
         <span style="display:flex;align-items:center;gap:4px;">
           <span class="arrow">›</span>
