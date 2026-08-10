@@ -7,7 +7,7 @@
     .chat-card {
         background: #ffffff;
         border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
         border: none;
         overflow: hidden;
     }
@@ -19,7 +19,7 @@
     }
 
     .chat-box {
-        height: 450px;
+        height: 480px;
         overflow-y: auto;
         padding: 20px;
         background-color: #f8fafc;
@@ -49,7 +49,7 @@
         display: flex; align-items: center; justify-content: center;
         font-size: 20px;
         flex-shrink: 0;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
     }
     .avatar.bot { background: #fbcfe8; color: #db2777; }
     .avatar.user { background: #0ea5e9; color: white; }
@@ -59,7 +59,7 @@
         border-radius: 18px;
         font-size: 0.95rem;
         line-height: 1.6;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         word-wrap: break-word;
     }
     
@@ -96,10 +96,53 @@
     .dot-pulse:nth-child(2) { animation-delay: 0.2s; }
     .dot-pulse:nth-child(3) { animation-delay: 0.4s; }
     @keyframes pulse { to { opacity: 0.3; transform: scale(0.8); } }
+
+    /* CSS hiệu ứng microphone ghi âm */
+    @keyframes pulse-red {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+    .recording-pulse {
+        animation: pulse-red 1.5s infinite;
+        background-color: #dc3545 !important;
+        color: white !important;
+        border-color: #dc3545 !important;
+    }
+
+    .monitor-card {
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+        border: none;
+        background: #ffffff;
+        padding: 20px;
+    }
+
+    .signal-badge {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 20px;
+        display: inline-block;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        letter-spacing: 0.01em;
+    }
+    .signal-voice {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+        border: 1px solid #93c5fd;
+    }
+    .signal-text {
+        background-color: #ede9fe;
+        color: #6d28d9;
+        border: 1px solid #c4b5fd;
+    }
 </style>
 
-<div class="row justify-content-center">
-    <div class="col-md-9 col-lg-8">
+<div class="row">
+    <!-- Cột bên trái: Chatbot -->
+    <div class="col-lg-8 col-md-7 mb-4">
         <div class="chat-card">
             <div class="chat-header d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
@@ -120,7 +163,7 @@
                     <div class="bubble">
                         Chào bạn! 👋 <br>
                         Mình là trợ lý tâm lý học đường. Hôm nay bạn cảm thấy thế nào? Có chuyện gì làm bạn áp lực không? 
-                        <br><i>(Hãy chia sẻ với mình nhé, mình luôn lắng nghe ❤️)</i>
+                        <br><i>(Hãy nói hoặc nhắn tin chia sẻ với mình nhé, mình luôn ở đây lắng nghe ❤️)</i>
                     </div>
                 </div>
             </div>
@@ -130,16 +173,100 @@
             </div>
 
             <div class="p-3 bg-white border-top">
-                <div class="input-group">
+                <div class="input-group d-flex align-items-center">
                     <input type="text" id="userInput" class="form-control form-control-lg border-0 bg-light rounded-pill px-4" 
                            placeholder="Nhập tâm sự của bạn..." onkeypress="handleEnter(event)">
-                    <button class="btn btn-primary rounded-circle ms-2 shadow-sm" style="width: 50px; height: 50px;" 
-                            onclick="sendMessage()" id="sendBtn">
-                        <i class="bi bi-send-fill"></i>
+                    
+                    <!-- Nút Đính kèm file MP3 -->
+                    <button class="btn btn-outline-secondary rounded-circle ms-2 shadow-sm d-flex align-items-center justify-content-center" 
+                            style="width: 50px; height: 50px;" onclick="document.getElementById('audioUpload').click()" id="uploadBtn" type="button" title="Tải tệp âm thanh MP3/WAV">
+                        <i class="bi bi-paperclip fs-5"></i>
+                    </button>
+                    <input type="file" id="audioUpload" accept="audio/mp3,audio/mpeg,audio/wav" style="display: none;" onchange="handleAudioUpload(event)">
+
+                    <!-- Nút Micro cho Voice Chat -->
+                    <button class="btn btn-outline-danger rounded-circle ms-2 shadow-sm d-flex align-items-center justify-content-center" 
+                            style="width: 50px; height: 50px;" onclick="toggleSpeech()" id="micBtn" type="button" title="Ghi âm giọng nói">
+                        <i class="bi bi-mic-fill fs-5"></i>
+                    </button>
+                    
+                    <button class="btn btn-primary rounded-circle ms-2 shadow-sm d-flex align-items-center justify-content-center" 
+                            style="width: 50px; height: 50px;" onclick="sendMessage('text')" id="sendBtn">
+                        <i class="bi bi-send-fill fs-5"></i>
                     </button>
                 </div>
                 <div class="text-center mt-2">
                     <a href="/result" class="text-muted small text-decoration-none">← Quay lại menu giải pháp</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột bên phải: Bảng theo dõi cảm xúc -->
+    <div class="col-lg-4 col-md-5 mb-4">
+        <div class="monitor-card h-100 d-flex flex-column gap-4">
+            <div>
+                <h5 class="fw-bold text-dark border-bottom pb-2 mb-3 text-uppercase">
+                    Theo dõi cảm xúc
+                </h5>
+                
+                <!-- Trạng thái Cảm xúc hiện tại -->
+                <div class="p-3 rounded-4 bg-light border mb-3 text-center">
+                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Cảm xúc hiện tại</small>
+                    <span id="currentEmotionEmoji" style="font-size: 3rem;">😐</span>
+                    <h4 id="currentEmotionLabel" class="fw-bold mb-0 text-secondary">BÌNH THƯỜNG / TRUNG TÍNH</h4>
+                </div>
+                
+                <!-- Cường độ (Intensity) -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <small class="text-muted fw-bold">Mức độ cảm xúc (Cường độ)</small>
+                        <small id="intensityValue" class="fw-bold text-primary">0/100</small>
+                    </div>
+                    <div class="progress" style="height: 12px; border-radius: 6px;">
+                        <div id="intensityBar" class="progress-bar bg-secondary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small id="intensityText" class="text-muted small mt-1 d-block">Mức độ: 0/100 (Bình thường)</small>
+                </div>
+                
+                <!-- Độ tin cậy & Xu hướng -->
+                <div class="row text-center mb-3">
+                    <div class="col-6 border-end">
+                        <small class="text-muted fw-bold d-block mb-1">Độ tin cậy</small>
+                        <span id="confidenceText" class="fw-bold fs-5 text-dark">85%</span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted fw-bold d-block mb-1">Xu hướng</small>
+                        <div id="trendText" class="fw-bold fs-5 text-secondary text-center">
+                            Ổn định
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Các tín hiệu kỹ thuật phát hiện được -->
+            <div>
+                <small class="text-muted fw-bold text-uppercase d-block mb-2">Tín hiệu phát hiện</small>
+                <div id="signalsVoiceRow" class="mb-1" style="display:none">
+                    <span class="text-muted" style="font-size:0.7rem; font-weight:600; letter-spacing:0.05em;">GIỌNG NÓI</span>
+                    <div id="signalsVoice" class="d-flex flex-wrap mt-1"></div>
+                </div>
+                <div id="signalsTextRow" class="mb-1" style="display:none">
+                    <span class="text-muted" style="font-size:0.7rem; font-weight:600; letter-spacing:0.05em;">NỘI DUNG</span>
+                    <div id="signalsText" class="d-flex flex-wrap mt-1"></div>
+                </div>
+                <div id="signalsEmpty">
+                    <span class="text-muted small">Chưa có tín hiệu</span>
+                </div>
+            </div>
+
+
+
+            <!-- Biểu đồ diễn biến cảm xúc -->
+            <div class="mt-auto">
+                <small class="text-muted fw-bold d-block mb-2">Diễn biến cảm xúc phiên chat</small>
+                <div style="height: 180px; position: relative;">
+                    <canvas id="emotionChart"></canvas>
                 </div>
             </div>
         </div>
@@ -150,8 +277,469 @@
     const chatBox = document.getElementById('chatBox');
     const userInput = document.getElementById('userInput');
     const typingIndicator = document.getElementById('typingIndicator');
+    
+    // Bản đồ dữ liệu cảm xúc sang giao diện trực quan
+    const EMOTION_MAP = {
+        'STRESS': { label: 'CĂNG THẲNG / BỰC BỘI', emoji: '😡', color: 'text-danger', bg: 'bg-danger' },
+        'ANXIETY': { label: 'LO LẮNG / HỒI HỘP', emoji: '😰', color: 'text-warning', bg: 'bg-warning' },
+        'SADNESS': { label: 'BUỒN BÃ', emoji: '😢', color: 'text-primary', bg: 'bg-primary' },
+        'HAPPY': { label: 'VUI VẺ', emoji: '😊', color: 'text-success', bg: 'bg-success' },
+        'NEUTRAL': { label: 'BÌNH THƯỜNG / TRUNG TÍNH', emoji: '😐', color: 'text-secondary', bg: 'bg-secondary' }
+    };
 
-    async function sendMessage() {
+    // Tín hiệu giọng nói (Acoustic) – hiển thị badge màu xanh dương
+    const VOICE_SIGNALS = {
+        'fast_pace':   'Nói nhanh / dồn dập',
+        'slow_pace':   'Nói chậm / rời rạc',
+        'shaky_voice': 'Giọng run rẩy',
+        'loud_voice':  'Nói to / gắt',
+        'quiet_voice': 'Nói nhỏ / thì thầm',
+        'laughter':    'Tiếng cười'
+    };
+
+    // Tín hiệu văn bản (Text) – hiển thị badge màu tím
+    const TEXT_SIGNALS = {
+        'hesitation':       'Ngập ngừng',
+        'word_repetition':  'Lặp từ',
+        'negation':         'Phủ định',
+        'intensity_low':    'Cường độ nhẹ',
+        'intensity_high':   'Cường độ mạnh',
+        'question':         'Câu hỏi bất an',
+        'exclamation':      'Câu cảm thán',
+        'indirect_stress':  'Căng thẳng gián tiếp',
+        'indirect_anxiety': 'Lo lắng gián tiếp',
+        'indirect_sadness': 'Buồn bã gián tiếp',
+        'indirect_happy':   'Vui mừng gián tiếp'
+    };
+
+    // Map chung để tra nhanh nhãn
+    const SIGNAL_MAP = { ...VOICE_SIGNALS, ...TEXT_SIGNALS };
+
+    const TREND_MAP = {
+        'INCREASING': { label: 'Tăng', icon: 'bi-arrow-up-right-circle-fill', color: 'text-danger' },
+        'DECREASING': { label: 'Giảm', icon: 'bi-arrow-down-left-circle-fill', color: 'text-success' },
+        'STABLE': { label: 'Ổn định', icon: 'bi-dash-circle-fill', color: 'text-secondary' },
+        'FLUCTUATING': { label: 'Biến động', icon: 'bi-arrow-left-right', color: 'text-warning' }
+    };
+
+    // --- KHỞI TẠO BIỂU ĐỒ DIỄN BIẾN ---
+    let emotionChart;
+    const chartCtx = document.getElementById('emotionChart').getContext('2d');
+    
+    function initChart() {
+        emotionChart = new Chart(chartCtx, {
+            type: 'line',
+            data: {
+                labels: [], 
+                datasets: [
+                    {
+                        label: 'Stress',
+                        data: [],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Lo lắng',
+                        data: [],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Buồn bã',
+                        data: [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Vui vẻ',
+                        data: [],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 12,
+                        ticks: { stepSize: 3, font: { size: 9 } }
+                    },
+                    x: {
+                        ticks: { font: { size: 9 } }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { boxWidth: 8, font: { size: 9 } }
+                    }
+                }
+            }
+        });
+    }
+
+    function getIntensityLabel(intensity) {
+        if (intensity <= 20) return 'Rất thấp';
+        if (intensity <= 40) return 'Thấp';
+        if (intensity <= 60) return 'Trung bình';
+        if (intensity <= 80) return 'Khá cao';
+        return 'Cực kỳ cao';
+    }
+
+    // Cập nhật bảng theo dõi cảm xúc ở frontend
+    function updateEmotionPanel(data) {
+        const e = EMOTION_MAP[data.emotion] || EMOTION_MAP['NEUTRAL'];
+        const t = TREND_MAP[data.trend] || TREND_MAP['STABLE'];
+        
+        // 1. Cập nhật nhãn và emoji
+        document.getElementById('currentEmotionEmoji').innerText = e.emoji;
+        document.getElementById('currentEmotionLabel').innerText = e.label;
+        document.getElementById('currentEmotionLabel').className = `fw-bold mb-0 ${e.color} text-center`;
+        
+        // 2. Cập nhật thanh tiến trình cường độ
+        const pBar = document.getElementById('intensityBar');
+        pBar.style.width = `${data.intensity}%`;
+        pBar.className = 'progress-bar';
+        pBar.classList.add(e.bg);
+        document.getElementById('intensityValue').innerText = `${data.intensity}/100`;
+        document.getElementById('intensityText').innerText = `Mức độ: ${data.intensity}/100 (${getIntensityLabel(data.intensity)})`;
+        
+        // 3. Cập nhật độ tin cậy
+        document.getElementById('confidenceText').innerText = `${Math.round(data.confidence * 100)}%`;
+        
+        // 4. Cập nhật xu hướng (không dùng icon)
+        const trendEl = document.getElementById('trendText');
+        trendEl.innerText = t.label;
+        trendEl.className = `fw-bold fs-5 ${t.color} text-center`;
+        
+        // 5. Cập nhật tín hiệu phát hiện (phân nhóm: giọng nói vs nội dung)
+        const voiceContainer = document.getElementById('signalsVoice');
+        const textContainer = document.getElementById('signalsText');
+        const voiceRow = document.getElementById('signalsVoiceRow');
+        const textRow = document.getElementById('signalsTextRow');
+        const emptyEl = document.getElementById('signalsEmpty');
+
+        voiceContainer.innerHTML = '';
+        textContainer.innerHTML = '';
+
+        let hasVoice = false, hasText = false;
+        if (data.signals && data.signals.length > 0) {
+            data.signals.forEach(sig => {
+                const badge = document.createElement('span');
+                badge.innerText = SIGNAL_MAP[sig] || sig;
+                if (VOICE_SIGNALS[sig]) {
+                    badge.className = 'signal-badge signal-voice';
+                    voiceContainer.appendChild(badge);
+                    hasVoice = true;
+                } else {
+                    badge.className = 'signal-badge signal-text';
+                    textContainer.appendChild(badge);
+                    hasText = true;
+                }
+            });
+        }
+
+        voiceRow.style.display = hasVoice ? 'block' : 'none';
+        textRow.style.display = hasText ? 'block' : 'none';
+        emptyEl.style.display = (hasVoice || hasText) ? 'none' : 'block';
+        
+        // 6. Đẩy dữ liệu vào biểu đồ Chart.js
+        const stepNum = emotionChart.data.labels.length + 1;
+        emotionChart.data.labels.push(`L lượt ${stepNum}`);
+        emotionChart.data.datasets[0].data.push(data.scores.stress);
+        emotionChart.data.datasets[1].data.push(data.scores.anxiety);
+        emotionChart.data.datasets[2].data.push(data.scores.sadness);
+        emotionChart.data.datasets[3].data.push(data.scores.happy);
+        emotionChart.update();
+    }
+
+    // --- GHI ÂM VÀO FILE BẰNG MEDIARECORDER API (TỰ ĐỘNG PHÁT HIỆN IM LẶNG) ---
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let streamRef = null;
+    let audioContext = null;
+    let analyser = null;
+    let silenceTimer = null;
+    const SILENCE_THRESHOLD = 0.015; // Ngưỡng âm lượng được coi là im lặng
+    const SILENCE_DURATION = 1500;  // Thời gian im lặng (ms) trước khi tự dừng (1.5 giây)
+    let hasSpoken = false;
+
+    let rmsHistory = [];
+    let recognition = null; // Bộ nhận diện thời gian thực để hiện text ngay lúc nói
+
+    async function toggleSpeech() {
+        if (isRecording) {
+            stopRecordingAndAnalyze();
+        } else {
+            await startRecording();
+        }
+    }
+
+    async function startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef = stream;
+            audioChunks = [];
+            rmsHistory = [];
+            hasSpoken = false;
+            userInput.value = ""; // Reset ô nhập liệu
+            
+            let options = { mimeType: 'audio/webm' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: 'audio/ogg' };
+            }
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: '' }; // Mặc định trình duyệt
+            }
+            
+            mediaRecorder = new MediaRecorder(stream, options);
+            
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+            
+            mediaRecorder.onstop = async () => {
+                // Dọn dẹp luồng ghi âm giải phóng micro phần cứng
+                if (streamRef) {
+                    streamRef.getTracks().forEach(track => track.stop());
+                }
+                if (audioContext) {
+                    audioContext.close();
+                }
+
+                // Tính toán chỉ số giọng nói từ phần cứng Micro
+                let voiceMetrics = null;
+                if (rmsHistory.length > 0) {
+                    const maxRms = Math.max(...rmsHistory);
+                    const avgRms = rmsHistory.reduce((a, b) => a + b, 0) / rmsHistory.length;
+                    let varianceSum = 0;
+                    for (let v of rmsHistory) {
+                        varianceSum += (v - avgRms) * (v - avgRms);
+                    }
+                    const variance = varianceSum / rmsHistory.length;
+                    
+                    voiceMetrics = {
+                        loud_voice: maxRms > 0.07,
+                        quiet_voice: avgRms < 0.02,
+                        shaky_voice: variance > 0.0008,
+                        fast_pace: rmsHistory.length > 30 && rmsHistory.length < 180
+                    };
+                }
+                
+                const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                if (audioBlob.size > 0) {
+                    const extension = mediaRecorder.mimeType.includes('ogg') ? 'ogg' : 'webm';
+                    await sendAudioFile(audioBlob, `voice.${extension}`, voiceMetrics);
+                }
+            };
+
+            // Khởi chạy Web Speech API song song để hiển thị text ngay lập tức
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'vi-VN';
+                
+                recognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    let finalTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
+                    }
+                    userInput.value = finalTranscript || interimTranscript;
+                };
+                
+                recognition.onerror = (e) => {
+                    console.error("Speech recognition error:", e.error);
+                };
+                
+                recognition.start();
+            }
+
+            // Thiết lập Web Audio API để phân tích âm lượng
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const sourceNode = audioContext.createMediaStreamSource(stream);
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 512;
+            sourceNode.connect(analyser);
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Float32Array(bufferLength);
+
+            function checkVolume() {
+                if (!isRecording) return;
+
+                analyser.getFloatTimeDomainData(dataArray);
+                
+                // Tính toán RMS (Root Mean Square) để đo âm lượng trung bình
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i] * dataArray[i];
+                }
+                const rms = Math.sqrt(sum / bufferLength);
+                rmsHistory.push(rms);
+
+                if (rms > SILENCE_THRESHOLD) {
+                    hasSpoken = true;
+                    // Reset bộ đếm im lặng nếu phát hiện tiếng nói
+                    if (silenceTimer) {
+                        clearTimeout(silenceTimer);
+                        silenceTimer = null;
+                    }
+                } else if (hasSpoken) {
+                    // Bắt đầu đếm ngược im lặng để tự dừng
+                    if (!silenceTimer) {
+                        silenceTimer = setTimeout(() => {
+                            console.log("Tự động dừng ghi âm do phát hiện im lặng...");
+                            stopRecordingAndAnalyze();
+                        }, SILENCE_DURATION);
+                    }
+                }
+
+                requestAnimationFrame(checkVolume);
+            }
+            
+            mediaRecorder.start();
+            isRecording = true;
+            updateMicUI(true);
+            requestAnimationFrame(checkVolume);
+        } catch (err) {
+            console.error("Lỗi truy cập micro:", err);
+            alert("Không thể truy cập Microphone! Hãy cấp quyền truy cập micro cho trang web.");
+        }
+    }
+
+    function stopRecordingAndAnalyze() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        if (recognition) {
+            recognition.stop();
+        }
+        isRecording = false;
+        updateMicUI(false);
+        if (silenceTimer) {
+            clearTimeout(silenceTimer);
+            silenceTimer = null;
+        }
+    }
+
+    function updateMicUI(active) {
+        const micBtn = document.getElementById('micBtn');
+        if (active) {
+            micBtn.classList.add('recording-pulse');
+            micBtn.innerHTML = '<i class="bi bi-mic-mute-fill fs-5"></i>';
+            userInput.placeholder = "🔴 Hệ thống đang lắng nghe... Nói xong tự động gửi...";
+            userInput.readOnly = true; 
+        } else {
+            micBtn.classList.remove('recording-pulse');
+            micBtn.innerHTML = '<i class="bi bi-mic-fill fs-5"></i>';
+            userInput.placeholder = "Nhập tâm sự của bạn...";
+            userInput.readOnly = false;
+            userInput.disabled = false;
+            userInput.focus();
+        }
+    }
+
+    // --- XỬ LÝ UPLOAD FILE ÂM THANH MP3 ---
+    async function handleAudioUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        // Hỗ trợ kiểm tra định dạng
+        const allowedTypes = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/webm'];
+        if (!allowedTypes.includes(file.type) && !file.name.endsWith('.mp3') && !file.name.endsWith('.wav')) {
+            alert("Vui lòng tải lên tệp âm thanh hợp lệ (.mp3 hoặc .wav)");
+            return;
+        }
+        
+        if (file.size > 10 * 1024 * 1024) {
+            alert("Dung lượng tệp tối đa được tải lên là 10MB!");
+            return;
+        }
+        
+        await sendAudioFile(file, file.name);
+        event.target.value = ''; // Reset input
+    }
+
+    // --- GỬI FILE ÂM THANH LÊN SERVER ---
+    async function sendAudioFile(audioBlob, filename, extraMetrics = null) {
+        userInput.disabled = true;
+        typingIndicator.style.display = 'block';
+        scrollToBottom();
+        
+        const formData = new FormData();
+        formData.append('audio', audioBlob, filename);
+        formData.append('source', 'voice');
+        if (extraMetrics) {
+            formData.append('voice_metrics', JSON.stringify(extraMetrics));
+        }
+        
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            typingIndicator.style.display = 'none';
+            
+            if (data.error) {
+                appendMessage(`⚠️ ${data.error}`, 'bot');
+                return;
+            }
+            
+            // Hiển thị lời dịch văn bản của học sinh (đẹp đẽ, không có tiền tố micro)
+            if (data.transcript) {
+                appendMessage(data.transcript, 'user');
+            } else {
+                appendMessage(`Đã gửi tệp âm thanh: ${filename}`, 'user');
+            }
+            userInput.value = ""; // Xóa text đã hiển thị thời gian thực
+            
+            // Hiển thị câu trả lời thấu cảm của Bot
+            appendMessage(data.reply, 'bot');
+            
+            // Cập nhật biểu đồ và panel cảm xúc
+            if (data.emotion_data) {
+                updateEmotionPanel(data.emotion_data);
+            }
+        } catch (error) {
+            console.error("Audio send error:", error);
+            typingIndicator.style.display = 'none';
+            appendMessage("⚠️ Lỗi kết nối hoặc xử lý âm thanh thất bại. Bạn thử lại nhé!", 'bot');
+        } finally {
+            userInput.disabled = false;
+            userInput.focus();
+            scrollToBottom();
+        }
+    }
+
+    // --- GỬI TIN NHẮN ---
+    async function sendMessage(source = 'text') {
         const text = userInput.value.trim();
         if (!text) return;
 
@@ -165,13 +753,18 @@
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify({ message: text, source: source })
             });
             
             const data = await response.json();
             
             typingIndicator.style.display = 'none';
             appendMessage(data.reply, 'bot');
+            
+            // Cập nhật biểu diễn cảm xúc tại panel
+            if (data.emotion_data) {
+                updateEmotionPanel(data.emotion_data);
+            }
 
         } catch (error) {
             typingIndicator.style.display = 'none';
@@ -207,7 +800,12 @@
     }
 
     function handleEnter(e) {
-        if (e.key === 'Enter') sendMessage();
+        if (e.key === 'Enter') sendMessage('text');
     }
+
+    // Khởi tạo biểu đồ khi trang web tải xong
+    document.addEventListener("DOMContentLoaded", () => {
+        initChart();
+    });
 </script>
 {% endblock %}

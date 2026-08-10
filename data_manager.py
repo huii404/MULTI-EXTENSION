@@ -31,7 +31,6 @@ def save_real_data(stress_level, emotion, hrv_data=None):
         
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=2)
-            
         if hrv_data:
             save_hrv_data(hrv_data)
             
@@ -151,16 +150,29 @@ def init_chat_file():
         with open(CHAT_LOG_FILE, 'w', encoding='utf-8') as f:
             json.dump([], f)
 
-def save_chat_log(user_msg, ai_reply):
+def save_chat_log(user_msg, ai_reply, source='text', emotion_data=None):
     init_chat_file()
     with open(CHAT_LOG_FILE, 'r', encoding='utf-8') as f:
         logs = json.load(f)
         
-    logs.append({
+    record = {
         "timestamp": datetime.now().isoformat(),
         "user_msg": user_msg,
-        "ai_reply": ai_reply
-    })
+        "ai_reply": ai_reply,
+        "source": source
+    }
+    
+    if emotion_data:
+        record.update({
+            "emotion": emotion_data.get("emotion"),
+            "intensity": emotion_data.get("intensity"),
+            "confidence": emotion_data.get("confidence"),
+            "trend": emotion_data.get("trend"),
+            "scores": emotion_data.get("scores"),
+            "signals": emotion_data.get("signals")
+        })
+        
+    logs.append(record)
     
     with open(CHAT_LOG_FILE, 'w', encoding='utf-8') as f:
         json.dump(logs, f, indent=2)

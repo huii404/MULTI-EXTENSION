@@ -7,6 +7,7 @@ from functools import wraps
 from camera import VideoCamera
 from chatbot import get_gemini_response
 from data_manager import get_dashboard_stats, save_real_data, get_alerts, resolve_alert, save_chat_log, get_chat_logs, save_hrv_data, get_hrv_history, get_hrv_baseline_7days
+from emotion import EmotionAnalyzer
 import base64
 import numpy as np
 import cv2
@@ -15,6 +16,7 @@ import os
 app = Flask(__name__)
 app.secret_key = 'polkijfuvfrighohdsckdzmmdsowofjsirjvmssskcke9'
 camera_stream = VideoCamera() 
+emotion_analyzer = EmotionAnalyzer()
 
 def login_required(f):
     @wraps(f)
@@ -83,16 +85,89 @@ def chat():
 
 @app.route('/api/chat', methods=['POST'])
 def chat_api():
-    data = request.json
-    user_msg = data.get('message', '')
+    user_msg = ""
+    source = "text"
+    audio_path = None
     
-    if not user_msg:
-        return jsonify({'reply': "Bạn im lặng thế, tâm sự với mình đi!"})
-    ai_reply = get_gemini_response(user_msg)
+    voice_metrics = None
+    # 1. Kiểm tra xem request gửi lên là FormData (có file âm thanh) hay JSON
+    if request.content_type and 'multipart/form-data' in request.content_type:
+        source = request.form.get('source', 'voice')
+        voice_metrics_raw = request.form.get('voice_metrics', None)
+        if voice_metrics_raw:
+            try:
+                voice_metrics = json.loads(voice_metrics_raw)
+            except Exception:
+                voice_metrics = None
 
-    save_chat_log(user_msg, ai_reply)
+        if 'audio' in request.files:
+            audio_file = request.files['audio']
+            filename = audio_file.filename
+            if filename:
+                temp_dir = os.path.join(app.root_path, 'temp_audio')
+                os.makedirs(temp_dir, exist_ok=True)
+                audio_path = os.path.join(temp_dir, filename)
+                audio_file.save(audio_path)
+    else:
+        data = request.json or {}
+        user_msg = data.get('message', '')
+        source = data.get('source', 'text')
+        
+    if not user_msg and not audio_path:
+        return jsonify({'reply': "Bạn im lặng thế, tâm sự với mình đi!"})
+        
+    if 'emotion_history' not in session:
+        session['emotion_history'] = []
+        
+    history = session['emotion_history']
+    transcript = None
+    emotion_res = None
     
-    return jsonify({'reply': ai_reply})
+    try:
+        if audio_path:
+            # Phân tích cảm xúc đa phương thức từ tệp âm thanh
+            emotion_res, transcript = emotion_analyzer.analyze_audio(audio_path, history, voice_metrics=voice_metrics)
+            try:
+                os.remove(audio_path)
+            except Exception as e:
+                print(f"Error removing temp audio file: {e}")
+                
+            if not transcript:
+                return jsonify({'error': "Không nhận diện được giọng nói trong file âm thanh này."})
+            user_msg = transcript
+        else:
+            # Phân tích văn bản thông thường
+            emotion_res = emotion_analyzer.analyze(user_msg, history)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f"Lỗi phân tích cảm xúc/âm thanh: {str(e)}"})
+        
+    emotion_data = emotion_res.to_dict()
+    
+    # Lưu vào lịch sử phiên để phân tích xu hướng ở lượt sau
+    history.append({
+        "emotion": emotion_res.emotion,
+        "scores": emotion_res.scores,
+        "intensity": emotion_res.intensity
+    })
+    session['emotion_history'] = history
+    session.modified = True
+    
+    # Lấy câu trả lời từ trợ lý có chèn trạng thái cảm xúc thấu cảm
+    ai_reply = get_gemini_response(user_msg, emotion_data)
+    
+    # Lưu log kèm nguồn và cảm xúc chi tiết
+    save_chat_log(user_msg, ai_reply, source, emotion_data)
+    
+    resp = {
+        'reply': ai_reply,
+        'emotion_data': emotion_data
+    }
+    if transcript:
+        resp['transcript'] = transcript
+        
+    return jsonify(resp)
 
 @app.route('/admin')
 @login_required
