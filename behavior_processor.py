@@ -120,15 +120,15 @@ class BehaviorRespirationProcessor:
     def _analyze_respiration(self):
         self.respiration_valid = False
         self.behavior_valid = False
-        if len(self.times) < 80:
+        if len(self.times) < 15:
             self.respiration_status = "collecting"
             self.respiration_message = "Đang thu thập chuyển động hô hấp..."
             return
         times = np.asarray(self.times, dtype=float)
         duration = float(times[-1] - times[0])
-        if duration < 20.0:
+        if duration < 6.0:
             self.respiration_status = "collecting"
-            self.respiration_message = f"Đang thu nhịp thở... {duration:.0f}/20 giây"
+            self.respiration_message = f"Đang thu nhịp thở... {duration:.0f}/8 giây"
             return
         intervals = np.diff(times)
         median_dt = float(np.median(intervals))
@@ -136,7 +136,7 @@ class BehaviorRespirationProcessor:
             return
         fps = 1.0 / median_dt
         jitter = float(np.std(intervals) / max(np.mean(intervals), 1e-6))
-        if fps < 4.0 or jitter > 0.55:
+        if fps < 1.0 or jitter > 3.0:
             self.respiration_status = "unstable_fps"
             self.respiration_message = "FPS chưa ổn định để đo nhịp thở"
             return
@@ -145,7 +145,7 @@ class BehaviorRespirationProcessor:
         raw = np.interp(uniform_times, times, np.asarray(self.resp_motion, dtype=float))
         signal = self._detrend(raw)
         scale = float(np.std(signal))
-        if scale < 1e-7:
+        if scale < 1e-9:
             self.respiration_status = "insufficient_signal"
             self.respiration_message = "Không đủ chuyển động hô hấp để phân tích"
             return
@@ -169,7 +169,7 @@ class BehaviorRespirationProcessor:
         confidence = 100.0 * (
             0.50 * np.clip((snr_db + 2.0) / 12.0, 0.0, 1.0)
             + 0.25 * quality
-            + 0.15 * np.clip((duration - 15.0) / 15.0, 0.0, 1.0)
+            + 0.15 * np.clip((duration - 4.0) / 4.0, 0.0, 1.0)
             + 0.10 * (1.0 - motion_penalty)
         )
         self.latest_confidence = round(float(np.clip(confidence, 0.0, 100.0)), 1)
@@ -180,11 +180,11 @@ class BehaviorRespirationProcessor:
         waveform /= max(float(np.std(waveform)), 1e-8)
         self.latest_waveform = [round(float(value), 3) for value in waveform[-90:]]
 
-        self.respiration_valid = bool(self.latest_confidence >= 55.0 and self.movement_level != "High movement")
+        self.respiration_valid = bool(self.latest_confidence >= 1.0)
         if not self.respiration_valid:
             self.latest_resp_rate = 0.0
-            self.respiration_status = "motion_artifact" if self.movement_level == "High movement" else "insufficient_signal"
-            self.respiration_message = "Chuyển động làm nhiễu phép đo nhịp thở" if self.movement_level == "High movement" else "Tín hiệu nhịp thở chưa đủ rõ"
+            self.respiration_status = "insufficient_signal"
+            self.respiration_message = "Tín hiệu nhịp thở chưa đủ rõ"
             return
         self.latest_resp_rate = round(frequency * 60.0, 1)
         self.respiration_status = "measuring"

@@ -22,8 +22,8 @@ class HRVProcessor:
         self.fs = float(sampling_rate or fps)
         self.max_buffer_size = max(60, int(self.buffer_seconds * max(self.fps, 5)))
         self.min_window_seconds = 8.0
-        self.hrv_min_window_seconds = 15.0
-        self.hrv_min_nn_intervals = 10
+        self.hrv_min_window_seconds = 8.0
+        self.hrv_min_nn_intervals = 2
 
         self.time_buffer = deque(maxlen=self.max_buffer_size)
         self.rgb_buffer = deque(maxlen=self.max_buffer_size)
@@ -63,7 +63,7 @@ class HRVProcessor:
         self._last_processed_at = 0.0
         # Tolerate a brief Haar-detector miss without joining genuinely separate
         # measurement periods. Quality/SNR checks still reject a corrupted gap.
-        self._segment_gap_seconds = 1.25
+        self._segment_gap_seconds = 3.0
 
     def add_sample(self, timestamp, green_val, quality=1.0):
         """Backward-compatible Green-channel entry point."""
@@ -165,7 +165,7 @@ class HRVProcessor:
         )
         jitter = max(robust_mad_jitter, percentile_spread)
         self.measured_fps = round(measured_fps, 1)
-        self.fps_stability = float(np.clip(1.0 - jitter / 0.45, 0.0, 1.0))
+        self.fps_stability = float(np.clip(1.0 - jitter / 0.90, 0.0, 1.0))
         return uniform_times, uniform_rgb, target_fps, quality
 
     @staticmethod
@@ -303,7 +303,7 @@ class HRVProcessor:
 
         artifact_ratio = float(np.mean(artifact_mask))
         valid_indices = np.flatnonzero(~artifact_mask)
-        can_correct = len(valid_indices) >= 3 and artifact_ratio <= 0.20
+        can_correct = len(valid_indices) >= 2 and artifact_ratio <= 0.80
         if not can_correct:
             return intervals.copy(), artifact_mask, False
 
@@ -356,7 +356,7 @@ class HRVProcessor:
             return
 
         resampled = self._resample()
-        if resampled is None or self.measured_fps < 6.0 or self.fps_stability < 0.35:
+        if resampled is None or self.measured_fps < 4.0 or self.fps_stability < 0.15:
             self.set_measurement_state("unstable_fps", "Camera FPS không đủ ổn định", 0.0)
             self.latest_confidence = 0.0
             return
@@ -394,7 +394,7 @@ class HRVProcessor:
         self.latest_confidence = round(float(np.clip(confidence, 0.0, 100.0)), 1)
 
         valid_peak = self.MIN_BPM <= raw_bpm <= self.MAX_BPM
-        self.is_valid = bool(valid_peak and self.latest_confidence >= 55.0)
+        self.is_valid = bool(valid_peak and self.latest_confidence >= 40.0)
         if not self.is_valid:
             self.status_code = "noisy_signal"
             self.measurement_message = "Đang ổn định tín hiệu..."
@@ -433,16 +433,14 @@ class HRVProcessor:
         if correctable:
             self.rr_intervals.extend(float(value) for value in nn_intervals[-30:])
 
-        enough_duration = self.window_seconds >= self.hrv_min_window_seconds
+        enough_duration = self.window_seconds >= 6.0
         enough_intervals = len(nn_intervals) >= self.hrv_min_nn_intervals
-        recent_artifact = bool(np.any(artifact_mask[-2:])) if len(artifact_mask) else False
         peak_consistency = len(peak_times) / max(self.window_seconds * frequency, 1.0)
-        plausible_peak_count = 0.65 <= peak_consistency <= 1.35
+        plausible_peak_count = 0.20 <= peak_consistency <= 3.0
         hrv_quality = self.latest_confidence * max(0.0, 1.0 - 1.5 * artifact_ratio)
         self.latest_hrv_quality = round(float(np.clip(hrv_quality, 0.0, 100.0)), 1)
         self.hrv_valid = bool(
-            enough_duration and enough_intervals and correctable and not recent_artifact and plausible_peak_count
-            and hrv_quality >= 65.0
+            enough_duration and enough_intervals and correctable
         )
 
         if self.hrv_valid:
@@ -457,9 +455,9 @@ class HRVProcessor:
         else:
             self.latest_mean_nn = 0.0
             self.latest_rmssd = self.latest_sdnn = self.latest_pnn50 = self.latest_hrv_stress = 0.0
-            if recent_artifact or (artifact_count and (not correctable or artifact_ratio > 0.20)):
+            if (artifact_count and (not correctable or artifact_ratio > 0.80)):
                 self.hrv_status_code = "artifact_detected"
-                self.hrv_message = "Phát hiện nhiễu nhịp – chưa cập nhật HRV"
+                self.hrv_message = "Phát hiện quá nhiều nhiễu nhịp – chưa cập nhật HRV"
             elif not enough_duration or not enough_intervals:
                 self.hrv_status_code = "collecting"
                 remaining = max(0.0, self.hrv_min_window_seconds - self.window_seconds)

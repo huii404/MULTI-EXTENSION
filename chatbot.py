@@ -11,11 +11,11 @@ load_dotenv(override=True)
 
 class PsychologyChatbot:
     def __init__(self):
-        keys_str = os.getenv("GEMINI_API_KEYS", "")
-        self.api_keys = [k.strip() for k in keys_str.split(",") if k.strip()]
+        keys_str = os.getenv("GEMINI_API_KEYS", "") or os.getenv("GEMINI_API_KEY", "")
+        self.api_keys = [k.strip() for k in keys_str.split(",") if k.strip() and not k.strip().startswith("your_") and not k.strip().startswith("dien_")]
         
         if not self.api_keys:
-            raise ValueError("Chưa cấu hình GEMINI_API_KEYS trong file .env!")
+            print("[WARNING] Chưa cấu hình GEMINI_API_KEY / GEMINI_API_KEYS trong file .env!")
 
         self.system_prompt = """
         Bạn là "AI Chia Sẻ" - một người bạn đồng hành tin cậy và chuyên gia tâm lý học đường tại trường THCS Nguyễn Văn A.
@@ -45,12 +45,20 @@ class PsychologyChatbot:
         self.initialize_chat()
 
     def _get_next_key(self):
+        if not self.api_keys:
+            return None
         key = self.api_keys[self.current_key_index]
         self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
         return key
 
     def initialize_chat(self):
+        if not self.api_keys:
+            self.chat_session = None
+            return
         key = self._get_next_key()
+        if not key:
+            self.chat_session = None
+            return
         genai.configure(api_key=key)
         
         model = genai.GenerativeModel(
@@ -132,17 +140,18 @@ class PsychologyChatbot:
         # 1. Thử dùng Gemini (quay vòng các key)
         final_message = f"{final_message}{voice_context}"
 
-        for attempt in range(len(self.api_keys)):
-            try:
-                response = self.chat_session.send_message(final_message)
-                return response.text.strip()
-            except Exception as e:
+        if self.api_keys and self.chat_session is not None:
+            for attempt in range(len(self.api_keys)):
                 try:
-                    print(f"[API ERROR] Gemini Key failed: {e}")
-                except Exception:
-                    pass
-                print("--> Changing key and retrying...")
-                self.initialize_chat()
+                    response = self.chat_session.send_message(final_message)
+                    return response.text.strip()
+                except Exception as e:
+                    try:
+                        print(f"[API ERROR] Gemini Key failed: {e}")
+                    except Exception:
+                        pass
+                    print("--> Changing key and retrying...")
+                    self.initialize_chat()
                 
         # 2. Fallback sang Groq Llama 3.3 nếu tất cả Gemini keys đều lỗi
         try:
@@ -153,11 +162,15 @@ class PsychologyChatbot:
         except Exception as e_groq:
             print(f"[GROQ ERROR] Groq Chatbot fallback failed: {e_groq}")
             
+        if not self.api_keys:
+            return "Hệ thống chưa được cấu hình GEMINI_API_KEY trong file .env! Bạn hãy điền GEMINI_API_KEY vào file .env để trò chuyện cùng AI nhé. 🌿"
+            
         return "Hệ thống đang bảo trì một chút, bạn chờ 30s rồi quay lại tâm sự với mình nhé! 😿"
 
     def clear_history(self):
         try:
-            self.chat_session.history.clear()
+            if self.chat_session:
+                self.chat_session.history.clear()
         except Exception:
             pass
         print("--> Da xoa lich su tro chuyen.")

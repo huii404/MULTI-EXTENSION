@@ -121,9 +121,11 @@
         if (["noisy_signal", "unstable_fps"].includes(code)) {
             return metrics.measurement_status || "Tín hiệu yếu – hãy giữ yên và kiểm tra ánh sáng";
         }
-        if (metrics.signal_valid && Number(metrics.bpm) > 0) return "Đo thành công";
-        if (code === "measuring") return "Đang phân tích...";
         const elapsed = Math.min(8, Math.max(0, Number(metrics.window_seconds || 0)));
+        if (elapsed >= 8.0 || (metrics.signal_valid && Number(metrics.bpm) > 0 && elapsed >= 7.5)) {
+            return "🎉 Hoàn tất phiên đo (8/8s)! Dữ liệu đã được lưu.";
+        }
+        if (code === "measuring") return `Đang đo… ${elapsed.toFixed(0)}/8 giây`;
         return `Đang đo… ${elapsed.toFixed(0)}/8 giây`;
     }
 
@@ -165,20 +167,36 @@
         setText("valMeasurementStatus", friendlyStatus);
         setText("valFPS", metrics.fps > 0 ? Number(metrics.fps).toFixed(1) : "--");
         setText("valAlgorithm", `${metrics.algorithm || "POS"} · SNR ${Number(metrics.snr_db || 0).toFixed(1)} dB`);
-        setStatus(friendlyStatus, metrics.status_code);
 
-        const durationProgress = Number(metrics.window_seconds || 0) / 8;
-        const sampleProgress = Number(metrics.sample_count || 0) / 45;
-        const progress = Math.min(100, Math.max(0, Math.min(durationProgress, sampleProgress) * 100));
-        $("scanProgressBar").style.width = `${progress}%`;
+        const windowSec = Number(metrics.window_seconds || 0);
+        const progress = Math.min(100, Math.max(0, (windowSec / 8.0) * 100));
+        $("scanProgressBar").style.width = `${progress.toFixed(0)}%`;
 
         if (metrics.signal_valid && Number(metrics.bpm) > 0) {
             setText("valBPM", Math.round(metrics.bpm));
             setText("valHz", Number(metrics.rppg_hz).toFixed(2));
+        }
+
+        const isCompleted = (windowSec >= 8.0 || progress >= 100) && (metrics.signal_valid || Number(metrics.bpm) > 0);
+        if (isCompleted && scanning) {
+            scanning = false; // Freeze measurement session! Stop sending frames
+            
+            const scannerLine = $("scanner-line-ui");
+            if (scannerLine) scannerLine.style.display = "none";
+            
+            const border = $("ekyc-border-ui");
+            if (border) {
+                border.style.borderColor = "#2ecc71";
+                border.style.boxShadow = "0 0 15px #2ecc71";
+            }
+            
+            const completionMsg = "🎉 Hoàn tất phiên đo (8/8s)! Dữ liệu đã được lưu.";
+            setStatus(completionMsg, "measuring");
+            setText("valMeasurementStatus", completionMsg);
+            $("scanProgressBar").style.width = "100%";
             $("btnRestartScan").style.display = "inline-block";
-        } else {
-            setText("valBPM", "--");
-            setText("valHz", "0.0");
+        } else if (scanning) {
+            setStatus(friendlyStatus, metrics.status_code);
         }
 
         const hrvReady = Boolean(metrics.hrv_valid);
@@ -188,12 +206,6 @@
             setText("valMeanNN", metrics.mean_nn);
             setText("valNNCount", metrics.nn_count || 0);
             setText("valPNN50", metrics.pnn50);
-        } else {
-            setText("valRMSSD", "--");
-            setText("valSDNN", "--");
-            setText("valMeanNN", "--");
-            setText("valNNCount", "0");
-            setText("valPNN50", "--");
         }
 
         const hrvCode = metrics.hrv_status_code || "collecting";
@@ -273,12 +285,18 @@
         }
         const highStress = stress > 60;
         const verySad = Number(details.sad || 0) > 50;
-        if (highStress || verySad) {
+        const multipleFaces = data.hrv && data.hrv.status_code === "multiple_faces";
+
+        if (highStress || verySad || multipleFaces) {
             alertBox.style.display = "block";
             normalBox.style.display = "none";
-            alertBox.querySelector("small").textContent = verySad && !highStress
-                ? "Biểu hiện cảm xúc cho thấy bạn có thể đang buồn. Bạn muốn chia sẻ thêm không?"
-                : "Một số tín hiệu tham khảo đang ở mức cao. Hãy nghỉ ngắn và quan sát cảm nhận của mình.";
+            if (multipleFaces) {
+                alertBox.querySelector("small").textContent = "Phát hiện nhiều người trong khung hình. Vui lòng chỉ để 1 khuôn mặt!";
+            } else {
+                alertBox.querySelector("small").textContent = verySad && !highStress
+                    ? "Biểu hiện cảm xúc cho thấy bạn có thể đang buồn. Bạn muốn chia sẻ thêm không?"
+                    : "Một số tín hiệu tham khảo đang ở mức cao. Hãy nghỉ ngắn và quan sát cảm nhận của mình.";
+            }
             alertLocked = true;
             clearTimeout(alertTimeout);
             alertTimeout = setTimeout(() => { alertLocked = false; }, 3000);
@@ -368,13 +386,23 @@
 
     window.restartScan = async () => {
         scanning = true;
+        processing = false;
         await fetch("/api/reset_scan", { method: "POST" }).catch(() => {});
         resetBiometrics(true);
         setText("valSignalQuality", "Yếu – 0%");
         setText("valMeasurementStatus", "Đang chờ khuôn mặt...");
         $("scanProgressBar").style.width = "0%";
         $("btnRestartScan").style.display = "none";
-        $("scanner-line-ui").style.display = "block";
+        
+        const scannerLine = $("scanner-line-ui");
+        if (scannerLine) scannerLine.style.display = "block";
+        
+        const border = $("ekyc-border-ui");
+        if (border) {
+            border.style.borderColor = "#0ea5e9";
+            border.style.boxShadow = "none";
+        }
+        
         if (!video.srcObject || !video.srcObject.active) await startCamera(facingMode);
         processNextFrame();
     };

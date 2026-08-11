@@ -40,10 +40,15 @@ class VideoCamera(object):
         self._last_face_seen_at = 0.0
         self._last_luminance = None
         self._last_face_count = 0
+        self._face_template = None
         self._roi_quality = 0.0
         self._state_lock = threading.RLock()
-        cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-        self._face_detector = cv2.CascadeClassifier(cascade_path)
+        try:
+            cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+            self._face_detector = cv2.CascadeClassifier(cascade_path)
+        except Exception as e:
+            print(f"[WARNING] Không thể khởi tạo CascadeClassifier: {e}")
+            self._face_detector = None
 
     def trigger_fake_stress(self):
         """Legacy demo shortcut: affects stress only, never fabricates BPM/rPPG."""
@@ -59,6 +64,19 @@ class VideoCamera(object):
     def reset_fake_stress(self):
         self.force_stress = False
 
+    def reset_hrv(self):
+        with self._state_lock:
+            self.hrv_processor.reset()
+            self.behavior_processor.reset()
+            self.emotion_history.clear()
+            self.current_stress = 0.0
+            self.current_emotion = "Đang khởi tạo..."
+            self.current_emotions_dict = {}
+            self._last_face = None
+            self.frame_counter = 0
+            self.current_hrv_metrics = self.hrv_processor.get_metrics()
+            self.latest_hrv_metrics = self.current_hrv_metrics
+
     def __del__(self):
         video = getattr(self, "video", None)
         if video is not None and video.isOpened():
@@ -73,23 +91,48 @@ class VideoCamera(object):
         return x, y, max(0, w), max(0, h)
 
     def _detect_or_track_face(self, img):
-        """Run a lightweight detector periodically and smooth its tracked box."""
+        """Run a lightweight detector periodically and smooth its tracked box, using template matching as fallback."""
         self.frame_counter += 1
         should_detect = self._last_face is None or self.frame_counter % 3 == 0
         detected = []
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
         if should_detect:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            gray = cv2.equalizeHist(gray)
+            eq_gray = cv2.equalizeHist(gray)
             min_side = max(50, int(min(img.shape[:2]) * 0.18))
             detected = list(self._face_detector.detectMultiScale(
-                gray, scaleFactor=1.12, minNeighbors=5,
+                eq_gray, scaleFactor=1.12, minNeighbors=5,
                 minSize=(min_side, min_side), flags=cv2.CASCADE_SCALE_IMAGE,
             ))
             self._last_face_count = len(detected)
+            
             if len(detected) != 1:
-                if len(detected) == 0 and time.time() - self._last_face_seen_at < 0.9:
-                    return self._last_face, 1, 0.0
+                # Fallback to template matching if face is lost
+                if len(detected) == 0 and self._last_face is not None and self._face_template is not None and time.time() - self._last_face_seen_at < 2.0:
+                    x, y, w, h = self._last_face
+                    search_margin = int(w * 0.5)
+                    sx = max(0, x - search_margin)
+                    sy = max(0, y - search_margin)
+                    sw = min(img.shape[1] - sx, w + 2 * search_margin)
+                    sh = min(img.shape[0] - sy, h + 2 * search_margin)
+                    
+                    search_roi = gray[sy:sy+sh, sx:sx+sw]
+                    if search_roi.shape[0] >= self._face_template.shape[0] and search_roi.shape[1] >= self._face_template.shape[1]:
+                        res = cv2.matchTemplate(search_roi, self._face_template, cv2.TM_CCOEFF_NORMED)
+                        _, max_val, _, max_loc = cv2.minMaxLoc(res)
+                        if max_val > 0.45: # Moderate threshold for quick tracking
+                            new_x = sx + max_loc[0]
+                            new_y = sy + max_loc[1]
+                            self._last_face = (new_x, new_y, w, h)
+                            self._last_face_seen_at = time.time()
+                            # Update template slightly to adapt
+                            tx, ty = new_x + int(w*0.25), new_y + int(h*0.25)
+                            tw, th = int(w*0.5), int(h*0.5)
+                            self._face_template = gray[ty:ty+th, tx:tx+tw]
+                            return self._last_face, 1, 0.0
+                
                 self._last_face = None
+                self._face_template = None
                 return None, len(detected), 0.0
 
             detected_face = np.asarray(detected[0], dtype=float)
@@ -102,10 +145,19 @@ class VideoCamera(object):
                 scale_change = np.max(np.abs(detected_face[2:] - previous[2:]) / np.maximum(previous[2:], 1.0))
                 movement = float(max(translation, scale_change))
                 detected_face = 0.72 * previous + 0.28 * detected_face
+            
             self._last_face = tuple(detected_face.astype(int))
             self._last_face_seen_at = time.time()
+            
+            # Save inner region as template
+            x, y, w, h = self._last_face
+            tx, ty = x + int(w*0.25), y + int(h*0.25)
+            tw, th = int(w*0.5), int(h*0.5)
+            self._face_template = gray[ty:ty+th, tx:tx+tw]
+            
             return self._last_face, 1, movement
 
+        # If not should_detect, return last face
         return self._last_face, 1 if self._last_face is not None else 0, 0.0
 
     @staticmethod
@@ -254,6 +306,7 @@ class VideoCamera(object):
                     self.hrv_processor.set_measurement_state(code, message, quality)
                 else:
                     self.hrv_processor.add_rgb_sample(frame_timestamp, *rgb, quality=quality)
+            
             self._merge_capture_metadata(face_count, self._roi_quality)
 
         # DeepFace is preserved for the existing emotion/stress feature, but runs

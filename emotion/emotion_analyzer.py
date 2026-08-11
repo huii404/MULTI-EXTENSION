@@ -38,8 +38,8 @@ class EmotionResult:
 class EmotionAnalyzer:
     def __init__(self):
         # Nạp danh sách các Gemini API Keys từ .env
-        keys_str = os.getenv("GEMINI_API_KEYS", "")
-        self.api_keys = [k.strip() for k in keys_str.split(",") if k.strip()]
+        keys_str = os.getenv("GEMINI_API_KEYS", "") or os.getenv("GEMINI_API_KEY", "")
+        self.api_keys = [k.strip() for k in keys_str.split(",") if k.strip() and not k.strip().startswith("your_") and not k.strip().startswith("dien_")]
         self.current_key_index = 0
         self.voice_processor = VoiceStressProcessor()
 
@@ -48,7 +48,7 @@ class EmotionAnalyzer:
         [Tier 1] Gọi API Gemini phân tích ngữ nghĩa sâu của câu nói.
         """
         if not self.api_keys:
-            raise ValueError("Chưa cấu hình GEMINI_API_KEYS trong file .env!")
+            raise ValueError("Chưa cấu hình GEMINI_API_KEY / GEMINI_API_KEYS trong file .env!")
 
         system_instruction = self._get_system_instruction()
 
@@ -337,7 +337,7 @@ class EmotionAnalyzer:
         [Tier 1] Sử dụng Gemini 2.5 Flash đa phương thức để trực tiếp nghe và phân tích tệp âm thanh.
         """
         if not self.api_keys:
-            raise ValueError("Chưa cấu hình GEMINI_API_KEYS trong file .env!")
+            raise ValueError("Chưa cấu hình GEMINI_API_KEY / GEMINI_API_KEYS trong file .env!")
 
         # Xác định mime-type
         filename = audio_path.lower()
