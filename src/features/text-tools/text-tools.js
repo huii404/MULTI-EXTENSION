@@ -30,14 +30,6 @@ const TEXT_TOOLS_SKILLS = {
     icon: '🖼️',
     color: 'linear-gradient(135deg, #e67e22, #d35400)',
     pageName: 'ocr'
-  },
-  scraper: {
-    id: 'scraper',
-    title: 'Cào Text & Bằng Chứng Ngầm',
-    desc: 'Tự tìm tin tức/web, cào & lưu ngầm, xuất TXT/Excel/Word',
-    icon: '🕵️',
-    color: 'linear-gradient(135deg, #10b981, #059669)',
-    pageName: 'scraper'
   }
 };
 
@@ -146,15 +138,6 @@ const TEXT_TOOLS_HTML = `
     <div class="tt-skill-info">
       <span class="tt-skill-title">Quét chữ từ ảnh (OCR)</span>
       <span class="tt-skill-desc">Trích xuất văn bản từ ảnh hoặc Clipboard</span>
-    </div>
-    <span class="tt-skill-arrow">›</span>
-  </button>
-
-  <button class="tt-skill-btn" data-skill="scraper" style="border-left:4px solid #10b981;">
-    <div class="tt-skill-icon" style="background:linear-gradient(135deg,#10b981,#059669);">🕵️</div>
-    <div class="tt-skill-info">
-      <span class="tt-skill-title">Cào Text & Bằng Chứng Ngầm</span>
-      <span class="tt-skill-desc">Tự tìm tin tức/web, cào & lưu ngầm, xuất TXT/Excel/Word</span>
     </div>
     <span class="tt-skill-arrow">›</span>
   </button>
@@ -574,7 +557,6 @@ PAGES['text-tools'] = {
             if (skillId === 'cleaner') attachCleanerEvents();
             else if (skillId === 'comparator') attachComparatorEvents();
             else if (skillId === 'ocr' && typeof attachOcrEvents === 'function') attachOcrEvents();
-            else if (skillId === 'scraper' && typeof attachScraperEvents === 'function') attachScraperEvents();
           }
         }, 50);
       });
@@ -583,20 +565,7 @@ PAGES['text-tools'] = {
   title: '🧹 Text Tools'
 };
 
-async function loadScraperHTML() {
-  try {
-    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) {
-      const res = await fetch(chrome.runtime.getURL('src/features/text-tools/skills/scraper/scraper.html'));
-      window.SKILL_HTML.scraper = await res.text();
-    }
-  } catch(e) {
-    console.error('Không thể load scraper.html:', e);
-  }
-}
-loadScraperHTML();
-
 window.PAGES = window.PAGES || {};
 window.PAGES['cleaner'] = { render: function () { return window.SKILL_HTML.cleaner; }, attachEvents: attachCleanerEvents, title: '🧹 Làm sạch văn bản' };
 window.PAGES['comparator'] = { render: function () { return window.SKILL_HTML.comparator; }, attachEvents: attachComparatorEvents, title: '🆚 So sánh văn bản' };
-window.PAGES['scraper'] = { render: function () { return window.SKILL_HTML.scraper; }, attachEvents: function() { if (typeof attachScraperEvents === 'function') attachScraperEvents(); }, title: '🕵️ Cào Text & Bằng Chứng Ngầm' };
 console.log('[Text Tools] Module fully loaded and PAGES registered');

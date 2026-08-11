@@ -120,6 +120,7 @@ function renderHome() {
         </span>
       </button>
 
+
       <!-- Social & Author Feature Card -->
       <button class="feature-card" data-page="social" style="border-left: 4px solid #FF007A;">
         <div class="icon-box" style="background: linear-gradient(135deg, #FF007A, #7928CA); color:white;">✨</div>

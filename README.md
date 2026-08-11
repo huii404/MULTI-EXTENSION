@@ -8,7 +8,7 @@ Multi Tool Hub là tiện ích mở rộng trên trình duyệt (Browser Extensi
 1. [Hướng Dẫn Cài Đặt](#hướng-dẫn-cài-đặt)
 2. [Hướng Dẫn Sử Dụng Chi Tiết Từng Tính Năng](#hướng-dẫn-sử-dụng-chi-tiết-từng-tính-năng)
    - [1. DTU Hub (Hỗ trợ sinh viên DTU)](#1-dtu-hub-hỗ-trợ-sinh-viên-dtu)
-   - [2. Document Download (Studocu & Scribd Downloader)](#2-document-download-studocu--scribd-downloader)
+   - [2. Document Download (Studocu Downloader)](#2-document-download-studocu-downloader)
    - [3. Text Tools (Bộ công cụ văn bản & Cào dữ liệu ngầm)](#3-text-tools-bộ-công-cụ-văn-bản--cào-dữ-liệu-ngầm)
    - [4. QR Code Suite (Tạo & Quét mã QR)](#4-qr-code-suite-tạo--quét-mã-qr)
    - [5. Web Screenshot (Chụp ảnh màn hình Web)](#5-web-screenshot-chụp-ảnh-màn-hình-web)
@@ -46,12 +46,9 @@ Bộ công cụ tối ưu thao tác cho sinh viên Đại học Duy Tân trên c
 
 ---
 
-### 2. Document Download (Studocu & Scribd Downloader)
+### 2. Document Download (Studocu Downloader)
 
 Bộ công cụ trích xuất và tải tài liệu học tập trực tuyến:
-* **Scribd Downloader**:
-  - **Cách sử dụng**: Truy cập trang tài liệu Scribd cần tải -> Mở tiện ích chọn **Tải tài liệu Scribd**.
-  - **Tính năng**: Tự động gỡ bỏ lớp phủ mờ (blur paywall), loại bỏ quảng cáo banner, tự động cuộn nạp 100% nội dung trang ngầm, xuất file **PDF sạch (định dạng A4)** hoặc file **văn bản nguyên bản (.txt)**.
 * **Studocu Downloader**:
   - **Cách sử dụng**: Mở trang tài liệu Studocu -> Nhấn nút tải về trong tiện ích.
   - **Tính năng**: Tải file PDF nguyên bản **không chứa Watermark của Studocu**, hỗ trợ xem trước và trích xuất từng trang ảnh chất lượng cao.
@@ -60,7 +57,7 @@ Bộ công cụ trích xuất và tải tài liệu học tập trực tuyến:
 
 ### 3. Text Tools (Bộ công cụ văn bản & Cào dữ liệu ngầm)
 
-Truy cập danh mục **Text Tools** để sử dụng 4 công cụ xử lý văn bản chuyên sâu:
+Truy cập danh mục **Text Tools** để sử dụng 3 công cụ xử lý văn bản chuyên sâu:
 
 #### 3.1. Làm Sạch Văn Bản (Text Cleaner)
 * **Cách sử dụng**: Dán văn bản từ Clipboard (`Ctrl + V`) hoặc kéo thả file văn bản -> Chọn cấp độ lọc (**Cơ bản**, **Tiêu chuẩn**, **Nâng cao**) -> Nhấn **Làm sạch lại**.
@@ -73,19 +70,6 @@ Truy cập danh mục **Text Tools** để sử dụng 4 công cụ xử lý vă
 #### 3.3. Quét Chữ Từ Ảnh (OCR)
 * **Cách sử dụng**: Chọn file hình ảnh hoặc dán ảnh trực tiếp từ Clipboard (`Ctrl + V`) -> Nhấn **Quét chữ**.
 * **Công dụng**: Nhận diện và trích xuất toàn bộ văn bản từ hình ảnh hoàn toàn Offline trên trình duyệt.
-
-#### 3.4. Cào Text & Bằng Chứng Ngầm (Deep Scraper & Evidence Vault)
-Công cụ cào ngầm tự động và xây dựng kho lưu trữ bằng chứng nghiên cứu:
-* **Các chế độ cào**:
-  - **Cào Đa Nền Tảng**: Tự động gửi từ khóa tìm kiếm ngầm đến 4 công cụ công cộng (**Google News, DuckDuckGo, Bing Search, Wikipedia**) -> Tự động đi sâu vào từng trang web bài báo mục tiêu để trích xuất các đoạn văn ngữ cảnh chứa từ khóa.
-  - **Cào các Tab đang mở**: Quét và cào ngầm toàn bộ các tab trình duyệt đang mở trong cửa sổ hiện tại.
-  - **Danh sách URLs nhập vào**: Dán danh sách URL tùy chỉnh để tiện ích tự động kết nối ngầm và trích xuất dữ liệu.
-* **Bộ nhớ ngầm lũy tiến (Evidence Vault)**:
-  - Tự động lưu ngầm từng bản ghi vào `chrome.storage.local` ngay trong quá trình cào. Dữ liệu được bảo toàn 100% ngay cả khi đóng tiện ích hoặc tắt trình duyệt.
-* **Định dạng Xuất File**:
-  - **Xuất TXT**: File văn bản phân đoạn rõ ràng.
-  - **Xuất Excel (.xlsx)**: Tự động xuống dòng (**Auto Text Wrap**), định dạng độ rộng cột thông minh và mã hóa UTF-8 BOM chống lỗi font tiếng Việt khi mở trên MS Excel hoặc Google Sheets.
-  - **Xuất Word (.doc)**: Xuất hồ sơ báo cáo định dạng khung Callout box, có tô màu Highlight từ khóa.
 
 ---
 

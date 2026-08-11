@@ -14,18 +14,6 @@ const DOC_DOWNLOAD_HTML = `
     <span class="doc-skill-arrow">›</span>
   </button>
 
-  <!-- Scribd -->
-  <button class="doc-skill-btn" data-skill="scribd" style="border-left: 4px solid #0077B5;">
-    <div class="doc-skill-icon" style="background: linear-gradient(135deg, #0077B5, #00A0DC);">
-      📄
-    </div>
-    <div class="doc-skill-info">
-      <span class="doc-skill-title">Scribd Tools</span>
-      <span class="doc-skill-desc">Tải PDF, xóa watermark, lưu ảnh</span>
-    </div>
-    <span class="doc-skill-arrow">›</span>
-  </button>
-
   <!-- Thêm container hiển thị nội dung skill con -->
   <div id="doc-skill-content" style="display:none; margin-top:12px; padding-top:12px;">
     <div id="doc-skill-body"></div>
@@ -43,14 +31,6 @@ const DOC_SKILLS = {
     icon: '📚',
     color: 'linear-gradient(135deg, #FF6B00, #FFB000)',
     pageName: 'studocu',
-  },
-  scribd: {
-    id: 'scribd',
-    title: 'Scribd Tools',
-    desc: 'Tải PDF, xóa watermark, lưu ảnh',
-    icon: '📄',
-    color: 'linear-gradient(135deg, #0077B5, #00A0DC)',
-    pageName: 'scribd',
   },
 };
 

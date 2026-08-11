@@ -24,14 +24,14 @@
     "cookies",
     "downloads",
     "clipboardWrite",
-    "clipboardRead"
+    "clipboardRead",
+    "alarms",
+    "storage"
   ],
   "host_permissions": [
     "https://mydtu.duytan.edu.vn/*",
     "*://*.studocu.com/*",
     "*://*.studocu.vn/*",
-    "*://*.scribd.com/*",
-    "*://*.scribd.vn/*",
     "<all_urls>"
   ],
   "content_security_policy": {
@@ -59,21 +59,6 @@
         "styles/custom-styles.css"
       ],
       "run_at": "document_start"
-    },
-    {
-      "matches": [
-        "*://*.scribd.com/*",
-        "*://*.scribd.vn/*"
-      ],
-      "js": [
-        "libs/html2canvas/html2canvas.min.js",
-        "libs/jsPDF/jspdf.umd.min.js",
-        "src/features/document-download/scribd/scribd-content.js"
-      ],
-      "css": [
-        "styles/custom-styles.css"
-      ],
-      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
@@ -97,11 +82,8 @@
         "src/features/dtu-univer/skills/course-register/course-register.html",
         "src/features/dtu-univer/skills/course-register/course-register.js",
         "src/features/qrcode/qrcode.html",
-        "src/features/text-tools/skills/scraper/scraper.html",
-        "src/features/text-tools/skills/scraper/scraper.js",
         "src/features/document-download/document-download.html",
-        "src/features/document-download/studocu/studocu.html",
-        "src/features/document-download/scribd/scribd.html"
+        "src/features/document-download/studocu/studocu.html"
       ],
       "matches": [
         "<all_urls>"

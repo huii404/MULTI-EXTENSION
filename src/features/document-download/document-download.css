@@ -5,12 +5,6 @@
   gap: 2px;
 }
 
-/* Styling cho ô nhập URL Scribd */
-.scribd-container #scribd-url-input:focus {
-  outline: none;
-  border-color: #0077B5 !important;
-  box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.15) !important;
-}
 
 /* ===== SKILL BUTTON ===== */
 .doc-skill-btn {
@@ -112,8 +106,7 @@
   margin: 0;
 }
 
-#doc-skill-body .studocu-container,
-#doc-skill-body .scribd-container {
+#doc-skill-body .studocu-container {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -124,9 +117,7 @@
 }
 
 #doc-skill-body .studocu-container::before,
-#doc-skill-body .studocu-container::after,
-#doc-skill-body .scribd-container::before,
-#doc-skill-body .scribd-container::after {
+#doc-skill-body .studocu-container::after {
   display: none !important;
 }
 
