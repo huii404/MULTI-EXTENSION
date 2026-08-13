@@ -20,6 +20,7 @@
   },
   "permissions": [
     "activeTab",
+    "tabs",
     "scripting",
     "cookies",
     "downloads",
@@ -53,7 +54,7 @@
         "*://*.studocu.vn/*"
       ],
       "js": [
-        "src/features/document-download/studocu/studocu-content.js"
+        "src/features/document-download/studocu-content.js"
       ],
       "css": [
         "styles/custom-styles.css"
@@ -82,8 +83,7 @@
         "src/features/dtu-univer/skills/course-register/course-register.html",
         "src/features/dtu-univer/skills/course-register/course-register.js",
         "src/features/qrcode/qrcode.html",
-        "src/features/document-download/document-download.html",
-        "src/features/document-download/studocu/studocu.html"
+        "src/features/document-download/studocu-content.js"
       ],
       "matches": [
         "<all_urls>"

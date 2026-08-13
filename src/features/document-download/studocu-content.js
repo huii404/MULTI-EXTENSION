@@ -251,6 +251,14 @@ function runCleanViewer() {
       textLayer.className = 'layer-text';
       const pcClone = deepCloneWithStyles(originalPc, SCALE_FACTOR, HEIGHT_SCALE_DIVISOR);
       pcClone.querySelectorAll('img').forEach(img => img.style.display = 'none');
+      pcClone.querySelectorAll('*').forEach(el => {
+        el.style.filter = 'none';
+        el.style.webkitFilter = 'none';
+        el.style.opacity = '1';
+        if (el.classList) {
+          el.classList.remove('blurred', 'blur');
+        }
+      });
       textLayer.appendChild(pcClone);
       newPage.appendChild(textLayer);
     }

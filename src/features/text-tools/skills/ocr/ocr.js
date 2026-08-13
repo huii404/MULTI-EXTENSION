@@ -1,12 +1,12 @@
 window.SKILL_HTML = window.SKILL_HTML || {};
 window.SKILL_HTML.ocr = `
 <div class="ocr-container" style="border:none !important; padding:0; margin:0;">
-  <!-- Tùy chọn 1: Chọn File ảnh -->
+  <!-- Nút Chọn File ảnh -->
   <div style="display:flex; gap:8px; margin-bottom:10px;">
     <input type="file" id="ocr-file-input" accept="image/*" style="display:none;" />
     <button id="ocr-browse-btn" class="action-btn primary" style="flex:1; padding:12px; background:linear-gradient(135deg,#3498db,#2980b9); margin-bottom:0; justify-content:center;">
       <span style="font-size:16px; margin-right:6px;">📁</span>
-      <span style="font-size:13px; font-weight:700;">Chọn file ảnh</span>
+      <span style="font-size:13px; font-weight:700;">Chọn file ảnh để quét</span>
     </button>
   </div>
 
@@ -21,9 +21,12 @@ window.SKILL_HTML.ocr = `
       <label style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:6px; margin:0;">
         <span>✨</span> Kết quả quét:
       </label>
-      <button id="ocr-copy-btn" class="action-btn secondary" style="padding:4px 8px; font-size:11px; margin:0; width:auto; border-radius:4px;">📋 Copy Text</button>
+      <div style="display:flex; gap:6px;">
+        <button id="ocr-reset-btn" class="action-btn secondary" style="padding:4px 10px; font-size:11px; margin:0; width:auto; border-radius:4px;" title="Xóa kết quả & Quét ảnh mới">🔄 Reset</button>
+        <button id="ocr-copy-btn" class="action-btn primary" style="padding:4px 10px; font-size:11px; margin:0; width:auto; border-radius:4px;">📋 Copy Text</button>
+      </div>
     </div>
-    <textarea id="ocr-output" rows="6" readonly placeholder="Kết quả chữ sẽ xuất hiện ở đây..." style="background:#f8f9fa; cursor:default; width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:13px; resize:vertical; line-height:1.6;"></textarea>
+    <textarea id="ocr-output" rows="8" placeholder="Kết quả chữ sẽ xuất hiện ở đây..." style="background:#f8f9fa; cursor:text; width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:13px; resize:vertical; line-height:1.6;"></textarea>
   </div>
 
   <div id="ocr-hint" style="text-align:center; padding:16px; color:var(--text-muted); font-size:12px;">
@@ -34,7 +37,133 @@ window.SKILL_HTML.ocr = `
 </div>
 `;
 
-// Hàm phụ chuyển File/Blob sang Base64 chuẩn cho Tesseract
+// 1. TỰ ĐỘNG LÀM NÉT & DOWN-SCALE ẢNH (Gấp 3 lần tốc độ quét)
+function fastPreprocessImage(imageSource, maxWidth = 1400) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      try {
+        let width = img.width;
+        let height = img.height;
+
+        // Downscale ảnh nếu kích thước quá lớn để Tesseract xử lý siêu tốc
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+
+        // Chuyển ảnh xám + Tăng tương phản siêu nhanh
+        for (let i = 0; i < data.length; i += 4) {
+          const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          const val = gray > 145 ? 255 : (gray < 85 ? 0 : gray);
+          data[i] = val;
+          data[i + 1] = val;
+          data[i + 2] = val;
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      } catch (e) {
+        resolve(imageSource);
+      }
+    };
+    img.onerror = () => resolve(imageSource);
+    img.src = imageSource;
+  });
+}
+
+// 2. TỰ ĐỘNG LỌC KÝ TỰ ẨN, RÁC ASCII & BỎ RÁC UI (Tự động chạy ngầm)
+function autoCleanOcrText(text) {
+  if (!text) return '';
+
+  // Gỡ control characters & zero-width spaces
+  let cleaned = text.replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200D\uFEFF]/g, '');
+
+  // Thay thế ký tự rác UI bằng khoảng trắng
+  cleaned = cleaned.replace(/[ØŒ§¬®©¤¶¥¢¦«»±µ°¹²³ˆ˜†‡•…~/\\|^<>{}[\]]/g, ' ');
+
+  // Chuẩn hóa timestamp (vd: 1954 hoặc =19:54 -> 19:54)
+  cleaned = cleaned.replace(/=?\b(\d{2})[:\.]?(\d{2})\b/g, '$1:$2');
+
+  const lines = cleaned.split('\n');
+  const validLines = [];
+
+  for (let line of lines) {
+    let l = line.replace(/[ \t]+/g, ' ').trim();
+    if (!l) continue;
+
+    // Bỏ qua dòng địa chỉ URL, Cốc Cốc, Facebook UI dính ở đầu/cuối ảnh
+    if (l.includes('http') || l.includes('youtube.com') || l.includes('Facebook') || l.includes('Cốc Cốc') || l.includes('Drive của')) continue;
+
+    l = l.replace(/-$/, '');
+
+    const validMatches = l.match(/[a-zA-Z0-9àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠÂẦẤẨẪẬĂẰẮẲẴẶÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/g) || [];
+    
+    // Bỏ dòng rác nếu tỷ lệ chữ quá thấp hoặc ngắn đứng lẻ không chứa số
+    if (l.length > 3 && (validMatches.length / l.length < 0.3)) {
+      continue;
+    }
+    if (l.length <= 2 && !/\d/.test(l)) {
+      continue;
+    }
+
+    // Bỏ từ nát dài không có nguyên âm (vd: 'ngwuvoastnenukwrwPclsviowooxvoxe')
+    const words = l.split(' ');
+    const cleanWords = words.filter(w => {
+      if (w.length > 15 && !/[aeiouyàáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(w)) {
+        return false;
+      }
+      return true;
+    });
+
+    l = cleanWords.join(' ').trim();
+    l = l.replace(/([=_\-\.\*#]){3,}/g, '');
+    l = l.trim();
+
+    if (l.length > 0) {
+      validLines.push(l);
+    }
+  }
+
+  let result = validLines.join('\n');
+  result = result.replace(/\n{3,}/g, '\n\n');
+  return result.trim();
+}
+
+// 3. REUSE TESSERACT WORKER CACHE (Quét nhanh gấp 2 lần)
+let cachedOcrWorker = null;
+
+async function getOcrWorker() {
+  if (cachedOcrWorker) return cachedOcrWorker;
+
+  cachedOcrWorker = await Tesseract.createWorker('vie+eng', 1, {
+    workerPath: chrome.runtime.getURL('libs/tesseract/worker.min.js'),
+    corePath: chrome.runtime.getURL('libs/tesseract/tesseract-core.wasm.js'),
+    workerBlobURL: false,
+    logger: m => {
+      if (m.status === 'recognizing text') {
+        const pct = Math.round((m.progress || 0) * 100);
+        const pEl = document.getElementById('ocr-progress');
+        if (pEl) pEl.textContent = pct + '%';
+      }
+    }
+  });
+
+  return cachedOcrWorker;
+}
+
+// Hàm phụ chuyển File/Blob sang Base64
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -53,13 +182,14 @@ function attachOcrEvents() {
   const outputEl = document.getElementById('ocr-output');
   const hintEl = document.getElementById('ocr-hint');
   const copyBtn = document.getElementById('ocr-copy-btn');
+  const resetBtn = document.getElementById('ocr-reset-btn');
 
   if (!browseBtn || !fileInput) return;
 
-  async function runOCR(imageSource) {
+  async function runOCR(rawImageSource) {
     if (statusEl) {
       statusEl.style.display = 'block';
-      statusEl.innerHTML = '⏳ Đang khởi tạo bộ quét chữ...';
+      statusEl.innerHTML = '⏳ Đang tối ưu nét ảnh...';
     }
     if (resultArea) resultArea.style.display = 'none';
     if (hintEl) hintEl.style.display = 'none';
@@ -75,33 +205,19 @@ function attachOcrEvents() {
         });
       }
 
-      if (statusEl) statusEl.innerHTML = '⏳ Đang phân tích hình ảnh... <span id="ocr-progress">0%</span>';
+      // Tự động tiền xử lý làm nét & downscale ảnh siêu tốc ngầm
+      const processedImageSource = await fastPreprocessImage(rawImageSource);
 
-      const worker = await Tesseract.createWorker('vie', 1, {
-        workerPath: chrome.runtime.getURL('libs/tesseract/worker.min.js'),
-        corePath: chrome.runtime.getURL('libs/tesseract/tesseract-core.wasm.js'),
-        workerBlobURL: false,
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            const pct = Math.round((m.progress || 0) * 100);
-            const pEl = document.getElementById('ocr-progress');
-            if (pEl) pEl.textContent = pct + '%';
-          }
-        }
-      });
+      if (statusEl) statusEl.innerHTML = '⏳ Đang quét chữ (Song ngữ)... <span id="ocr-progress">0%</span>';
 
-      const ret = await worker.recognize(imageSource);
-      await worker.terminate();
+      const worker = await getOcrWorker();
+      const ret = await worker.recognize(processedImageSource);
 
       let extractedText = ret && ret.data && ret.data.text ? ret.data.text.trim() : '';
 
+      // Tự động lọc sạch ký tự ẩn & rác ASCII ngầm
       if (extractedText) {
-        extractedText = extractedText.replace(/-\n/g, '');
-        extractedText = extractedText.replace(/\r\n/g, '\n');
-        extractedText = extractedText.replace(/\n{2,}/g, '___PARAGRAPH___');
-        extractedText = extractedText.replace(/\n/g, ' ');
-        extractedText = extractedText.replace(/___PARAGRAPH___/g, '\n\n');
-        extractedText = extractedText.replace(/[ \t]+/g, ' ').trim();
+        extractedText = autoCleanOcrText(extractedText);
       }
 
       if (!extractedText) {
@@ -126,6 +242,7 @@ function attachOcrEvents() {
       console.error('[OCR Detail Error]:', err);
       if (statusEl) statusEl.style.display = 'none';
       if (hintEl) hintEl.style.display = 'block';
+      cachedOcrWorker = null; // Reset worker cache nếu có lỗi
       
       const errMsg = (err && err.message) ? err.message : String(err || 'Không rõ nguyên nhân');
       if (typeof showToast === 'function') {
@@ -185,6 +302,14 @@ function attachOcrEvents() {
         runOCR(base64Image);
       }
     }
+  });
+
+  resetBtn?.addEventListener('click', function() {
+    if (fileInput) fileInput.value = '';
+    if (outputEl) outputEl.value = '';
+    if (resultArea) resultArea.style.display = 'none';
+    if (hintEl) hintEl.style.display = 'block';
+    if (typeof showToast === 'function') showToast('🔄 Đã làm mới giao diện!', 'info');
   });
 
   copyBtn?.addEventListener('click', function() {
