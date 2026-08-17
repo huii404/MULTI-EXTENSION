@@ -1,9 +1,9 @@
 
-// SCREENSHOT MODULE - TỐI ƯU TỐC ĐỘ (NATIVE + WEBP)
+// SCREENSHOT MODULE - TỐI ƯU TỐC ĐỘ (NATIVE + PNG)
 
 const SCREENSHOT_CONFIG = {
-  defaultFormat: 'webp',    // Chuyển sang webp để sinh file nhanh & nhẹ hơn
-  jpegQuality: 0.9,         // Chất lượng WebP/JPEG
+  defaultFormat: 'png',     // Định dạng PNG sắc nét, phổ biến
+  jpegQuality: 0.9,         // Chất lượng
   maxDimension: 3000,       // Giới hạn kích thước tối đa
   scale: 1.5,               // Scale vừa đủ nét, tối ưu bộ nhớ
 };
@@ -179,7 +179,7 @@ PAGES.screenshot = {
     document.getElementById('ss-download-btn')?.addEventListener('click', function() {
       const preview = document.getElementById('ss-preview');
       const dataUrl = preview.dataset.dataUrl;
-      const filename = preview.dataset.filename || 'screenshot.webp';
+      const filename = preview.dataset.filename || 'screenshot.png';
       
       if (dataUrl) {
         chrome.downloads.download({
