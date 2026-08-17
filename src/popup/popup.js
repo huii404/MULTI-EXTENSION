@@ -1,4 +1,4 @@
-
+﻿
 window.PAGES = window.PAGES || {};
 window.PAGES.home = {
   render: renderHome,
@@ -99,14 +99,7 @@ function renderHome() {
         </span>
       </button>
 
-      <button class="feature-card" data-page="text-tools" style="border-left: 4px solid #2ECC71;">
-        <div class="icon-box" style="background: linear-gradient(135deg, #2ECC71, #27AE60); color:white;">🧹</div>
-        <div class="info">
-          <span class="title">Text Tools</span>
-          <span class="desc">Làm sạch, so sánh, phân tích văn bản</span>
-        </div>
-        <span class="arrow">›</span>
-      </button>
+        
 
       <!-- QR Code -->
       <button class="feature-card" data-page="qrcode" style="border-left: 4px solid #8e44ad;">
@@ -170,4 +163,5 @@ document.addEventListener('DOMContentLoaded', () => {
   navigateTo('home');
   initLiveClock();
 });
-
+
+

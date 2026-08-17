@@ -1,4 +1,4 @@
-{
+﻿{
   "manifest_version": 3,
   "name": "Multi Tool Hub",
   "version": "2.0.0",
@@ -75,11 +75,6 @@
         "styles/custom-styles.css",
         "libs/html2canvas/html2canvas.min.js",
         "libs/jsPDF/jspdf.umd.min.js",
-        "src/features/text-tools/text-tools.html",
-        "src/features/text-tools/cleaner/cleaner.html",
-        "src/features/text-tools/cleaner/cleaner.js",
-        "src/features/text-tools/comparator/comparator.html",
-        "src/features/text-tools/comparator/comparator.js",
         "src/features/dtu-univer/dtu-univer.html",
         "src/features/dtu-univer/skills/rating/rating.html",
         "src/features/dtu-univer/skills/rating/rating-content.js",

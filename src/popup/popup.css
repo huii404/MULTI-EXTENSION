@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* ===== ROOT VARIABLES ===== */
 :root {
@@ -222,12 +222,6 @@ body {
   background: linear-gradient(135deg, #7C3AED, #A78BFA); 
   color: #fff;
   box-shadow: 0 3px 10px rgba(124, 58, 237, 0.2);
-}
-.feature-card[data-page="textcleaner"] .icon-box,
-.feature-card[data-page="text-tools"] .icon-box { 
-  background: linear-gradient(135deg, #2ECC71, #27AE60); 
-  color: #fff;
-  box-shadow: 0 3px 10px rgba(46, 204, 113, 0.2);
 }
 .feature-card[data-page="qrcode"] .icon-box { 
   background: linear-gradient(135deg, #8e44ad, #9b59b6); 
@@ -915,4 +909,5 @@ body {
   background: #0068FF;
   color: #fff;
 }
-
+
+
