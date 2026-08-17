@@ -22,6 +22,17 @@ function sendToContent(message) {
         reject(new Error('Không tìm thấy tab hiện tại'));
         return;
       }
+
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: [
+            'src/features/dtu-univer/skills/rating/rating-content.js',
+            'src/features/dtu-univer/dtu-content.js'
+          ]
+        });
+      } catch (e) {}
+
       chrome.tabs.sendMessage(tab.id, message, (response) => {
         if (chrome.runtime.lastError) {
           reject(new Error(chrome.runtime.lastError.message));

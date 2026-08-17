@@ -44,6 +44,9 @@
         "https://mydtu.duytan.edu.vn/sites/index.aspx*"
       ],
       "js": [
+        "src/features/dtu-univer/skills/rating/rating-content.js",
+        "src/features/dtu-univer/skills/schedule/schedule-content.js",
+        "src/features/dtu-univer/skills/course-register/course-register-content.js",
         "src/features/dtu-univer/dtu-content.js"
       ],
       "run_at": "document_idle"
@@ -79,9 +82,12 @@
         "src/features/text-tools/comparator/comparator.js",
         "src/features/dtu-univer/dtu-univer.html",
         "src/features/dtu-univer/skills/rating/rating.html",
+        "src/features/dtu-univer/skills/rating/rating-content.js",
         "src/features/dtu-univer/skills/schedule/schedule.html",
+        "src/features/dtu-univer/skills/schedule/schedule-content.js",
         "src/features/dtu-univer/skills/course-register/course-register.html",
         "src/features/dtu-univer/skills/course-register/course-register.js",
+        "src/features/dtu-univer/skills/course-register/course-register-content.js",
         "src/features/qrcode/qrcode.html",
         "src/features/document-download/studocu-content.js"
       ],

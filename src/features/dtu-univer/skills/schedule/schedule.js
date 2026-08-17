@@ -26,7 +26,10 @@ export function attachEvents() {
       try {
         await chrome.scripting.executeScript({
           target: { tabId: targetTabId },
-          files: ['src/features/dtu-univer/dtu-content.js']
+          files: [
+            'src/features/dtu-univer/skills/schedule/schedule-content.js',
+            'src/features/dtu-univer/dtu-content.js'
+          ]
         });
 
         chrome.tabs.sendMessage(targetTabId, {

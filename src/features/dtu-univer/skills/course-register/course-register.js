@@ -73,7 +73,10 @@ export function attachEvents() {
         // Inject content script nếu chưa có
         await chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          files: ['src/features/dtu-univer/dtu-content.js']
+          files: [
+            'src/features/dtu-univer/skills/course-register/course-register-content.js',
+            'src/features/dtu-univer/dtu-content.js'
+          ]
         });
 
         // Gửi tin nhắn kích hoạt đăng ký tự động
