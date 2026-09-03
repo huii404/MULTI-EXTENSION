@@ -1,4 +1,4 @@
-﻿
+
 window.PAGES = window.PAGES || {};
 window.PAGES.home = {
   render: renderHome,
@@ -77,10 +77,10 @@ function renderHome() {
 
       <!-- Document Download -->
       <button class="feature-card" data-page="document-download" style="border-left: 4px solid #FF6B00;">
-        <div class="icon-box" style="background: linear-gradient(135deg, #FF6B00, #0077B5); color:white;">📚</div>
+        <div class="icon-box" style="background: linear-gradient(135deg, #FF6B00, #008272); color:white;">📚</div>
         <div class="info">
-          <span class="title">Tải tài liệu Studocu</span>
-          <span class="desc">Tải PDF, xóa watermark, lưu ảnh</span>
+          <span class="title">Tải tài liệu (Studocu & Scribd)</span>
+          <span class="desc">Gỡ mờ, mở link Embed, tải PDF sạch</span>
         </div>
         <span style="display:flex;align-items:center;gap:4px;">
           <span class="arrow">›</span>

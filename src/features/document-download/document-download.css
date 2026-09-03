@@ -1,12 +1,175 @@
-/* DOCUMENT DOWNLOAD FEATURE STYLES */
+/* DOCUMENT DOWNLOAD FEATURE STYLES - MULTI-SKILL HUB */
 
 .doc-download-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
 }
 
-.doc-download-container .action-btn {
-  margin-bottom: 0;
+/* Danh sách chọn Skill */
+.doc-skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.doc-skill-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border);
+  transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.doc-skill-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.doc-skill-card:active {
+  transform: scale(0.98);
+}
+
+.doc-skill-card .skill-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  color: #fff;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.doc-skill-card:hover .skill-icon {
+  transform: scale(1.1) rotate(-4deg);
+}
+
+.doc-skill-card .skill-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-skill-card .skill-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.doc-skill-card .skill-desc {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.doc-skill-card .skill-arrow {
+  font-size: 18px;
+  color: #bbb;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.doc-skill-card:hover .skill-arrow {
+  transform: translateX(3px);
+  color: var(--text);
+}
+
+/* Thẻ Studocu & Scribd */
+.doc-skill-card.studocu {
+  border-left: 4px solid var(--stu-orange);
+}
+.doc-skill-card.studocu .skill-icon {
+  background: linear-gradient(135deg, #FF6B00, #FF9E00);
+  box-shadow: 0 3px 10px rgba(255, 107, 0, 0.25);
+}
+
+.doc-skill-card.scribd {
+  border-left: 4px solid #008272;
+}
+.doc-skill-card.scribd .skill-icon {
+  background: linear-gradient(135deg, #002B49, #008272);
+  box-shadow: 0 3px 10px rgba(0, 130, 114, 0.3);
+}
+
+/* Sub-view Navigation Bar */
+.doc-sub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.doc-sub-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.doc-sub-back:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text);
+  transform: translateX(-2px);
+}
+
+.doc-sub-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Action buttons Scribd theme */
+.action-btn.scribd-primary {
+  background: linear-gradient(135deg, #002B49, #008272);
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(0, 130, 114, 0.25);
+  border-color: transparent;
+}
+.action-btn.scribd-primary .icon-circle {
+  background: rgba(255, 255, 255, 0.2);
+}
+.action-btn.scribd-primary:hover {
+  background: linear-gradient(135deg, #001f35, #006d60) !important;
+  box-shadow: 0 6px 20px rgba(0, 130, 114, 0.35);
+}
+
+.action-btn.scribd-secondary {
+  background: var(--surface);
+  color: #008272;
+  border: 1px solid var(--border);
+}
+.action-btn.scribd-secondary .icon-circle {
+  background: rgba(0, 130, 114, 0.08);
+}
+.action-btn.scribd-secondary:hover {
+  border-color: #008272;
+  background: #f0fdf9;
 }

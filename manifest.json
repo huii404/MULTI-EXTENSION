@@ -1,4 +1,4 @@
-﻿{
+{
   "manifest_version": 3,
   "name": "Multi Tool Hub",
   "version": "2.0.0",
@@ -33,6 +33,7 @@
     "https://mydtu.duytan.edu.vn/*",
     "*://*.studocu.com/*",
     "*://*.studocu.vn/*",
+    "*://*.scribd.com/*",
     "<all_urls>"
   ],
   "content_security_policy": {
@@ -63,6 +64,15 @@
         "styles/custom-styles.css"
       ],
       "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "*://*.scribd.com/*"
+      ],
+      "js": [
+        "src/features/document-download/scribd-content.js"
+      ],
+      "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
@@ -84,7 +94,8 @@
         "src/features/dtu-univer/skills/course-register/course-register.js",
         "src/features/dtu-univer/skills/course-register/course-register-content.js",
         "src/features/qrcode/qrcode.html",
-        "src/features/document-download/studocu-content.js"
+        "src/features/document-download/studocu-content.js",
+        "src/features/document-download/scribd-content.js"
       ],
       "matches": [
         "<all_urls>"

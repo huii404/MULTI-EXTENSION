@@ -9,7 +9,7 @@ const SCREENSHOT_CONFIG = {
 };
 
 PAGES.screenshot = {
-  render: function() {
+  render: function () {
     return `
       <div class="screenshot-options">
         <div class="form-group">
@@ -43,13 +43,13 @@ PAGES.screenshot = {
     `;
   },
 
-  attachEvents: function() {
+  attachEvents: function () {
     // === NÚT CHỤP ===
-    document.getElementById('ss-capture-btn').addEventListener('click', async function() {
+    document.getElementById('ss-capture-btn').addEventListener('click', async function () {
       const tab = await getCurrentTab();
       const statusText = document.getElementById('ss-status-text');
       const statusDot = document.getElementById('ss-status-dot');
-      
+
       if (!tab) {
         showToast('Không tìm thấy tab', 'error');
         return;
@@ -58,7 +58,7 @@ PAGES.screenshot = {
       // Kiểm tra URL - KHÔNG CHỤP TRANG HỆ THỐNG
       const blockedSchemes = ['chrome://', 'edge://', 'about:', 'chrome-extension://', 'devtools://', 'view-source:'];
       const isBlocked = blockedSchemes.some(scheme => tab.url.startsWith(scheme));
-      
+
       if (isBlocked || !tab.url || tab.url === 'about:blank') {
         const msg = '❌ Không thể chụp trang hệ thống hoặc trang trống';
         showToast(msg, 'error');
@@ -73,7 +73,7 @@ PAGES.screenshot = {
       const mode = document.getElementById('ss-mode').value;
       const btn = this;
       const originalHeading = btn.querySelector('.btn-heading').innerText;
-      
+
       btn.querySelector('.btn-heading').innerText = '⏳ Đang chụp...';
       btn.style.opacity = '0.7';
       btn.style.pointerEvents = 'none';
@@ -104,7 +104,7 @@ PAGES.screenshot = {
             width: window.innerWidth,
             height: window.innerHeight
           };
-        } 
+        }
         // Nếu chụp FULLPAGE hoặc ELEMENT -> Dùng Injection html2canvas
         else {
           // Kiểm tra xem html2canvas đã inject chưa
@@ -146,10 +146,10 @@ PAGES.screenshot = {
           preview.style.display = 'block';
           preview.dataset.dataUrl = imageData.dataUrl;
           preview.dataset.filename = imageData.filename;
-          
+
           const sizeKB = (imageData.dataUrl.length * 3 / 4 / 1024).toFixed(1);
           showToast(`✅ Đã chụp (${elapsed}ms, ${sizeKB}KB)`, 'success');
-          
+
           if (statusText) {
             statusText.textContent = `✅ ${imageData.width || ''}×${imageData.height || ''} - ${elapsed}ms`;
             statusText.style.color = '#27ae60';
@@ -176,17 +176,17 @@ PAGES.screenshot = {
     });
 
     // === TẢI XUỐNG ===
-    document.getElementById('ss-download-btn')?.addEventListener('click', function() {
+    document.getElementById('ss-download-btn')?.addEventListener('click', function () {
       const preview = document.getElementById('ss-preview');
       const dataUrl = preview.dataset.dataUrl;
       const filename = preview.dataset.filename || 'screenshot.png';
-      
+
       if (dataUrl) {
         chrome.downloads.download({
           url: dataUrl,
           filename: filename,
           saveAs: true
-        }, function() {
+        }, function () {
           if (chrome.runtime.lastError) {
             showToast('❌ Lỗi tải xuống: ' + chrome.runtime.lastError.message, 'error');
           } else {
@@ -195,14 +195,13 @@ PAGES.screenshot = {
         });
       }
     });
-
   },
 
   title: '📸 Chụp ảnh Web'
 };
 
-// HÀM CAPTURE TRÊN PAGE (Injected Script)
 
+// HÀM CAPTURE TRÊN PAGE (Injected Script)
 function captureWebContentFullOptimized(mode, format, quality, scale, maxDim) {
   return new Promise((resolve) => {
     try {
