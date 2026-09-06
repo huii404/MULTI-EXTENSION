@@ -26,6 +26,7 @@ function navigateTo(pageName) {
   container.scrollTop = 0;
 
   if (pageName === 'home') {
+    previousPage = null;
     container.innerHTML = page.render();
     attachHomeEvents();
   } else {
@@ -44,13 +45,15 @@ function navigateTo(pageName) {
       </div>
     `;
     
-    // ✅ Xử lý nút back: quay về trang trước đó
+    // ✅ Xử lý nút back: nếu page có onBack riêng thì gọi trước, nếu không thì quay về trang trước / home
     document.getElementById('backBtn').addEventListener('click', () => {
+      if (page.onBack) {
+        const handled = page.onBack();
+        if (handled) return;
+      }
       if (previousPage && previousPage !== 'home') {
-        // Nếu trang trước không phải home → quay về trang đó
         navigateTo(previousPage);
       } else {
-        // Nếu không có trang trước → về home
         navigateTo('home');
       }
     });

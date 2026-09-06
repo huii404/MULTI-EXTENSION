@@ -128,7 +128,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .social-card-fancy:hover {
@@ -138,7 +138,7 @@
 }
 
 .social-card-fancy:active {
-  transform: scale(0.99);
+  transform: translateY(0);
 }
 
 .social-card-icon-wrapper {
@@ -149,11 +149,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.social-card-fancy:hover .social-card-icon-wrapper {
-  transform: scale(1.05);
+  transition: transform 0.15s ease;
 }
 
 /* Platform specific icon colors */

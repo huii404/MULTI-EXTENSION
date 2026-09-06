@@ -155,29 +155,20 @@ PAGES.dtu = {
       });
     });
 
-    // ===== XỬ LÝ QUAY LẠI TỪ POPUP CHÍNH =====
-    // Popup chính có nút "Quay lại" ở back-bar
-    // Khi quay lại, cần reset trạng thái DTU Hub
-    const backBtn = document.getElementById('backBtn');
-    if (backBtn) {
-      // Lưu lại handler cũ nếu có
-      const oldHandler = backBtn._listeners ? backBtn._listeners : null;
-      
-      // Ghi đè để reset DTU Hub khi quay lại
-      backBtn.removeEventListener('click', backBtn._dtuHandler);
-      backBtn._dtuHandler = function() {
-        // Reset DTU Hub
-        document.querySelectorAll('.dtu-skill-btn').forEach(el => el.style.display = 'flex');
-        const statusBar = document.querySelector('.status-bar');
-        if (statusBar) statusBar.style.display = 'flex';
-        if (container) container.style.display = 'none';
-        if (body) body.innerHTML = '';
-        
-        // Gọi navigateTo home
-        navigateTo('home');
-      };
-      backBtn.addEventListener('click', backBtn._dtuHandler);
+  },
+
+  onBack: function() {
+    const container = document.getElementById('dtu-skill-content');
+    const body = document.getElementById('dtu-skill-body');
+    if (container && container.style.display !== 'none') {
+      document.querySelectorAll('.dtu-skill-btn').forEach(el => el.style.display = 'flex');
+      const statusBar = document.querySelector('.status-bar');
+      if (statusBar) statusBar.style.display = 'flex';
+      container.style.display = 'none';
+      if (body) body.innerHTML = '';
+      return true; // Quay lại danh sách skill
     }
+    return false; // Thoát ra trang home
   },
 
   title: '🏛️ SINHVIEN DTU'

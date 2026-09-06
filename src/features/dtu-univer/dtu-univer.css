@@ -14,7 +14,7 @@
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   text-align: left;
   background: var(--surface);
   margin-bottom: 8px;
@@ -23,7 +23,7 @@
 }
 
 .dtu-skill-btn:active {
-  transform: scale(0.97);
+  transform: translateY(0);
 }
 
 .dtu-skill-btn:hover {
@@ -70,23 +70,23 @@
 .dtu-skill-btn .dtu-skill-arrow {
   color: #ccc;
   font-size: 18px;
-  transition: transform 0.2s;
+  transition: transform 0.15s ease, color 0.15s ease;
   flex-shrink: 0;
 }
 
 .dtu-skill-btn:hover .dtu-skill-arrow {
-  transform: translateX(4px);
+  transform: translateX(3px);
   color: #999;
 }
 
 /* ===== SKILL CONTENT ===== */
 #dtu-skill-content {
-  animation: fadeIn 0.25s ease-out forwards;
+  animation: fadeIn 0.15s ease-out forwards;
 }
 
 @keyframes fadeIn {
-  0% { opacity: 0; transform: translateY(8px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* ===== RESPONSIVE ===== */

@@ -584,6 +584,15 @@ PAGES['document-download'] = {
     });
   },
 
+  onBack: function() {
+    if (currentDocSkill) {
+      currentDocSkill = null;
+      renderCurrentView();
+      return true;
+    }
+    return false;
+  },
+
   title: '📚 Tải tài liệu (Studocu & Scribd)'
 };
 
