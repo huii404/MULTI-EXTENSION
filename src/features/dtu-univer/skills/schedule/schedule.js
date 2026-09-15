@@ -19,8 +19,22 @@ export function attachEvents() {
 
       // Nếu không đúng trang Lịch học -> Chuyển về đúng trang Lịch học
       if (!tab.url.includes('p=home_timetable')) {
+        const navigation = new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            chrome.tabs.onUpdated.removeListener(onUpdated);
+            reject(new Error('Trang lịch học tải quá lâu'));
+          }, 15000);
+          const onUpdated = (tabId, changeInfo) => {
+            if (tabId === targetTabId && changeInfo.status === 'complete') {
+              clearTimeout(timeout);
+              chrome.tabs.onUpdated.removeListener(onUpdated);
+              resolve();
+            }
+          };
+          chrome.tabs.onUpdated.addListener(onUpdated);
+        });
         await chrome.tabs.update(tab.id, { url: timetableUrl });
-        await new Promise(r => setTimeout(r, 2000));
+        await navigation;
       }
 
       try {
@@ -32,13 +46,14 @@ export function attachEvents() {
           ]
         });
 
-        chrome.tabs.sendMessage(targetTabId, {
+        const result = await chrome.tabs.sendMessage(targetTabId, {
           action: 'EXPORT_DTU_SMART_SCHEDULE',
           rangeMode: range,
           formatType: format
         });
 
-        if (typeof showToast === 'function') showToast('🚀 Đang cào dữ liệu từ Lịch Học...', 'success');
+        if (!result?.success) throw new Error(result?.error || 'Không thể xuất lịch học');
+        if (typeof showToast === 'function') showToast(`✅ Đã xuất ${result.count} buổi học`, 'success');
       } catch (err) {
         console.error('[DTU Schedule] Error:', err);
         if (typeof showToast === 'function') showToast('❌ Lỗi: ' + err.message, 'error');

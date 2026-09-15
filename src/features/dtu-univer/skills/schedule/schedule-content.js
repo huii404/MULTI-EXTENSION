@@ -10,12 +10,14 @@
       'SEMESTER': ['Học kỳ', 'Semester', 'Năm học']
     }[rangeMode] || [];
 
+    let switchedView = false;
     if (textsToFind.length > 0) {
       const buttons = document.querySelectorAll('button, a, input[type="button"], input[type="submit"], .btn, .nav-link');
       for (const btn of buttons) {
         const text = (btn.innerText || btn.value || '').trim();
         if (textsToFind.some(t => text.toLowerCase() === t.toLowerCase())) {
           btn.click();
+          switchedView = true;
           break;
         }
       }
@@ -23,7 +25,9 @@
 
     // 2. Tiến hành cào dữ liệu (Polling để chờ bảng load xong)
     let courses = [];
-    for (let i = 0; i < 10; i++) {
+    // Give an asynchronously updated calendar time to replace the previous view.
+    if (switchedView) await new Promise(r => setTimeout(r, 600));
+    for (let i = 0; i < 20; i++) {
       courses = parseExactCourseBlocks(rangeMode);
       if (courses && courses.length > 0) {
         break;
@@ -426,16 +430,32 @@
     let ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//DTU//Timetable//VN', 'METHOD:PUBLISH'];
     const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
+    const escapeICS = value => String(value || '').replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+    let exported = 0;
+
     courses.forEach((item, idx) => {
+      const dateMatch = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(item.isoDate || '');
+      const timeMatch = /^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/.exec(item.time || '');
+      if (!dateMatch || !timeMatch) return;
+      const [, year, month, day] = dateMatch;
+      const [, startHour, startMinute, endHour, endMinute] = timeMatch;
+      const start = new Date(+year, +month - 1, +day, +startHour, +startMinute);
+      const end = new Date(+year, +month - 1, +day, +endHour, +endMinute);
+      if (start.getFullYear() !== +year || start.getMonth() !== +month - 1 || start.getDate() !== +day || end <= start) return;
+      const stamp = (hour, minute) => `${year}${month}${day}T${hour.padStart(2, '0')}${minute}00`;
       ics.push('BEGIN:VEVENT');
       ics.push(`UID:dtu-course-${idx}-${Date.now()}@mydtu`);
-      ics.push(`SUMMARY:[DTU] ${item.subject}`);
-      ics.push(`LOCATION:${item.location}`);
-      ics.push(`DESCRIPTION:${item.day} | ${item.dateObj} | ${item.time}`);
-      ics.push(`DTSTART:${now}`);
-      ics.push(`DTEND:${now}`);
+      ics.push(`DTSTAMP:${now}`);
+      ics.push(`SUMMARY:${escapeICS(`[DTU] ${item.subject}`)}`);
+      ics.push(`LOCATION:${escapeICS(item.location)}`);
+      ics.push(`DESCRIPTION:${escapeICS(`${item.day} | ${item.dateObj} | ${item.time}`)}`);
+      ics.push(`DTSTART;TZID=Asia/Ho_Chi_Minh:${stamp(startHour, startMinute)}`);
+      ics.push(`DTEND;TZID=Asia/Ho_Chi_Minh:${stamp(endHour, endMinute)}`);
       ics.push('END:VEVENT');
+      exported++;
     });
+
+    if (!exported) throw new Error('Không có buổi học nào có đủ ngày và giờ để xuất ICS');
 
     ics.push('END:VCALENDAR');
     const blob = new Blob([ics.join('\r\n')], { type: 'text/calendar;charset=utf-8;' });

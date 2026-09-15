@@ -97,18 +97,23 @@
     // Quét tất cả hàng trong các bảng dữ liệu
     const rows = document.querySelectorAll('table tr, .table-responsive tr, [id*="grv"] tr');
 
+    const normalizeCode = value => String(value || '').toUpperCase().replace(/\s+/g, ' ').trim();
+    const containsCode = (text, code) => {
+      const escaped = code.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp(`(^|[^A-Z0-9])${escaped}(?=$|[^A-Z0-9])`).test(text);
+    };
+
     rows.forEach(row => {
-      const text = (row.innerText || '').toUpperCase();
+      const cells = Array.from(row.querySelectorAll('td'));
+      const texts = (cells.length ? cells : [row]).map(cell => normalizeCode(cell.innerText));
       
       for (const code of codes) {
-        const normCode = code.toUpperCase();
-        if (text.includes(normCode)) {
+        const normCode = normalizeCode(code);
+        if (texts.some(text => containsCode(text, normCode))) {
           const checkbox = row.querySelector('input[type="checkbox"], input[type="radio"]');
           if (checkbox && !checkbox.disabled) {
             if (!checkbox.checked) {
-              checkbox.checked = true;
-              checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-              checkbox.dispatchEvent(new Event('click', { bubbles: true }));
+              checkbox.click();
             }
             // Đổi màu nền hàng để sinh viên dễ thấy
             row.style.backgroundColor = 'rgba(46, 204, 113, 0.2)';

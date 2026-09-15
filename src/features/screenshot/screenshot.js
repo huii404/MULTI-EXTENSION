@@ -27,7 +27,7 @@ PAGES.screenshot = {
           <div class="icon-circle">📸</div>
           <div class="btn-info">
             <span class="btn-heading">Chụp ảnh</span>
-            <span class="btn-sub">Tốc độ cao, tối ưu bộ nhớ</span>
+            <span class="btn-sub">Chọn phần tử sẽ tải ảnh ngay sau khi click</span>
           </div>
         </button>
 
@@ -139,7 +139,9 @@ PAGES.screenshot = {
 
         const elapsed = (performance.now() - startTime).toFixed(0);
 
-        if (imageData && !imageData.error) {
+        if (imageData && !imageData.error && mode === 'element') {
+          showToast('✅ Đã tải ảnh phần tử', 'success');
+        } else if (imageData && !imageData.error) {
           const preview = document.getElementById('ss-preview');
           const img = document.getElementById('ss-preview-img');
           img.src = imageData.dataUrl;
@@ -237,6 +239,17 @@ function captureWebContentFullOptimized(mode, format, quality, scale, maxDim) {
             const mimeType = format === 'webp' ? 'image/webp' : 'image/png';
             const ext = format === 'webp' ? 'webp' : 'png';
             const dataUrl = canvas.toDataURL(mimeType, quality);
+
+            if (mode === 'element') {
+              const link = document.createElement('a');
+              link.href = dataUrl;
+              link.download = `${filenamePrefix}_${Date.now()}.${ext}`;
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              resolve({ downloaded: true });
+              return;
+            }
 
             resolve({
               dataUrl: dataUrl,
